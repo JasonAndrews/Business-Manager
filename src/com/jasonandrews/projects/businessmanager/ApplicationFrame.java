@@ -63,6 +63,8 @@ import java.awt.event.FocusEvent;
 
 public class ApplicationFrame extends JFrame {
 
+	private AppManager appManager;
+	
 	private JPanel mainMenuPanel;
 	private JPanel configurePanel;
 	private JPanel loginPanel;
@@ -96,7 +98,9 @@ public class ApplicationFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public ApplicationFrame() {
+	public ApplicationFrame(AppManager appManager) {
+		this.appManager = appManager;
+		
 		setTitle("Business Manager");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 687, 490);
@@ -156,7 +160,7 @@ public class ApplicationFrame extends JFrame {
 				}
 			}
 		});
-		newCustomerBtn.setLocation(10, 31);
+		newCustomerBtn.setLocation(10, 23);
 		newCustomerBtn.setSize(118, 30);
 		customersPanel.add(newCustomerBtn);
 		
@@ -179,16 +183,19 @@ public class ApplicationFrame extends JFrame {
 		customerSearchTextField.setColumns(10);
 		
 		JCheckBox customerNoChckbx = new JCheckBox("Customer No.");
+		customerNoChckbx.setBackground(Color.WHITE);
 		customerNoChckbx.setSelected(true);
 		customerNoChckbx.setBounds(236, 71, 102, 23);
 		customersPanel.add(customerNoChckbx);
 		
 		JCheckBox customerNameChckbx = new JCheckBox("Name");
+		customerNameChckbx.setBackground(Color.WHITE);
 		customerNameChckbx.setSelected(true);
 		customerNameChckbx.setBounds(346, 71, 102, 23);
 		customersPanel.add(customerNameChckbx);
 		
 		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBackground(Color.WHITE);
 		scrollPane.setBounds(10, 103, 661, 348);
 		customersPanel.add(scrollPane);
 
@@ -200,14 +207,21 @@ public class ApplicationFrame extends JFrame {
 		customersTable.setColumnSelectionAllowed(true);		
 		customersTable.setBorder(new LineBorder(new Color(0, 0, 0)));
 		String[] columnNames = {"Customer No.", "First Name", "Last Name"};
-		customersTable.setModel(new DefaultTableModel(null, columnNames));
+		customersTable.setModel(new DefaultTableModel(null, columnNames));		
 		
 		
-		JLabel refreshCustomersTableLbl = new JLabel("");
-		refreshCustomersTableLbl.setBounds(12, 62, 40, 40);
-		customersPanel.add(refreshCustomersTableLbl);
+		
+		JButton refreshCustomersTableBtn = new JButton("");
+		refreshCustomersTableBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+			}
+		});
+		refreshCustomersTableBtn.setBorderPainted(false);
+		refreshCustomersTableBtn.setBounds(10, 60, 40, 40);
 		ImageIcon refreshImageIcon = new ImageIcon("lib/images/refresh_image_icon");
-		refreshCustomersTableLbl.setIcon(refreshImageIcon);
+		refreshCustomersTableBtn.setIcon(refreshImageIcon);
+		customersPanel.add(refreshCustomersTableBtn);
 		
 		setContentPane(customersPanel);
 	}
@@ -424,7 +438,11 @@ public class ApplicationFrame extends JFrame {
 				String password = new String(passwordArray);
 				String username = loginUsernameTextField.getText();
 				//System.out.println(connection);
-				loginUser(username, password);
+				if(appManager.loginUser(username, password)) {
+					//They logged in. Load next panel.
+				} else {
+					//They failed to login.
+				}
 			}
 		});
 		
@@ -549,7 +567,7 @@ public class ApplicationFrame extends JFrame {
 			//Some debugging.
 			System.out.println("Attempting to connect to URL: [" + url + "] | USER: [" + user + "] | PASSWORD: [" + password + "]");
 			
-			connection = DriverManager.getConnection(url, user, password);			
+			connection = DriverManager.getConnection(url, user, password);
 			
 			statusResultLbl.setForeground(Color.GREEN);
 			statusResultLbl.setText("Connected.");
@@ -620,6 +638,25 @@ public class ApplicationFrame extends JFrame {
 			
 			loginUsernameTextField.setText("admin");
 			loginPasswordField.setText("password");
+		}
+	}
+	
+	//Sets the Login screens username and password.
+	public void setLoginFields(String username, String password) {	
+		loginUsernameTextField.setText(username);
+		loginPasswordField.setText(password);		
+	}
+	
+	
+	public static final int ERROR_CONNECTION_FAILED = 1;
+	public static final int ERROR_CONNECTION_DROPPED = 2;
+	public static final int ERROR_LOGIN_FAILED = 3;  
+	public void triggerError(int errorID, String message) {
+		switch(errorID) {
+			case ERROR_LOGIN_FAILED: {
+				loginErrorLbl.setText(message);
+			}
+		
 		}
 	}
 	
