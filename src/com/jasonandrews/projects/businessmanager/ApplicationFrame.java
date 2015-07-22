@@ -168,8 +168,8 @@ public class ApplicationFrame extends JFrame {
 				String user = userTextField.getText();
 				String password = passwordTextField.getText();
 				
-				if(!appManager.connectToDatabase(url, user, password)) { //If the connection failed, then give them the error on the main menu.
-					errorLbl.setText("Could not connect, please enter the credentials on the Configuration form.");		
+				if(!appManager.testConnectionToDatabase(url, user, password)) { //If the connection failed, then give them the error on the main menu.
+					errorLbl.setText("Could not connect, please enter the correct credentials on the Configuration form.");		
 					statusResultLbl.setText("Could not connect.");
 					statusResultLbl.setForeground(Color.RED);			
 					
@@ -243,7 +243,7 @@ public class ApplicationFrame extends JFrame {
 		passwordTextField.setBounds(242, 204, 226, 20);
 		configurePanel.add(passwordTextField);
 		
-		JButton connectBtn = new JButton("Connect");
+		JButton connectBtn = new JButton("Test Connection");
 		connectBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
@@ -252,7 +252,7 @@ public class ApplicationFrame extends JFrame {
 				String password = passwordTextField.getText();
 				
 				//Attempt to connect to the database using the credentials.
-				if(appManager.connectToDatabase(url, user, password)) {
+				if(appManager.testConnectionToDatabase(url, user, password)) {
 					statusResultLbl.setForeground(Color.GREEN);
 					statusResultLbl.setText("Connected.");
 				} else {

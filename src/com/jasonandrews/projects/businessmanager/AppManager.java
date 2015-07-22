@@ -33,11 +33,11 @@ public class AppManager {
 		
 		this.loggedIn = false;
 		
-		dbConnector = new DatabaseConnector("", "", "");
+		//dbConnector = new DatabaseConnector("", "", "");
 		
 		customerTableColumns = new String[]{"Customer No.", "First Name", "Last Name"};
 		
-		firstTimeUseCheck();
+		//firstTimeUseCheck();
 		
 	}
 	
@@ -48,7 +48,7 @@ public class AppManager {
 		try {
 			
 		} catch (Exception ex) {
-			
+			ex.printStackTrace();
 		}
 		switch(tableName) {
 			case "Customers": { 
@@ -85,12 +85,21 @@ public class AppManager {
 			count = resultSet.getRow();
 			resultSet.beforeFirst();
 			
-			rowData = new Object[count][];
+			rowData = new Object[count][3];
 			
 			System.out.println("Counted rows: " + count);
-			//while(resultSet.next()) {
+			
+			int arrayRow = 0, rsRow = 1;
+			while(resultSet.next()) {
+				rowData[arrayRow][0] = resultSet.getInt("employee_number");
+				rowData[arrayRow][1] = resultSet.getString("first_name");
+				rowData[arrayRow][2] = resultSet.getString("last_name");
 				
-			//}
+				System.out.println(rowData[arrayRow][0] + " | " + rowData[arrayRow][1] + " | " + rowData[arrayRow][2]);
+				++arrayRow;
+				
+				
+			}
 			
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -122,17 +131,12 @@ public class AppManager {
 		return rowData;		
 	}
 	
-	public boolean connectToDatabase(String url, String user, String password) {
+	public boolean testConnectionToDatabase(String url, String user, String password) {
 		//Add a thread here.
 		
-		dbConnector = new DatabaseConnector(url, user, password);
+		dbConnector = new DatabaseConnector(url, user, password);	
 		
-		try {
-			dbConnector.connect();
-		} catch (SQLException sqlEx) {
-			sqlEx.printStackTrace();
-			return false;
-		}
+		firstTimeUseCheck();
 		
 		return true;
 	}
@@ -148,7 +152,7 @@ public class AppManager {
 			
 			connection = dbConnector.getConnection();
 			
-			statement = dbConnector.getConnection().createStatement(); //Creates a statement.
+			statement = connection.createStatement(); //Creates a statement.
 			
 			resultSet = statement.executeQuery("SELECT * FROM `users`"); //Executes a SELECT query and store the result set.
 			

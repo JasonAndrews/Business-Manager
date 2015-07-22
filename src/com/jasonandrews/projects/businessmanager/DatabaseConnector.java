@@ -17,44 +17,35 @@ public class DatabaseConnector {
 		this.password = password;
 	}
 	
-	//Connect to the database.
-	public void connect() throws SQLException {		
-		
-		//try {
-			
-			if(connection != null && connection.isValid(0)) { //If there's already a connection, close it before continuing.
-				//System.out.println("Already has a connection.");
-				connection.close(); //Close the connection.
-			}
-			
-			//Some debugging.
-			//System.out.println("Attempting to connect to URL: [" + url + "] | USER: [" + user + "] | PASSWORD: [" + password + "]");
-			
-			connection = DriverManager.getConnection(url, user, password);
-			
-			//return true;
-		//} catch(Exception ex) {
-		//	ex.printStackTrace();
-		//	//return false;
-		//}
-	}
-	
 	//Close the connection to the database.
-	public void close() throws SQLException {
-		if(connection != null) {
-			connection.close(); //Close the connection.
+	public void close() {
+		try {
+			if(connection != null) {
 		}
+			connection.close(); //Close the connection.
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
 		
 	}
 	
 	//Return the connection object.
 	public Connection getConnection() {
+		
 		try {
-			connect();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			
+			//Some debugging.
+			//System.out.println("Attempting to connect to URL: [" + url + "] | USER: [" + user + "] | PASSWORD: [" + password + "]");
+			//System.out.println(url + " | " + user + " | " + " | " + password);
+			connection = DriverManager.getConnection(url, user, password);
+			
+			//return true;
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			//return false;
+		} 
+		
 		return connection;
 	}
 	
