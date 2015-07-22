@@ -1,10 +1,13 @@
 package com.jasonandrews.projects.businessmanager;
 
+import java.awt.Color;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
@@ -34,15 +37,8 @@ public class AppManager {
 		
 		customerTableColumns = new String[]{"Customer No.", "First Name", "Last Name"};
 		
-		try {
-			firstTimeUseCheck();
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		firstTimeUseCheck();
+		
 	}
 	
 	//Get the column names for a table (employee or customer).
@@ -67,36 +63,143 @@ public class AppManager {
 		return columnNames;
 	}
 	
-	String[] getTableRowData(String tableName) {
+	//Get row data depending on the query passed.
+	Object[][] getTableRowData(String query) {
+		System.out.println("QUERY: ["+query+"]");
+		Object[][] rowData = null;
 		
-		return customerTableColumns;		
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet resultSet = null;
+		
+		try {
+			
+			connection = dbConnector.getConnection();
+			
+			statement = connection.createStatement();
+			
+			resultSet = statement.executeQuery(query);			
+			
+			int count = 0;
+			resultSet.last();
+			count = resultSet.getRow();
+			resultSet.beforeFirst();
+			
+			rowData = new Object[count][];
+			
+			System.out.println("Counted rows: " + count);
+			//while(resultSet.next()) {
+				
+			//}
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if(connection != null) {
+				try {
+					connection.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			if(statement != null) { 
+				try {
+					statement.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			if(resultSet != null) {				
+				try {
+					resultSet.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
+		
+		
+		return rowData;		
+	}
+	
+	public boolean connectToDatabase(String url, String user, String password) {
+		//Add a thread here.
+		
+		dbConnector = new DatabaseConnector(url, user, password);
+		
+		try {
+			dbConnector.connect();
+		} catch (SQLException sqlEx) {
+			sqlEx.printStackTrace();
+			return false;
+		}
+		
+		return true;
 	}
 	
 	//Check if this is the first time the application has been used previously (no users within the database).
-	private void firstTimeUseCheck() throws SQLException, NoSuchAlgorithmException {
-		if(dbConnector.getConnection() == null) return;
+	private void firstTimeUseCheck() {		
 		
-		Statement statement = dbConnector.getConnection().createStatement(); //Creates a statement.
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet resultSet = null;
 		
-		ResultSet resultSet = statement.executeQuery("SELECT * FROM `users`"); //Executes a SELECT query and store the result set.
-		
-		if(!resultSet.next()) { //There's no users, which means this is the first time the application has been used. 
+		try {
 			
-			String newUserQuery = "INSERT INTO `users` (`username`, `password`, `admin`) VALUES ('admin', '" + Encryption.hash("password") + "', '1')"; //Creating a string that will store the INSERT query for the new user.
-			//System.out.println("QUERY: " + newUserQuery);
-			statement.executeUpdate(newUserQuery); //Execute the query.
+			connection = dbConnector.getConnection();
 			
-			appFrame.setLoginFields("admin", "password");
-		}
+			statement = dbConnector.getConnection().createStatement(); //Creates a statement.
+			
+			resultSet = statement.executeQuery("SELECT * FROM `users`"); //Executes a SELECT query and store the result set.
+			
+			if(!resultSet.next()) { //There's no users, which means this is the first time the application has been used. 
+				
+				String newUserQuery = "INSERT INTO `users` (`username`, `password`, `admin`) VALUES ('admin', '" + Encryption.hash("password") + "', '1')"; //Creating a string that will store the INSERT query for the new user.
+				//System.out.println("QUERY: " + newUserQuery);
+				statement.executeUpdate(newUserQuery); //Execute the query.
+				
+				appFrame.setLoginFields("admin", "password");
+				
+				//POPUP DIALOG STATING "Because this is the first time you are using the application, an account with the username 'admin' and the password 'password' was created for you. You may add new users once logged in and you can also delete the temporary account provided.
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if(connection != null) {
+				try {
+					connection.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			if(statement != null) { 
+				try {
+					statement.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			if(resultSet != null) {				
+				try {
+					resultSet.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}		
 	}
 	
-	private boolean loginUser(String username, String password) {
+	
+	
+	public boolean loginUser(String username, String password) {
 		
 		Connection connection = dbConnector.getConnection(); 
 		
 		try {			
+			
 			if(connection == null || !connection.isValid(0)) { //Check if the application is not connected to the database.
-				appFrame.triggerError(ApplicationFrame.ERROR_LOGIN_FAILED, "Login failed, there is no connection to the database.");
+				//appFrame.triggerError(ApplicationFrame.ERROR_LOGIN_FAILED, "Login failed, there is no connection to the database.");
+				System.out.println(connection + " | " + connection.isValid(0) +  " | Failed at 1");
 				return false;
 				//loginErrorLbl.setText("Login failed, there is no connection to the database.");
 			} else {
@@ -116,22 +219,39 @@ public class AppManager {
 						//loginErrorLbl.setText("Login failed, you have entered an incorrect password.");
 					} else {
 						//THEY LOGGED IN SUCCESSFULLY
-						
-						//Continue onto the next pane where most of the content will actually be.
+						loggedIn = true;
+						appFrame.displayHome();
+						//Continue onto the next HOME panel where most of the content will actually be.
 						//Check if the user is an administrator.
-					}
+					}			
 					
 				} else {
 					appFrame.triggerError(ApplicationFrame.ERROR_LOGIN_FAILED, "Login failed, the username you have specified does not exist.");
 					//loginErrorLbl.setText("Login failed, the username you have specified does not exist.");
+					System.out.println("Failed at 4");
 					return false;
 				}
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			System.out.println("Failed at 5");
 			return false;
 		}
+		
 		return true;			
 	}
+	
+	public void setApplicationFrame(ApplicationFrame appFrame) {
+		this.appFrame = appFrame;
+	}
+	public ApplicationFrame getApplicationFrame() {
+		return this.appFrame;
+	}
+	
+	public boolean isUserLoggedIn() {
+		return this.loggedIn;
+	}
+	
+	
 	
 }

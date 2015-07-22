@@ -18,9 +18,9 @@ public class DatabaseConnector {
 	}
 	
 	//Connect to the database.
-	public boolean connect() {		
+	public void connect() throws SQLException {		
 		
-		try {
+		//try {
 			
 			if(connection != null && connection.isValid(0)) { //If there's already a connection, close it before continuing.
 				//System.out.println("Already has a connection.");
@@ -32,11 +32,11 @@ public class DatabaseConnector {
 			
 			connection = DriverManager.getConnection(url, user, password);
 			
-			return true;
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			return false;
-		}		
+			//return true;
+		//} catch(Exception ex) {
+		//	ex.printStackTrace();
+		//	//return false;
+		//}
 	}
 	
 	//Close the connection to the database.
@@ -49,6 +49,12 @@ public class DatabaseConnector {
 	
 	//Return the connection object.
 	public Connection getConnection() {
+		try {
+			connect();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return connection;
 	}
 	

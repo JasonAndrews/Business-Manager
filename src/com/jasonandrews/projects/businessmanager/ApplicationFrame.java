@@ -1,6 +1,7 @@
 package com.jasonandrews.projects.businessmanager;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Image;
 
@@ -60,10 +61,13 @@ import javax.swing.JCheckBox;
 
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.MouseMotionAdapter;
 
 public class ApplicationFrame extends JFrame {
 
 	private AppManager appManager;
+	
+	private JPanel currentPanel;
 	
 	private JPanel mainMenuPanel;
 	private JPanel configurePanel;
@@ -94,11 +98,12 @@ public class ApplicationFrame extends JFrame {
 	private JPasswordField loginPasswordField;
 	private JTextField customerSearchTextField;
 	
+	private JMenuBar homeMenuBar;
 
 	/**
 	 * Create the frame.
 	 */
-	public ApplicationFrame(AppManager appManager) {
+	public ApplicationFrame(AppManager appManager) {		
 		this.appManager = appManager;
 		
 		setTitle("Business Manager");
@@ -107,129 +112,17 @@ public class ApplicationFrame extends JFrame {
 		setResizable(false);		
 		getContentPane().setLayout(new CardLayout(0, 0));
 		
-		createContentPanels();		
+		createContentPanels();				
 		
-		customersPanel = new JPanel();		
-		customersPanel.setBackground(Color.WHITE);
-		customersPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		customersPanel.setLayout(null);
+		//customersPanel.add(homeMenuBar);
 		
-		JButton newCustomerBtn = new JButton("New customer");
-		newCustomerBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				Object[][] tableData = {
-						{"0434", "Jayceon", "Zrews"},	
-						{"0003", "Jayceon", "Andrews"},
-						{"0001", "Jayceon", "Dndrews"},
-						{"0055", "Jayceon", "Cndrews"},
-						{"0105", "Jayceon", "Rndrews"},
-						{"0565", "Jayceon", "Endrews"},
-						{"0335", "Jayceon", "Fndrews"},
-						{"0006", "Jayceon", "Hndrews"},
-						{"0115", "Jayceon", "Xndrews"},
-						{"0095", "Jayceon", "Lndrews"},
-						{"0033", "Jayceon", "Gndrews"},
-						{"1015", "Jayceon", "Rndrews"},
-						{"1555", "Jayceon", "Vndrews"},
-						{"0002", "Jayceon", "Sndrews"},
-						{"0555", "Jayceon", "Kndrews"},
-						{"0335", "Jayceon", "Ondrews"},	
-						{"0434", "Jayceon", "Zrews"},	
-						{"0003", "Jayceon", "Andrews"},
-						{"0001", "Jayceon", "Dndrews"},
-						{"0055", "Jayceon", "Cndrews"},
-						{"0105", "Jayceon", "Rndrews"},
-						{"0565", "Jayceon", "Endrews"},
-						{"0335", "Jayceon", "Fndrews"},
-						{"0006", "Jayceon", "Hndrews"},
-						{"0115", "Jayceon", "Xndrews"},
-						{"0095", "Jayceon", "Lndrews"},
-						{"0033", "Jayceon", "Gndrews"},
-						{"1015", "Jayceon", "Rndrews"},
-						{"1555", "Jayceon", "Vndrews"},
-						{"0002", "Jayceon", "Sndrews"},
-						{"0555", "Jayceon", "Kndrews"},
-						{"0335", "Jayceon", "Ondrews"},		
-						{"0003", "Robert", "Stark"}
-						
-				};
-				
-				DefaultTableModel model = (DefaultTableModel) customersTable.getModel();
-				for(int row = 0; row < tableData.length; ++row) {
-					model.addRow(tableData[row]);
-				}
-			}
-		});
-		newCustomerBtn.setLocation(10, 23);
-		newCustomerBtn.setSize(118, 30);
-		customersPanel.add(newCustomerBtn);
-		
-		customerSearchTextField = new JTextField();
-		customerSearchTextField.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusGained(FocusEvent arg0) {
-				customerSearchTextField.setText("");
-			}
-			@Override
-			public void focusLost(FocusEvent arg0) {
-				if(customerSearchTextField.getText().length() == 0) {
-					customerSearchTextField.setText("Search...");
-				}
-			}
-		});
-		customerSearchTextField.setText("Search...");
-		customerSearchTextField.setBounds(55, 72, 165, 20);
-		customersPanel.add(customerSearchTextField);
-		customerSearchTextField.setColumns(10);
-		
-		JCheckBox customerNoChckbx = new JCheckBox("Customer No.");
-		customerNoChckbx.setBackground(Color.WHITE);
-		customerNoChckbx.setSelected(true);
-		customerNoChckbx.setBounds(236, 71, 102, 23);
-		customersPanel.add(customerNoChckbx);
-		
-		JCheckBox customerNameChckbx = new JCheckBox("Name");
-		customerNameChckbx.setBackground(Color.WHITE);
-		customerNameChckbx.setSelected(true);
-		customerNameChckbx.setBounds(346, 71, 102, 23);
-		customersPanel.add(customerNameChckbx);
-		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBackground(Color.WHITE);
-		scrollPane.setBounds(10, 103, 661, 348);
-		customersPanel.add(scrollPane);
-
-		customersTable = new JTable();
-		scrollPane.setViewportView(customersTable);
-
-		customersTable.setAutoCreateRowSorter(true);
-		customersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		customersTable.setColumnSelectionAllowed(true);		
-		customersTable.setBorder(new LineBorder(new Color(0, 0, 0)));
-		String[] columnNames = {"Customer No.", "First Name", "Last Name"};
-		customersTable.setModel(new DefaultTableModel(null, columnNames));		
-		
-		
-		
-		JButton refreshCustomersTableBtn = new JButton("");
-		refreshCustomersTableBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				
-			}
-		});
-		refreshCustomersTableBtn.setBorderPainted(false);
-		refreshCustomersTableBtn.setBounds(10, 60, 40, 40);
-		ImageIcon refreshImageIcon = new ImageIcon("lib/images/refresh_image_icon");
-		refreshCustomersTableBtn.setIcon(refreshImageIcon);
-		customersPanel.add(refreshCustomersTableBtn);
-		
-		setContentPane(customersPanel);
+		setContentPane(mainMenuPanel);
 	}
 	
 	//Create the content panes that will be used. These are essentially the different screens of the application, such as the main menu and login screens.
 	void createContentPanels() {	
 		
-		/*
+		
 		mainMenuPanel = new JPanel();
 		mainMenuPanel.setBackground(Color.WHITE);
 		mainMenuPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -275,9 +168,16 @@ public class ApplicationFrame extends JFrame {
 				String user = userTextField.getText();
 				String password = passwordTextField.getText();
 				
-				if(!connectToDatabase(url, user, password)) { //If the connection failed, then give them the error on the main menu.
-					errorLbl.setText("Could not connect, please enter the credentials on the Configuration form.");					
-				} else errorLbl.setText("");
+				if(!appManager.connectToDatabase(url, user, password)) { //If the connection failed, then give them the error on the main menu.
+					errorLbl.setText("Could not connect, please enter the credentials on the Configuration form.");		
+					statusResultLbl.setText("Could not connect.");
+					statusResultLbl.setForeground(Color.RED);			
+					
+				} else { 
+					errorLbl.setText("");
+					statusResultLbl.setForeground(Color.GREEN);
+					statusResultLbl.setText("Connected.");
+				}
 			}
 		});
 		quickConnectBtn.setBackground(BUTTON_BACKGROUND_COLOR);
@@ -352,7 +252,13 @@ public class ApplicationFrame extends JFrame {
 				String password = passwordTextField.getText();
 				
 				//Attempt to connect to the database using the credentials.
-				connectToDatabase(url, user, password);
+				if(appManager.connectToDatabase(url, user, password)) {
+					statusResultLbl.setForeground(Color.GREEN);
+					statusResultLbl.setText("Connected.");
+				} else {
+					statusResultLbl.setText("Could not connect.");
+					statusResultLbl.setForeground(Color.RED);	
+				}
 				//try connect to the database specified.				
 				
 				//String url = "jdbc:mysql://localhost:3306/employee_manager";
@@ -439,9 +345,12 @@ public class ApplicationFrame extends JFrame {
 				String username = loginUsernameTextField.getText();
 				//System.out.println(connection);
 				if(appManager.loginUser(username, password)) {
+					System.out.println("Logged in - ApplicationFrame");
 					//They logged in. Load next panel.
 				} else {
+					
 					//They failed to login.
+					System.out.println("Failed Logged in - ApplicationFrame");
 				}
 			}
 		});
@@ -467,32 +376,157 @@ public class ApplicationFrame extends JFrame {
 		loginBackBtn.setBounds(324, 273, 89, 23);		
 		loginPanel.add(loginBackBtn);
 		
-		//Home Panel
+		//Customers - View
+		customersPanel = new JPanel();		
+		customersPanel.setBackground(Color.WHITE);
+		customersPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		customersPanel.setLayout(null);
 		
+		JButton newCustomerBtn = new JButton("New customer");
+		newCustomerBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				Object[][] tableData = {
+						{"0434", "Jayceon", "Zrews"},	
+						{"0003", "Jayceon", "Andrews"},
+						{"0001", "Jayceon", "Dndrews"},
+						{"0055", "Jayceon", "Cndrews"},
+						{"0105", "Jayceon", "Rndrews"},
+						{"0565", "Jayceon", "Endrews"},
+						{"0335", "Jayceon", "Fndrews"},
+						{"0006", "Jayceon", "Hndrews"},
+						{"0115", "Jayceon", "Xndrews"},
+						{"0095", "Jayceon", "Lndrews"},
+						{"0033", "Jayceon", "Gndrews"},
+						{"1015", "Jayceon", "Rndrews"},
+						{"1555", "Jayceon", "Vndrews"},
+						{"0002", "Jayceon", "Sndrews"},
+						{"0555", "Jayceon", "Kndrews"},
+						{"0335", "Jayceon", "Ondrews"},	
+						{"0434", "Jayceon", "Zrews"},	
+						{"0003", "Jayceon", "Andrews"},
+						{"0001", "Jayceon", "Dndrews"},
+						{"0055", "Jayceon", "Cndrews"},
+						{"0105", "Jayceon", "Rndrews"},
+						{"0565", "Jayceon", "Endrews"},
+						{"0335", "Jayceon", "Fndrews"},
+						{"0006", "Jayceon", "Hndrews"},
+						{"0115", "Jayceon", "Xndrews"},
+						{"0095", "Jayceon", "Lndrews"},
+						{"0033", "Jayceon", "Gndrews"},
+						{"1015", "Jayceon", "Rndrews"},
+						{"1555", "Jayceon", "Vndrews"},
+						{"0002", "Jayceon", "Sndrews"},
+						{"0555", "Jayceon", "Kndrews"},
+						{"0335", "Jayceon", "Ondrews"},		
+						{"0003", "Robert", "Stark"}
+						
+				};
+				
+				DefaultTableModel model = (DefaultTableModel) customersTable.getModel();
+				for(int row = 0; row < tableData.length; ++row) {
+					model.addRow(tableData[row]);
+				}
+			}
+		});
+		newCustomerBtn.setLocation(10, 23);
+		newCustomerBtn.setSize(118, 30);
+		customersPanel.add(newCustomerBtn);
+		
+		customerSearchTextField = new JTextField();
+		customerSearchTextField.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				customerSearchTextField.setText("");
+			}
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				if(customerSearchTextField.getText().length() == 0) {
+					customerSearchTextField.setText("Search...");
+				}
+			}
+		});
+		customerSearchTextField.setText("Search...");
+		customerSearchTextField.setBounds(55, 72, 165, 20);
+		customersPanel.add(customerSearchTextField);
+		customerSearchTextField.setColumns(10);
+		
+		final JCheckBox customerNoChckbx = new JCheckBox("Customer No.");
+		customerNoChckbx.setBackground(Color.WHITE);
+		customerNoChckbx.setSelected(true);
+		customerNoChckbx.setBounds(236, 71, 102, 23);
+		customersPanel.add(customerNoChckbx);
+		
+		final JCheckBox customerNameChckbx = new JCheckBox("Name");
+		customerNameChckbx.setBackground(Color.WHITE);
+		customerNameChckbx.setSelected(true);
+		customerNameChckbx.setBounds(346, 71, 102, 23);
+		customersPanel.add(customerNameChckbx);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBackground(Color.WHITE);
+		scrollPane.setBounds(10, 103, 661, 348);
+		customersPanel.add(scrollPane);
+
+		customersTable = new JTable();
+		scrollPane.setViewportView(customersTable);
+
+		customersTable.setAutoCreateRowSorter(true);
+		customersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		customersTable.setColumnSelectionAllowed(true);		
+		customersTable.setBorder(new LineBorder(new Color(0, 0, 0)));
+		String[] columnNames = {"Customer No.", "First Name", "Last Name"};
+		customersTable.setModel(new DefaultTableModel(null, columnNames));		
+		
+		
+		
+		JButton refreshCustomersTableBtn = new JButton("");
+		refreshCustomersTableBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String query = "SELECT * FROM `customers` ";
+				if(customerNoChckbx.isSelected() || customerNameChckbx.isSelected()) {
+					query += "WHERE ";
+					
+					//Alter the query depending on if the search by employee number check box is ticked.
+					if(customerNoChckbx.isSelected()) { 
+						query += "`employee_number` LIKE '"+customerSearchTextField.getText()+"%' ";
+					}
+					//Alter the query depending on if the search by employee name check box is ticked.
+					if(customerNameChckbx.isSelected()) {
+						if(customerNoChckbx.isSelected()) query += "OR ";
+						query += "`first_name` LIKE '"+customerSearchTextField.getText()+"%' OR `last_name` LIKE '"+customerSearchTextField.getText()+"%'";	
+					}
+					
+					//If the search field is just left as "Search...", then select everything from the table.
+					if(customerSearchTextField.getText().equals("Search...")) query = "SELECT * FROM `customers`";
+					
+					appManager.getTableRowData(query);
+					
+				} else {
+					DefaultTableModel model = (DefaultTableModel) customersTable.getModel();
+					model.addRow(new String[]{"Please "});
+					
+				}
+			}
+		});
+		refreshCustomersTableBtn.setBorderPainted(false);
+		refreshCustomersTableBtn.setBounds(10, 60, 40, 40);
+		ImageIcon refreshImageIcon = new ImageIcon("lib/images/refresh_image_icon");
+		refreshCustomersTableBtn.setIcon(refreshImageIcon);
+		customersPanel.add(refreshCustomersTableBtn);
+		
+		
+		//Home Panel
 		homePanel = new JPanel();
 		homePanel.setBackground(Color.WHITE);
 		homePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		//homePanel.setLayout(new CardLayout(0, 0));
+		homePanel.setLayout(null);
 		
-		
-		JLabel lblBusinessManagerApplication = new JLabel("Business Manager Application");
-		lblBusinessManagerApplication.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		lblBusinessManagerApplication.setHorizontalAlignment(SwingConstants.CENTER);
-		homePanel.add(lblBusinessManagerApplication, "name_13899687219859");
-		
-		JLabel lblHome = new JLabel("Home");
-		lblHome.setHorizontalAlignment(SwingConstants.CENTER);
-		homePanel.add(lblHome, "name_13899708000450");
-		
-		JTextPane textPane = new JTextPane();
-		textPane.setEditable(false);
-		homePanel.add(textPane, "name_13899728377762");
-		
-		JMenuBar menuBar = new JMenuBar();
-		homePanel.add(menuBar, "name_13899651122552");
+		homeMenuBar = new JMenuBar();
+		homeMenuBar.setBounds(0, 0, 681, 21);
+		homePanel.add(homeMenuBar);
 		
 		JMenu applicationMenu = new JMenu("Application");
-		menuBar.add(applicationMenu);
+		homeMenuBar.add(applicationMenu);
 		
 		JMenuItem exitMnItem = new JMenuItem("Exit");
 		exitMnItem.addActionListener(new ActionListener() {
@@ -509,11 +543,13 @@ public class ApplicationFrame extends JFrame {
 		applicationMenu.add(exitMnItem);
 		
 		JMenu customersMenu = new JMenu("Customers");
-		menuBar.add(customersMenu);
+		homeMenuBar.add(customersMenu);
 		
 		JMenuItem viewCustomersMnItem = new JMenuItem("View");
 		viewCustomersMnItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				//currentPanel.setVisible(false);
+				setContentPane(customersPanel);
 			}
 		});
 		customersMenu.add(viewCustomersMnItem);
@@ -522,7 +558,7 @@ public class ApplicationFrame extends JFrame {
 		customersMenu.add(newCustomersMnItem);
 		
 		JMenu employeesMenu = new JMenu("Employees");
-		menuBar.add(employeesMenu);
+		homeMenuBar.add(employeesMenu);
 		
 		JMenuItem viewEmployeesMnItem = new JMenuItem("View");
 		employeesMenu.add(viewEmployeesMnItem);
@@ -531,16 +567,16 @@ public class ApplicationFrame extends JFrame {
 		employeesMenu.add(newEmployeesMnItem);
 		
 		JMenu settingsMenu = new JMenu("Settings");
-		menuBar.add(settingsMenu);
+		homeMenuBar.add(settingsMenu);
 		
 		JMenu accountMenu = new JMenu("Account");
-		menuBar.add(accountMenu);
+		homeMenuBar.add(accountMenu);
 		
 		JMenuItem changePasswordMnItem = new JMenuItem("Change password");
 		accountMenu.add(changePasswordMnItem);
 		
 		JMenu adminMenu = new JMenu("Admin");
-		menuBar.add(adminMenu);
+		homeMenuBar.add(adminMenu);
 		
 		JMenuItem newUserMnItem = new JMenuItem("New User");
 		newUserMnItem.addActionListener(new ActionListener() {
@@ -549,10 +585,31 @@ public class ApplicationFrame extends JFrame {
 			}
 		});
 		adminMenu.add(newUserMnItem);
+		//homePanel.setLayout(null);
 		
-		*/
+		
+		JLabel lblBusinessManagerApplication = new JLabel("Business Manager Application");
+		lblBusinessManagerApplication.setBounds(5, 5, 671, 86);
+		lblBusinessManagerApplication.setAlignmentX(Component.CENTER_ALIGNMENT);
+		lblBusinessManagerApplication.setFont(new Font("Tahoma", Font.PLAIN, 17));
+		lblBusinessManagerApplication.setHorizontalAlignment(SwingConstants.CENTER);
+		homePanel.add(lblBusinessManagerApplication);
+		
+		JLabel lblHome = new JLabel("Home");
+		lblHome.setBounds(5, 102, 671, 75);
+		lblHome.setHorizontalAlignment(SwingConstants.CENTER);
+		homePanel.add(lblHome);
+		
+		JTextPane textPane = new JTextPane();
+		textPane.setBounds(5, 167, 666, 285);
+		textPane.setEditable(false);
+		homePanel.add(textPane);
+		
+		
+		
 	}
 	
+	/*
 	//Connect to the database with the given credentials.
 	boolean connectToDatabase(String url, String user, String password) {		
 				
@@ -565,7 +622,7 @@ public class ApplicationFrame extends JFrame {
 			}
 			
 			//Some debugging.
-			System.out.println("Attempting to connect to URL: [" + url + "] | USER: [" + user + "] | PASSWORD: [" + password + "]");
+			//System.out.println("Attempting to connect to URL: [" + url + "] | USER: [" + user + "] | PASSWORD: [" + password + "]");
 			
 			connection = DriverManager.getConnection(url, user, password);
 			
@@ -641,6 +698,8 @@ public class ApplicationFrame extends JFrame {
 		}
 	}
 	
+	*/
+	
 	//Sets the Login screens username and password.
 	public void setLoginFields(String username, String password) {	
 		loginUsernameTextField.setText(username);
@@ -653,9 +712,7 @@ public class ApplicationFrame extends JFrame {
 	public static final int ERROR_LOGIN_FAILED = 3;  
 	public void triggerError(int errorID, String message) {
 		switch(errorID) {
-			case ERROR_LOGIN_FAILED: {
-				loginErrorLbl.setText(message);
-			}
+			case ERROR_LOGIN_FAILED: { loginErrorLbl.setText(message); break; }
 		
 		}
 	}
@@ -666,6 +723,7 @@ public class ApplicationFrame extends JFrame {
 		
 		configurePanel.setVisible(false);
 		loginPanel.setVisible(false);
+		homePanel.setVisible(false);
 		
 		mainMenuPanel.setVisible(true);
 		setContentPane(mainMenuPanel);
@@ -675,6 +733,7 @@ public class ApplicationFrame extends JFrame {
 	void displayConfiguration() {		
 		mainMenuPanel.setVisible(false);
 		loginPanel.setVisible(false);
+		homePanel.setVisible(false);
 		
 		setContentPane(configurePanel);
 		configurePanel.setVisible(true);
@@ -684,22 +743,32 @@ public class ApplicationFrame extends JFrame {
 	void displayLogin() {
 		mainMenuPanel.setVisible(false);
 		configurePanel.setVisible(false);
+		homePanel.setVisible(false);
 		
 		setContentPane(loginPanel);
 		loginPanel.setVisible(true);
 	}
 	
-	//Returns a hashed string of the string that was passed as a parameter.
-	public String SHA1(String input) throws NoSuchAlgorithmException {
-		MessageDigest msgDigest = MessageDigest.getInstance("SHA1");
-		byte[] result = msgDigest.digest(input.getBytes());
-		StringBuffer sb = new StringBuffer();
-		for(int i = 0; i < result.length; i++) {
-			sb.append(Integer.toString((result[i] & 0xff) + 0x100, 16).substring(1));
-		}
+	void displayHome() {
+		mainMenuPanel.setVisible(false);
+		configurePanel.setVisible(false);
+		loginPanel.setVisible(false);
 		
-		return sb.toString();	
+		setContentPane(homePanel);
+		homePanel.setVisible(true);
 	}
+	
+	//Get the text the user has entered into the 'Search' part of the customers area.
+	public String getCustomerTableSearchQuery() {
+		return (customerSearchTextField.getText());
+	}
+	
+	//Get the text the user has entered into the 'Search' part of the employees area.
+	public String getEmployeeTableSearchQuery() { //#WIP
+		//return (employeeSearchTextField.getText());
+		return null;
+	}
+	
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
@@ -717,7 +786,30 @@ public class ApplicationFrame extends JFrame {
 			}
 		});
 	}
+	
+	/*
+	 * This will internally handle the showing/hiding of different panels. It will also move the JMenuBar around so it fits on all panels where appropiate.
+	 * 
+	 */
+	public void setContentPane(JPanel panel) {
+		if(currentPanel != null) currentPanel.setVisible(false);
+		super.setContentPane(panel);		
+		
+		if(currentPanel != null && currentPanel != mainMenuPanel && currentPanel != configurePanel && currentPanel != loginPanel) {
+			currentPanel.remove(homeMenuBar);			
+		}
+		
+		this.currentPanel = panel;
+		if(currentPanel != null) this.currentPanel.setVisible(true);
+		
+		if(currentPanel != null && currentPanel != mainMenuPanel && currentPanel != configurePanel && currentPanel != loginPanel) {
+			currentPanel.add(homeMenuBar);
+		}
+	}
+	
 }
+
+
 /*
 
 // Creates a table, adds a scroll to it and fills in the table with the dummy info. 
