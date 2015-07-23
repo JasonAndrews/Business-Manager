@@ -89,7 +89,7 @@ public class AppManager {
 			
 			System.out.println("Counted rows: " + count);
 			
-			int arrayRow = 0, rsRow = 1;
+			int arrayRow = 0;
 			while(resultSet.next()) {
 				rowData[arrayRow][0] = resultSet.getInt("employee_number");
 				rowData[arrayRow][1] = resultSet.getString("first_name");

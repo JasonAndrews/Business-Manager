@@ -61,6 +61,7 @@ import javax.swing.JCheckBox;
 
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 
 public class ApplicationFrame extends JFrame {
@@ -376,7 +377,7 @@ public class ApplicationFrame extends JFrame {
 		loginBackBtn.setBounds(324, 273, 89, 23);		
 		loginPanel.add(loginBackBtn);
 		
-		//Customers - View
+		//Customers Panel
 		customersPanel = new JPanel();		
 		customersPanel.setBackground(Color.WHITE);
 		customersPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -436,7 +437,7 @@ public class ApplicationFrame extends JFrame {
 		customerSearchTextField.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent arg0) {
-				customerSearchTextField.setText("");
+				if(customerSearchTextField.getText().equals("Search...")) customerSearchTextField.setText("");
 			}
 			@Override
 			public void focusLost(FocusEvent arg0) {
@@ -474,9 +475,53 @@ public class ApplicationFrame extends JFrame {
 		customersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		customersTable.setColumnSelectionAllowed(true);		
 		customersTable.setBorder(new LineBorder(new Color(0, 0, 0)));
-		String[] columnNames = {"Customer No.", "First Name", "Last Name"};
+		customersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		customersTable.setColumnSelectionAllowed(false);
+		customersTable.setCellEditor(null);
+		final String[] columnNames = {"Customer No.", "First Name", "Last Name"};
 		customersTable.setModel(new DefaultTableModel(null, columnNames));		
-		
+		customersTable.addMouseListener(new MouseListener() {			
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				//If they right clicked.
+				if(arg0.getButton() == MouseEvent.BUTTON3) {
+					System.out.println("Right Clicked");					
+				}
+				
+				//If they left clicked.
+				if(arg0.getButton() == MouseEvent.BUTTON1) {
+					int selectedRow = customersTable.getSelectedRow();
+					System.out.println("Left Clicked");		
+					System.out.println("Selected row " + selectedRow + ".");		
+				}
+				
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
 		
 		JButton refreshCustomersTableBtn = new JButton("");
@@ -499,11 +544,25 @@ public class ApplicationFrame extends JFrame {
 					//If the search field is just left as "Search...", then select everything from the table.
 					if(customerSearchTextField.getText().equals("Search...")) query = "SELECT * FROM `customers`";
 					
-					appManager.getTableRowData(query);
+					//Get the row data from the query.
+					Object[][] rowData = appManager.getTableRowData(query);
+					
+					DefaultTableModel tableModel = new DefaultTableModel(rowData, columnNames) {
+						@Override
+					    public boolean isCellEditable(int row, int column) {
+					       //all cells false
+					       return false;
+					    }
+					};
+					customersTable.setModel(tableModel);
 					
 				} else {
+					//If both of the checkboxes are unticked, then simply show them a row with the specified message.
+					String[] temp = new String[]{""};
+					customersTable.setModel(new DefaultTableModel(null, temp));
 					DefaultTableModel model = (DefaultTableModel) customersTable.getModel();
-					model.addRow(new String[]{"Please "});
+					
+					model.addRow(new String[]{"Please tick atleast one of the checkboxes."});
 					
 				}
 			}
