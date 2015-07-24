@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Image;
+import java.awt.MouseInfo;
+import java.awt.Point;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -63,6 +65,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
 
 public class ApplicationFrame extends JFrame {
 
@@ -100,6 +103,11 @@ public class ApplicationFrame extends JFrame {
 	private JTextField customerSearchTextField;
 	
 	private JMenuBar homeMenuBar;
+	
+	/**
+	 * @wbp.nonvisual location=82,359
+	 */
+	private final JPopupMenu customerOptionsPopup = new JPopupMenu();
 
 	/**
 	 * Create the frame.
@@ -113,10 +121,9 @@ public class ApplicationFrame extends JFrame {
 		setResizable(false);		
 		getContentPane().setLayout(new CardLayout(0, 0));
 		
-		createContentPanels();				
-		
-		//customersPanel.add(homeMenuBar);
-		
+		createContentPanels(); //Create the different panels.				
+				
+		//super.setContentPane(customersPanel);
 		setContentPane(mainMenuPanel);
 	}
 	
@@ -124,6 +131,8 @@ public class ApplicationFrame extends JFrame {
 	void createContentPanels() {	
 		
 		
+		
+		//Main Menu Panel.
 		mainMenuPanel = new JPanel();
 		mainMenuPanel.setBackground(Color.WHITE);
 		mainMenuPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -195,7 +204,7 @@ public class ApplicationFrame extends JFrame {
 		
 		
 		
-		//configurePanel
+		//Configure Panel
 		
 		
 		//Creating the elements of the Configuration content pane.
@@ -377,6 +386,7 @@ public class ApplicationFrame extends JFrame {
 		loginBackBtn.setBounds(324, 273, 89, 23);		
 		loginPanel.add(loginBackBtn);
 		
+		
 		//Customers Panel
 		customersPanel = new JPanel();		
 		customersPanel.setBackground(Color.WHITE);
@@ -463,6 +473,102 @@ public class ApplicationFrame extends JFrame {
 		customerNameChckbx.setBounds(346, 71, 102, 23);
 		customersPanel.add(customerNameChckbx);
 		
+		//Popup Menu (When a user left clicks a row, a menu will pop up with a list of different options). 
+		customerOptionsPopup.setPopupSize(60, 60);
+		
+		final JMenuItem popupCloseMnItem = new JMenuItem("Close");
+		final JMenuItem popupViewMnItem = new JMenuItem("View");
+		final JMenuItem popupEditMnItem = new JMenuItem("Edit");
+		final JMenuItem popupDeleteMnItem = new JMenuItem("Delete");
+		
+		//The Close menu item.
+		popupCloseMnItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//System.out.println("VIEWING");
+				customerOptionsPopup.setVisible(false);
+			}
+		});
+		popupCloseMnItem.addMouseMotionListener(new MouseMotionListener() {
+			@Override
+			public void mouseDragged(MouseEvent arg0) { }
+
+			@Override
+			public void mouseMoved(MouseEvent arg0) {				
+				popupCloseMnItem.setForeground(Color.RED);
+				popupViewMnItem.setForeground(Color.BLACK);
+				popupEditMnItem.setForeground(Color.BLACK);
+				popupDeleteMnItem.setForeground(Color.BLACK);
+			}
+			
+		});
+		popupCloseMnItem.setBounds(0, 0, 20, 20);
+		customerOptionsPopup.add(popupCloseMnItem);
+		
+		//The View menu item.
+		popupViewMnItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				System.out.println("VIEWING");
+			}
+		});
+		popupViewMnItem.addMouseMotionListener(new MouseMotionListener() {
+			@Override
+			public void mouseDragged(MouseEvent arg0) { }
+
+			@Override
+			public void mouseMoved(MouseEvent arg0) {		
+				popupCloseMnItem.setForeground(Color.BLACK);
+				popupViewMnItem.setForeground(Color.RED);
+				popupEditMnItem.setForeground(Color.BLACK);
+				popupDeleteMnItem.setForeground(Color.BLACK);
+			}
+			
+		});
+		popupViewMnItem.setBounds(0, 0, 20, 20);
+		customerOptionsPopup.add(popupViewMnItem);
+		
+		//The Edit menu item.
+		popupEditMnItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				System.out.println("EDITING");
+			}
+		});
+		popupEditMnItem.addMouseMotionListener(new MouseMotionListener() {
+			@Override
+			public void mouseDragged(MouseEvent arg0) { }
+
+			@Override
+			public void mouseMoved(MouseEvent arg0) {			
+				popupCloseMnItem.setForeground(Color.BLACK);	
+				popupViewMnItem.setForeground(Color.BLACK);	
+				popupEditMnItem.setForeground(Color.RED);
+				popupDeleteMnItem.setForeground(Color.BLACK);
+			}
+			
+		});
+		customerOptionsPopup.add(popupEditMnItem);
+		
+		//The Delete menu item.
+		popupDeleteMnItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				System.out.println("DELETING");
+			}
+		});
+		popupDeleteMnItem.addMouseMotionListener(new MouseMotionListener() {
+			@Override
+			public void mouseDragged(MouseEvent arg0) { }
+
+			@Override
+			public void mouseMoved(MouseEvent arg0) {	
+				popupCloseMnItem.setForeground(Color.BLACK);	
+				popupEditMnItem.setForeground(Color.BLACK);
+				popupViewMnItem.setForeground(Color.BLACK);				
+				popupDeleteMnItem.setForeground(Color.RED);
+			}
+			
+		});
+		customerOptionsPopup.add(popupDeleteMnItem);
+		
+		//Customer Table
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBackground(Color.WHITE);
 		scrollPane.setBounds(10, 103, 661, 348);
@@ -483,44 +589,37 @@ public class ApplicationFrame extends JFrame {
 		customersTable.addMouseListener(new MouseListener() {			
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				//If they right clicked.
-				if(arg0.getButton() == MouseEvent.BUTTON3) {
-					System.out.println("Right Clicked");					
-				}
-				
 				//If they left clicked.
 				if(arg0.getButton() == MouseEvent.BUTTON1) {
-					int selectedRow = customersTable.getSelectedRow();
-					System.out.println("Left Clicked");		
-					System.out.println("Selected row " + selectedRow + ".");		
+					
+					int selectedRow = customersTable.getSelectedRow(); //Get the id of the row the user selected. The return int value will be the value used in the array to retrieve information on the customer.					
+					int columnCount = customersTable.getColumnCount(); //Get the total amount of columns, if it's only 1, then that means that they have no check boxes ticked and the notice was shown.
+					
+					if(selectedRow >= 0 && columnCount > 1) { //Only show the options if the person clicked on a valid row.
+						//System.out.println("Left Clicked");		
+						//System.out.println("Selected row " + selectedRow + ".");
+						
+						int mouseX = MouseInfo.getPointerInfo().getLocation().x;
+						int mouseY = MouseInfo.getPointerInfo().getLocation().y;
+						
+						
+						customerOptionsPopup.setLocation(mouseX, mouseY);
+						customerOptionsPopup.setVisible(true);
+					}					
 				}
-				
-				
 			}
 
 			@Override
-			public void mouseEntered(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseEntered(MouseEvent arg0) { }
 
 			@Override
-			public void mouseExited(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseExited(MouseEvent arg0) { }
 
 			@Override
-			public void mousePressed(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mousePressed(MouseEvent arg0) { }
 
 			@Override
-			public void mouseReleased(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseReleased(MouseEvent arg0) { }
 		});
 		
 		
@@ -533,11 +632,13 @@ public class ApplicationFrame extends JFrame {
 					
 					//Alter the query depending on if the search by employee number check box is ticked.
 					if(customerNoChckbx.isSelected()) { 
-						query += "`employee_number` LIKE '"+customerSearchTextField.getText()+"%' ";
+						query += "`customer_number` LIKE '"+customerSearchTextField.getText()+"%' ";
 					}
-					//Alter the query depending on if the search by employee name check box is ticked.
+					//Alter the query depending on if the search by customer name check box is ticked.
 					if(customerNameChckbx.isSelected()) {
-						if(customerNoChckbx.isSelected()) query += "OR ";
+						
+						if(customerNoChckbx.isSelected()) query += "OR "; //Easy way to alter the query so the query will work properly. "OR " is needed for the query to actually work if both checkboxes are ticked.
+						
 						query += "`first_name` LIKE '"+customerSearchTextField.getText()+"%' OR `last_name` LIKE '"+customerSearchTextField.getText()+"%'";	
 					}
 					
@@ -593,13 +694,14 @@ public class ApplicationFrame extends JFrame {
 				System.out.println("EXIT");
 			}
 		});
+		applicationMenu.add(exitMnItem);
 		
 		JMenuItem homeMnItem = new JMenuItem("Home");
 		applicationMenu.add(homeMnItem);
 		
 		JMenuItem mainMenuMnItem = new JMenuItem("Main Menu");
 		applicationMenu.add(mainMenuMnItem);
-		applicationMenu.add(exitMnItem);
+		
 		
 		JMenu customersMenu = new JMenu("Customers");
 		homeMenuBar.add(customersMenu);
@@ -668,96 +770,7 @@ public class ApplicationFrame extends JFrame {
 		
 	}
 	
-	/*
-	//Connect to the database with the given credentials.
-	boolean connectToDatabase(String url, String user, String password) {		
-				
-		//Add a thread here.
-		try {			
-			
-			if(connection != null && connection.isValid(0)) { //If there's already a connection, close it before continuing.
-				System.out.println("Already has a connection.");
-				connection.close(); //Close the connection.
-			}
-			
-			//Some debugging.
-			//System.out.println("Attempting to connect to URL: [" + url + "] | USER: [" + user + "] | PASSWORD: [" + password + "]");
-			
-			connection = DriverManager.getConnection(url, user, password);
-			
-			statusResultLbl.setForeground(Color.GREEN);
-			statusResultLbl.setText("Connected.");
-			
-			//Check if this is the first time the application has been used (no users within the database). 
-			firstTimeUseCheck();
-		} catch(Exception ex) {
-			statusResultLbl.setText("Could not connect.");
-			statusResultLbl.setForeground(Color.RED);	
-			return false;
-		}
-		
-		//String url = "jdbc:mysql://localhost:3306/employee_manager";
-		//String user = "root";
-		//String pw = "";
-	 
-		return true;
-	}
 	
-	//Attempts to log a user into the application through the Login screen.
-	void loginUser(String username, String password) {
-		
-		try {
-			
-			if(connection == null || !connection.isValid(0)) { //Check if the application is not connected to the database.
-				loginErrorLbl.setText("Login failed, there is no connection to the database.");
-			} else {
-			
-				Statement statement = connection.createStatement();
-				
-				ResultSet resultSet = statement.executeQuery("SELECT * FROM `users` WHERE `username` = '"+username+"'");
-				
-				if(resultSet.next()) { //If their username exists in the database.
-					//System.out.println("Username: [" + username + "] | Admin ID: [" + resultSet.getInt("adminId") + "]"); //Debugging
-					String hashedPassword = SHA1(password);
-					//System.out.println("PASSWORD: " + password + " | HASHED: " + hashedPassword);
-					
-					//Retrieve the password and compare the stored password with the password specified by the user.
-					if(!hashedPassword.equals(resultSet.getString("password"))) { //If the passwords do not match.
-						loginErrorLbl.setText("Login failed, you have entered an incorrect password.");
-					} else {
-						//Continue onto the next pane where most of the content will actually be.
-						//Check if the user is an administrator.
-					}
-					
-				} else {
-					loginErrorLbl.setText("Login failed, the username you have specified does not exist.");
-				}
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}			
-	}
-	
-	//Checks whether or not the application has been used previously (there's no users created yet).
-	void firstTimeUseCheck() throws SQLException, NoSuchAlgorithmException {
-		if(connection == null) return;
-		
-		Statement statement = connection.createStatement(); //Creates a statement.
-		
-		ResultSet resultSet = statement.executeQuery("SELECT * FROM `users`"); //Executes a SELECT query and store the result set.
-		
-		if(!resultSet.next()) { //There's no users, which means this is the first time the application has been used. 
-			
-			String newUserQuery = "INSERT INTO `users` (`username`, `password`, `admin`) VALUES ('admin', '" + SHA1("password") + "', '1')"; //Creating a string that will store the INSERT query for the new user.
-			//System.out.println("QUERY: " + newUserQuery);
-			statement.executeUpdate(newUserQuery); //Execute the query.
-			
-			loginUsernameTextField.setText("admin");
-			loginPasswordField.setText("password");
-		}
-	}
-	
-	*/
 	
 	//Sets the Login screens username and password.
 	public void setLoginFields(String username, String password) {	
@@ -769,10 +782,15 @@ public class ApplicationFrame extends JFrame {
 	public static final int ERROR_CONNECTION_FAILED = 1;
 	public static final int ERROR_CONNECTION_DROPPED = 2;
 	public static final int ERROR_LOGIN_FAILED = 3;  
+	
+	/*
+	 * A way to trigger error messages within the application. 
+	 * In most instances, this will just show an error message in a label.
+	 */
 	public void triggerError(int errorID, String message) {
 		switch(errorID) {
 			case ERROR_LOGIN_FAILED: { loginErrorLbl.setText(message); break; }
-		
+			
 		}
 	}
 	
@@ -909,5 +927,96 @@ table_1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 table_1.setColumnSelectionAllowed(true);
 table_1.setModel(new DefaultTableModel(tableData, columns));
 table_1.setBorder(new LineBorder(new Color(0, 0, 0)));
+
+*/
+
+/*
+//Connect to the database with the given credentials.
+boolean connectToDatabase(String url, String user, String password) {		
+			
+	//Add a thread here.
+	try {			
+		
+		if(connection != null && connection.isValid(0)) { //If there's already a connection, close it before continuing.
+			System.out.println("Already has a connection.");
+			connection.close(); //Close the connection.
+		}
+		
+		//Some debugging.
+		//System.out.println("Attempting to connect to URL: [" + url + "] | USER: [" + user + "] | PASSWORD: [" + password + "]");
+		
+		connection = DriverManager.getConnection(url, user, password);
+		
+		statusResultLbl.setForeground(Color.GREEN);
+		statusResultLbl.setText("Connected.");
+		
+		//Check if this is the first time the application has been used (no users within the database). 
+		firstTimeUseCheck();
+	} catch(Exception ex) {
+		statusResultLbl.setText("Could not connect.");
+		statusResultLbl.setForeground(Color.RED);	
+		return false;
+	}
+	
+	//String url = "jdbc:mysql://localhost:3306/employee_manager";
+	//String user = "root";
+	//String pw = "";
+ 
+	return true;
+}
+
+//Attempts to log a user into the application through the Login screen.
+void loginUser(String username, String password) {
+	
+	try {
+		
+		if(connection == null || !connection.isValid(0)) { //Check if the application is not connected to the database.
+			loginErrorLbl.setText("Login failed, there is no connection to the database.");
+		} else {
+		
+			Statement statement = connection.createStatement();
+			
+			ResultSet resultSet = statement.executeQuery("SELECT * FROM `users` WHERE `username` = '"+username+"'");
+			
+			if(resultSet.next()) { //If their username exists in the database.
+				//System.out.println("Username: [" + username + "] | Admin ID: [" + resultSet.getInt("adminId") + "]"); //Debugging
+				String hashedPassword = SHA1(password);
+				//System.out.println("PASSWORD: " + password + " | HASHED: " + hashedPassword);
+				
+				//Retrieve the password and compare the stored password with the password specified by the user.
+				if(!hashedPassword.equals(resultSet.getString("password"))) { //If the passwords do not match.
+					loginErrorLbl.setText("Login failed, you have entered an incorrect password.");
+				} else {
+					//Continue onto the next pane where most of the content will actually be.
+					//Check if the user is an administrator.
+				}
+				
+			} else {
+				loginErrorLbl.setText("Login failed, the username you have specified does not exist.");
+			}
+		}
+	} catch (Exception ex) {
+		ex.printStackTrace();
+	}			
+}
+
+//Checks whether or not the application has been used previously (there's no users created yet).
+void firstTimeUseCheck() throws SQLException, NoSuchAlgorithmException {
+	if(connection == null) return;
+	
+	Statement statement = connection.createStatement(); //Creates a statement.
+	
+	ResultSet resultSet = statement.executeQuery("SELECT * FROM `users`"); //Executes a SELECT query and store the result set.
+	
+	if(!resultSet.next()) { //There's no users, which means this is the first time the application has been used. 
+		
+		String newUserQuery = "INSERT INTO `users` (`username`, `password`, `admin`) VALUES ('admin', '" + SHA1("password") + "', '1')"; //Creating a string that will store the INSERT query for the new user.
+		//System.out.println("QUERY: " + newUserQuery);
+		statement.executeUpdate(newUserQuery); //Execute the query.
+		
+		loginUsernameTextField.setText("admin");
+		loginPasswordField.setText("password");
+	}
+}
 
 */

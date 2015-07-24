@@ -85,20 +85,28 @@ public class AppManager {
 			count = resultSet.getRow();
 			resultSet.beforeFirst();
 			
-			rowData = new Object[count][3];
+			rowData = new Object[count][7];
 			
 			System.out.println("Counted rows: " + count);
 			
 			int arrayRow = 0;
-			while(resultSet.next()) {
-				rowData[arrayRow][0] = resultSet.getInt("employee_number");
+			
+			
+			//NEED A THREAD HERE!!
+			while(resultSet.next()) { //While there is another row of data.
+				
+				//Load the data into the array.
+				rowData[arrayRow][0] = resultSet.getInt("customer_number");
 				rowData[arrayRow][1] = resultSet.getString("first_name");
 				rowData[arrayRow][2] = resultSet.getString("last_name");
+				rowData[arrayRow][3] = resultSet.getString("address_one");
+				rowData[arrayRow][4] = resultSet.getString("address_two");
+				rowData[arrayRow][5] = resultSet.getString("address_city");
+				rowData[arrayRow][6] = resultSet.getString("address_country");
 				
-				System.out.println(rowData[arrayRow][0] + " | " + rowData[arrayRow][1] + " | " + rowData[arrayRow][2]);
-				++arrayRow;
+				System.out.println(rowData[arrayRow][0] + " | " + rowData[arrayRow][1] + " | " + rowData[arrayRow][2]); //DEBUGGING.
 				
-				
+				++arrayRow; //Increment the index for the array.				
 			}
 			
 		} catch (Exception ex) {
@@ -128,7 +136,7 @@ public class AppManager {
 		}
 		
 		
-		return rowData;		
+		return rowData;	//return the row of data.
 	}
 	
 	public boolean testConnectionToDatabase(String url, String user, String password) {
