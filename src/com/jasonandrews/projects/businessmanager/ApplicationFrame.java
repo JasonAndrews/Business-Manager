@@ -73,7 +73,7 @@ public class ApplicationFrame extends JFrame {
 
 	private AppManager appManager;
 	
-	private JFrame popupFrame;
+	private PopupFrame popupFrame;
 	private JPanel currentPanel;
 	
 	private JPanel mainMenuPanel;
@@ -119,7 +119,7 @@ public class ApplicationFrame extends JFrame {
 	private JTextField addressCityTextField;
 	private JTextField addressCountryTextField;
 	
-	private Object[][] customerRowData;
+	private ArrayList<Object> customerList; //A list of customer objects represented in the current customer table.
 	
 	/**
 	 * @wbp.nonvisual location=82,359
@@ -659,6 +659,11 @@ public class ApplicationFrame extends JFrame {
 		popupViewMnItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				//System.out.println("VIEWING");
+				int selectedRow = customersTable.getSelectedRow();
+				
+				if(selectedRow >= 0) {
+					popupFrame.fillInForm("CUSTOMER",  ((Customer) customerList.get(selectedRow)).getCustomerInformation());
+				}
 				popupFrame.setVisible(true);			
 				customerOptionsPopup.setVisible(false);
 			}
@@ -808,8 +813,8 @@ public class ApplicationFrame extends JFrame {
 					if(customerSearchTextField.getText().equals("Search...")) query = "SELECT * FROM `customers`";
 					
 					//Get the row data from the query (called from AppManager).
-					ArrayList<Object> objectList = appManager.getTableRowData("CUSTOMERS", query); 
-					Object[][] rowData = appManager.getRowData("CUSTOMER", objectList);
+					customerList = appManager.getTableRowData("CUSTOMERS", query); 
+					Object[][] rowData = appManager.getRowData("CUSTOMER", customerList);
 					
 					DefaultTableModel tableModel = new DefaultTableModel(rowData, columnNames) {
 						@Override

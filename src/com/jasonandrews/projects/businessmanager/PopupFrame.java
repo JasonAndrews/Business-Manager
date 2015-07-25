@@ -172,20 +172,20 @@ public class PopupFrame extends JFrame {
 	}
 	
 	//Populate the form with the given information, depending on the given panel type.
-	public void fillInForm(String panelType, String[] info) {
+	public void fillInForm(String panelType, Object[] info) {
 		switch(panelType) {
 			case "CUSTOMER": {
 				customerPanel.setVisible(true);
 				//employeePanel.setVisible(false);
 				//userPanel.setVisible(false);
 				
-				c_customerNoTextField.setText(info[0]);
-				c_firstNameTextField.setText(info[1]);
-				c_lastNameTextField.setText(info[2]);				
-				c_addressOneTextField.setText(info[3]);
-				c_addressTwoTextField.setText(info[4]);
-				c_addressCityTextField.setText(info[5]);
-				c_addressCountryTextField.setText(info[6]);
+				c_customerNoTextField.setText(info[0].toString());
+				c_firstNameTextField.setText(info[1].toString());
+				c_lastNameTextField.setText(info[2].toString());				
+				c_addressOneTextField.setText(info[3].toString());
+				c_addressTwoTextField.setText(info[4].toString());
+				c_addressCityTextField.setText(info[5].toString());
+				c_addressCountryTextField.setText(info[6].toString());
 				break;
 			}
 			case "EMPLOYEE": {

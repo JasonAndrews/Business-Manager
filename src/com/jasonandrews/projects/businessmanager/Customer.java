@@ -34,7 +34,7 @@ public class Customer {
 		this.addressCountry = addressCountry;
 	}
 	
-	private Object[] getCustomerInformation() {
+	public Object[] getCustomerInformation() {
 		Object[] info = {this.customerNumber, this.firstName, this.lastName, this.addressOne, this.addressTwo, this.addressCity, this.addressCountry};		
 		return info;
 	}
