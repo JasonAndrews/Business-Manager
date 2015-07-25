@@ -25,6 +25,7 @@ import java.awt.event.ActionEvent;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
+import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JTextField;
@@ -63,6 +64,7 @@ import javax.swing.JCheckBox;
 
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseMotionListener;
@@ -71,6 +73,7 @@ public class ApplicationFrame extends JFrame {
 
 	private AppManager appManager;
 	
+	private JFrame popupFrame;
 	private JPanel currentPanel;
 	
 	private JPanel mainMenuPanel;
@@ -96,6 +99,8 @@ public class ApplicationFrame extends JFrame {
 
 	private Connection connection;
 
+	private boolean popupIsShown;
+	
 	private static final Color BUTTON_BACKGROUND_COLOR = Color.BLACK;
 	private static final Color BUTTON_FOREGROUND_COLOR = Color.WHITE;
 	private JTextField loginUsernameTextField;
@@ -103,6 +108,18 @@ public class ApplicationFrame extends JFrame {
 	private JTextField customerSearchTextField;
 	
 	private JMenuBar homeMenuBar;
+	
+	
+	private JFrame customerInternalFrame;
+	private JTextField firstNameTextField;
+	private JTextField lastNameTextField;
+	private JTextField customerNoTextField;
+	private JTextField addressOneTextField;
+	private JTextField addressTwoTextField;
+	private JTextField addressCityTextField;
+	private JTextField addressCountryTextField;
+	
+	private Object[][] customerRowData;
 	
 	/**
 	 * @wbp.nonvisual location=82,359
@@ -121,16 +138,52 @@ public class ApplicationFrame extends JFrame {
 		setResizable(false);		
 		getContentPane().setLayout(new CardLayout(0, 0));
 		
-		createContentPanels(); //Create the different panels.				
+		popupFrame = new PopupFrame(appManager);
+		
+		addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				System.out.println("FRAME - click.");
+				//customerOptionsPopup.setVisible(false);
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		
+		createContentPanels(); //Create the different panels.
+		//createInternalFrames();	
 				
 		//super.setContentPane(customersPanel);
 		setContentPane(mainMenuPanel);
 	}
 	
 	//Create the content panes that will be used. These are essentially the different screens of the application, such as the main menu and login screens.
-	void createContentPanels() {	
-		
-		
+	void createContentPanels() {			
 		
 		//Main Menu Panel.
 		mainMenuPanel = new JPanel();
@@ -168,9 +221,7 @@ public class ApplicationFrame extends JFrame {
 		exitBtn.setForeground(BUTTON_FOREGROUND_COLOR);
 		exitBtn.setBounds(268, 257, 122, 33);
 		mainMenuPanel.add(exitBtn);
-		
-		
-		
+				
 		JButton quickConnectBtn = new JButton("Quick Connect");
 		quickConnectBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -199,11 +250,7 @@ public class ApplicationFrame extends JFrame {
 		errorLbl.setForeground(Color.RED);
 		errorLbl.setBounds(112, 301, 454, 14);
 		mainMenuPanel.add(errorLbl);
-		
-		
-		
-		
-		
+				
 		//Configure Panel
 		
 		
@@ -387,6 +434,99 @@ public class ApplicationFrame extends JFrame {
 		loginPanel.add(loginBackBtn);
 		
 		
+		
+		
+		
+		//Home Panel
+		homePanel = new JPanel();
+		homePanel.setBackground(Color.WHITE);
+		homePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		homePanel.setLayout(null);
+		
+		homeMenuBar = new JMenuBar();
+		homeMenuBar.setBounds(0, 0, 681, 21);
+		homePanel.add(homeMenuBar);
+		
+		JMenu applicationMenu = new JMenu("Application");
+		homeMenuBar.add(applicationMenu);
+		
+		JMenuItem exitMnItem = new JMenuItem("Exit");
+		exitMnItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				System.out.println("EXIT");
+			}
+		});
+		applicationMenu.add(exitMnItem);
+		
+		JMenuItem homeMnItem = new JMenuItem("Home");
+		applicationMenu.add(homeMnItem);
+		
+		JMenuItem mainMenuMnItem = new JMenuItem("Main Menu");
+		applicationMenu.add(mainMenuMnItem);
+		
+		
+		JMenu customersMenu = new JMenu("Customers");
+		homeMenuBar.add(customersMenu);
+		
+		JMenuItem viewCustomersMnItem = new JMenuItem("View");
+		viewCustomersMnItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//currentPanel.setVisible(false);
+				setContentPane(customersPanel);
+			}
+		});
+		customersMenu.add(viewCustomersMnItem);
+		
+		JMenuItem newCustomersMnItem = new JMenuItem("New");
+		customersMenu.add(newCustomersMnItem);
+		
+		JMenu employeesMenu = new JMenu("Employees");
+		homeMenuBar.add(employeesMenu);
+		
+		JMenuItem viewEmployeesMnItem = new JMenuItem("View");
+		employeesMenu.add(viewEmployeesMnItem);
+		
+		JMenuItem newEmployeesMnItem = new JMenuItem("New");
+		employeesMenu.add(newEmployeesMnItem);
+		
+		JMenu settingsMenu = new JMenu("Settings");
+		homeMenuBar.add(settingsMenu);
+		
+		JMenu accountMenu = new JMenu("Account");
+		homeMenuBar.add(accountMenu);
+		
+		JMenuItem changePasswordMnItem = new JMenuItem("Change password");
+		accountMenu.add(changePasswordMnItem);
+		
+		JMenu adminMenu = new JMenu("Admin");
+		homeMenuBar.add(adminMenu);
+		
+		JMenuItem newUserMnItem = new JMenuItem("New User");
+		newUserMnItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				System.out.println("Yooo");
+			}
+		});
+		adminMenu.add(newUserMnItem);
+		//homePanel.setLayout(null);		
+		
+		JLabel lblBusinessManagerApplication = new JLabel("Business Manager Application");
+		lblBusinessManagerApplication.setBounds(5, 5, 671, 86);
+		lblBusinessManagerApplication.setAlignmentX(Component.CENTER_ALIGNMENT);
+		lblBusinessManagerApplication.setFont(new Font("Tahoma", Font.PLAIN, 17));
+		lblBusinessManagerApplication.setHorizontalAlignment(SwingConstants.CENTER);
+		homePanel.add(lblBusinessManagerApplication);
+		
+		JLabel lblHome = new JLabel("Home");
+		lblHome.setBounds(5, 102, 671, 75);
+		lblHome.setHorizontalAlignment(SwingConstants.CENTER);
+		homePanel.add(lblHome);
+		
+		JTextPane textPane = new JTextPane();
+		textPane.setBounds(5, 167, 666, 285);
+		textPane.setEditable(false);
+		homePanel.add(textPane);
+		
 		//Customers Panel
 		customersPanel = new JPanel();		
 		customersPanel.setBackground(Color.WHITE);
@@ -484,8 +624,9 @@ public class ApplicationFrame extends JFrame {
 		//The Close menu item.
 		popupCloseMnItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				//System.out.println("VIEWING");
+				//System.out.println("CLOSING");
 				customerOptionsPopup.setVisible(false);
+				popupIsShown = false;
 			}
 		});
 		popupCloseMnItem.addMouseMotionListener(new MouseMotionListener() {
@@ -501,13 +642,25 @@ public class ApplicationFrame extends JFrame {
 			}
 			
 		});
+		customerOptionsPopup.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent arg0) { }
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				customerOptionsPopup.setVisible(false);
+				//System.out.println("Focus Lost: customerOptionsPopup");
+			}
+		});
 		popupCloseMnItem.setBounds(0, 0, 20, 20);
 		customerOptionsPopup.add(popupCloseMnItem);
 		
 		//The View menu item.
 		popupViewMnItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("VIEWING");
+				//System.out.println("VIEWING");
+				popupFrame.setVisible(true);			
+				customerOptionsPopup.setVisible(false);
 			}
 		});
 		popupViewMnItem.addMouseMotionListener(new MouseMotionListener() {
@@ -568,6 +721,7 @@ public class ApplicationFrame extends JFrame {
 		});
 		customerOptionsPopup.add(popupDeleteMnItem);
 		
+		
 		//Customer Table
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBackground(Color.WHITE);
@@ -599,13 +753,21 @@ public class ApplicationFrame extends JFrame {
 						//System.out.println("Left Clicked");		
 						//System.out.println("Selected row " + selectedRow + ".");
 						
-						int mouseX = MouseInfo.getPointerInfo().getLocation().x;
+						//Get the location of the mouse when the user clicked. Will be used to display the popup menu.
+						int mouseX = MouseInfo.getPointerInfo().getLocation().x; 
 						int mouseY = MouseInfo.getPointerInfo().getLocation().y;
 						
 						
-						customerOptionsPopup.setLocation(mouseX, mouseY);
-						customerOptionsPopup.setVisible(true);
-					}					
+						customerOptionsPopup.setLocation(mouseX, mouseY); //Reposition the popup menu.
+						customerOptionsPopup.setVisible(true); //Show the popup menu.
+						customerOptionsPopup.requestFocus();
+						popupIsShown = true;
+					} else {
+						if(customerOptionsPopup != null) {
+							customerOptionsPopup.setVisible(false); //Hide the popup menu.
+							popupIsShown = false;
+						}
+					}
 				}
 			}
 
@@ -645,8 +807,9 @@ public class ApplicationFrame extends JFrame {
 					//If the search field is just left as "Search...", then select everything from the table.
 					if(customerSearchTextField.getText().equals("Search...")) query = "SELECT * FROM `customers`";
 					
-					//Get the row data from the query.
-					Object[][] rowData = appManager.getTableRowData(query);
+					//Get the row data from the query (called from AppManager).
+					ArrayList<Object> objectList = appManager.getTableRowData("CUSTOMERS", query); 
+					Object[][] rowData = appManager.getRowData("CUSTOMER", objectList);
 					
 					DefaultTableModel tableModel = new DefaultTableModel(rowData, columnNames) {
 						@Override
@@ -658,7 +821,7 @@ public class ApplicationFrame extends JFrame {
 					customersTable.setModel(tableModel);
 					
 				} else {
-					//If both of the checkboxes are unticked, then simply show them a row with the specified message.
+					//If both of the checkboxes are unticked, then simply show them a row with the "Please tick atleast one of the checkboxes" notice.
 					String[] temp = new String[]{""};
 					customersTable.setModel(new DefaultTableModel(null, temp));
 					DefaultTableModel model = (DefaultTableModel) customersTable.getModel();
@@ -673,103 +836,108 @@ public class ApplicationFrame extends JFrame {
 		ImageIcon refreshImageIcon = new ImageIcon("lib/images/refresh_image_icon");
 		refreshCustomersTableBtn.setIcon(refreshImageIcon);
 		customersPanel.add(refreshCustomersTableBtn);
-		
-		
-		//Home Panel
-		homePanel = new JPanel();
-		homePanel.setBackground(Color.WHITE);
-		homePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		homePanel.setLayout(null);
-		
-		homeMenuBar = new JMenuBar();
-		homeMenuBar.setBounds(0, 0, 681, 21);
-		homePanel.add(homeMenuBar);
-		
-		JMenu applicationMenu = new JMenu("Application");
-		homeMenuBar.add(applicationMenu);
-		
-		JMenuItem exitMnItem = new JMenuItem("Exit");
-		exitMnItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("EXIT");
-			}
-		});
-		applicationMenu.add(exitMnItem);
-		
-		JMenuItem homeMnItem = new JMenuItem("Home");
-		applicationMenu.add(homeMnItem);
-		
-		JMenuItem mainMenuMnItem = new JMenuItem("Main Menu");
-		applicationMenu.add(mainMenuMnItem);
-		
-		
-		JMenu customersMenu = new JMenu("Customers");
-		homeMenuBar.add(customersMenu);
-		
-		JMenuItem viewCustomersMnItem = new JMenuItem("View");
-		viewCustomersMnItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				//currentPanel.setVisible(false);
-				setContentPane(customersPanel);
-			}
-		});
-		customersMenu.add(viewCustomersMnItem);
-		
-		JMenuItem newCustomersMnItem = new JMenuItem("New");
-		customersMenu.add(newCustomersMnItem);
-		
-		JMenu employeesMenu = new JMenu("Employees");
-		homeMenuBar.add(employeesMenu);
-		
-		JMenuItem viewEmployeesMnItem = new JMenuItem("View");
-		employeesMenu.add(viewEmployeesMnItem);
-		
-		JMenuItem newEmployeesMnItem = new JMenuItem("New");
-		employeesMenu.add(newEmployeesMnItem);
-		
-		JMenu settingsMenu = new JMenu("Settings");
-		homeMenuBar.add(settingsMenu);
-		
-		JMenu accountMenu = new JMenu("Account");
-		homeMenuBar.add(accountMenu);
-		
-		JMenuItem changePasswordMnItem = new JMenuItem("Change password");
-		accountMenu.add(changePasswordMnItem);
-		
-		JMenu adminMenu = new JMenu("Admin");
-		homeMenuBar.add(adminMenu);
-		
-		JMenuItem newUserMnItem = new JMenuItem("New User");
-		newUserMnItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("Yooo");
-			}
-		});
-		adminMenu.add(newUserMnItem);
-		//homePanel.setLayout(null);
-		
-		
-		JLabel lblBusinessManagerApplication = new JLabel("Business Manager Application");
-		lblBusinessManagerApplication.setBounds(5, 5, 671, 86);
-		lblBusinessManagerApplication.setAlignmentX(Component.CENTER_ALIGNMENT);
-		lblBusinessManagerApplication.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		lblBusinessManagerApplication.setHorizontalAlignment(SwingConstants.CENTER);
-		homePanel.add(lblBusinessManagerApplication);
-		
-		JLabel lblHome = new JLabel("Home");
-		lblHome.setBounds(5, 102, 671, 75);
-		lblHome.setHorizontalAlignment(SwingConstants.CENTER);
-		homePanel.add(lblHome);
-		
-		JTextPane textPane = new JTextPane();
-		textPane.setBounds(5, 167, 666, 285);
-		textPane.setEditable(false);
-		homePanel.add(textPane);
-		
+				
 		
 		
 	}
 	
+	/*
+	private void createInternalFrames() {
+		customerInternalFrame = new JFrame();
+		JPanel panel = new JPanel();
+		
+		customerInternalFrame.setBounds(getLocation().x + (getWidth() / 4), getLocation().y + (getHeight() / 4), 450, 300);
+		customerInternalFrame.setResizable(false);
+		panel.setLayout(null);
+		
+		JLabel firstNameLbl = new JLabel("First Name:");
+		firstNameLbl.setHorizontalAlignment(SwingConstants.RIGHT);
+		firstNameLbl.setBounds(123, 37, 68, 14);
+		panel.add(firstNameLbl);
+		
+		JLabel lastNameLbl = new JLabel("Last Name:");
+		lastNameLbl.setHorizontalAlignment(SwingConstants.RIGHT);
+		lastNameLbl.setBounds(123, 59, 68, 14);
+		panel.add(lastNameLbl);
+		
+		firstNameTextField = new JTextField();
+		firstNameTextField.setEditable(false);
+		firstNameTextField.setBounds(201, 34, 136, 20);
+		panel.add(firstNameTextField);
+		firstNameTextField.setColumns(10);
+		
+		lastNameTextField = new JTextField();
+		lastNameTextField.setEditable(false);
+		lastNameTextField.setColumns(10);
+		lastNameTextField.setBounds(201, 56, 136, 20);
+		panel.add(lastNameTextField);
+		
+		JLabel customerNoLbl = new JLabel("Customer Number:");
+		customerNoLbl.setHorizontalAlignment(SwingConstants.RIGHT);
+		customerNoLbl.setBounds(88, 9, 103, 14);
+		panel.add(customerNoLbl);
+		
+		customerNoTextField = new JTextField();
+		customerNoTextField.setEditable(false);
+		customerNoTextField.setColumns(10);
+		customerNoTextField.setBounds(201, 6, 136, 20);
+		panel.add(customerNoTextField);
+		
+		JLabel addressTwoLbl = new JLabel("Address Two:");
+		addressTwoLbl.setHorizontalAlignment(SwingConstants.RIGHT);
+		addressTwoLbl.setBounds(123, 108, 68, 14);
+		panel.add(addressTwoLbl);
+		
+		JLabel addressOneLbl = new JLabel("Address One:");
+		addressOneLbl.setHorizontalAlignment(SwingConstants.RIGHT);
+		addressOneLbl.setBounds(123, 86, 68, 14);
+		panel.add(addressOneLbl);
+		
+		addressOneTextField = new JTextField();
+		addressOneTextField.setEditable(false);
+		addressOneTextField.setColumns(10);
+		addressOneTextField.setBounds(201, 83, 136, 20);
+		panel.add(addressOneTextField);
+		
+		addressTwoTextField = new JTextField();
+		addressTwoTextField.setEditable(false);
+		addressTwoTextField.setColumns(10);
+		addressTwoTextField.setBounds(201, 105, 136, 20);
+		panel.add(addressTwoTextField);
+		
+		JLabel addressCountryLbl = new JLabel("Country:");
+		addressCountryLbl.setHorizontalAlignment(SwingConstants.RIGHT);
+		addressCountryLbl.setBounds(123, 154, 68, 14);
+		panel.add(addressCountryLbl);
+		
+		JLabel addressCityLbl = new JLabel("City:");
+		addressCityLbl.setHorizontalAlignment(SwingConstants.RIGHT);
+		addressCityLbl.setBounds(123, 132, 68, 14);
+		panel.add(addressCityLbl);
+		
+		addressCityTextField = new JTextField();
+		addressCityTextField.setEditable(false);
+		addressCityTextField.setColumns(10);
+		addressCityTextField.setBounds(201, 129, 136, 20);
+		panel.add(addressCityTextField);
+		
+		addressCountryTextField = new JTextField();
+		addressCountryTextField.setEditable(false);
+		addressCountryTextField.setColumns(10);
+		addressCountryTextField.setBounds(201, 151, 136, 20);
+		panel.add(addressCountryTextField);
+		
+		JButton confirmBtn = new JButton("Edit");
+		confirmBtn.setBounds(102, 237, 89, 23);
+		panel.add(confirmBtn);
+		
+		JButton closeBtn = new JButton("Close");
+		closeBtn.setBounds(201, 237, 89, 23);
+		panel.add(closeBtn);
+		
+		customerInternalFrame.setContentPane(panel);
+	}
+	*/
 	
 	
 	//Sets the Login screens username and password.

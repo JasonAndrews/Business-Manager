@@ -64,13 +64,15 @@ public class AppManager {
 	}
 	
 	//Get row data depending on the query passed.
-	Object[][] getTableRowData(String query) {
+	ArrayList<Object> getTableRowData(String tableName, String query) {
 		System.out.println("QUERY: ["+query+"]");
 		Object[][] rowData = null;
 		
 		Connection connection = null;
 		Statement statement = null;
 		ResultSet resultSet = null;
+		
+		ArrayList<Object> objectList = null;
 		
 		try {
 			
@@ -85,26 +87,40 @@ public class AppManager {
 			count = resultSet.getRow();
 			resultSet.beforeFirst();
 			
-			rowData = new Object[count][7];
+			rowData = new Object[count][this.getTableColumnCount(tableName)];
 			
-			System.out.println("Counted rows: " + count);
+			objectList = new ArrayList<Object>();
+			//System.out.println("Counted rows: " + count);
 			
 			int arrayRow = 0;
 			
 			
 			//NEED A THREAD HERE!!
-			while(resultSet.next()) { //While there is another row of data.
+			while(resultSet.next()) { //While there is another row of data.		
 				
-				//Load the data into the array.
-				rowData[arrayRow][0] = resultSet.getInt("customer_number");
-				rowData[arrayRow][1] = resultSet.getString("first_name");
-				rowData[arrayRow][2] = resultSet.getString("last_name");
-				rowData[arrayRow][3] = resultSet.getString("address_one");
-				rowData[arrayRow][4] = resultSet.getString("address_two");
-				rowData[arrayRow][5] = resultSet.getString("address_city");
-				rowData[arrayRow][6] = resultSet.getString("address_country");
-				
-				System.out.println(rowData[arrayRow][0] + " | " + rowData[arrayRow][1] + " | " + rowData[arrayRow][2]); //DEBUGGING.
+				//Switch to the appropriate case so the data is loaded correctly.
+				switch(tableName) {
+					case "CUSTOMERS": {
+						objectList.add(new Customer(resultSet.getInt("customer_number"), resultSet.getString("first_name"), resultSet.getString("last_name"), resultSet.getString("address_one"), resultSet.getString("address_two"), resultSet.getString("address_city"), resultSet.getString("address_country")));
+						//Load the data into the array.
+						//rowData[arrayRow][0] = resultSet.getInt("customer_number");
+						//rowData[arrayRow][1] = resultSet.getString("first_name");
+						//rowData[arrayRow][2] = resultSet.getString("last_name");
+						//rowData[arrayRow][3] = resultSet.getString("address_one");
+						//rowData[arrayRow][4] = resultSet.getString("address_two");
+						//rowData[arrayRow][5] = resultSet.getString("address_city");
+						//rowData[arrayRow][6] = resultSet.getString("address_country");
+						
+						//System.out.println(rowData[arrayRow][0] + " | " + rowData[arrayRow][1] + " | " + rowData[arrayRow][2]); //DEBUGGING.
+						break;
+					}
+					case "EMPLOYEES": {
+						break;
+					}
+					case "USERS": {
+						break;
+					}
+				}
 				
 				++arrayRow; //Increment the index for the array.				
 			}
@@ -133,10 +149,8 @@ public class AppManager {
 					ex.printStackTrace();
 				}
 			}
-		}
-		
-		
-		return rowData;	//return the row of data.
+		}		
+		return objectList;	//return the row of data.
 	}
 	
 	public boolean testConnectionToDatabase(String url, String user, String password) {
@@ -264,6 +278,32 @@ public class AppManager {
 		return this.loggedIn;
 	}
 	
+	public int getTableColumnCount(String tableName) {
+		int columns = 0;
+		
+		switch(tableName) {
+		
+			case "CUSTOMERS": {
+				columns = 7;
+				break;
+			}
+			case "EMPLOYEES": {
+				columns = 3;		
+				break;
+			}
+			case "USERS": {
+				columns = 4;
+				break;
+			}
+			
+		}
+		return columns;
+	}
 	
-	
+	public Object[][] getRowData(String tableName, ArrayList<Object> objectList) {
+		Object[][] rowData = Customer.convertObjectsToRowData(this, objectList);
+		
+		return rowData;
+	}
+		
 }
