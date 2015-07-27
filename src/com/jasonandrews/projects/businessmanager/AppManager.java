@@ -219,20 +219,24 @@ public class AppManager {
 	
 	public boolean loginUser(String username, String password) {
 		
-		Connection connection = dbConnector.getConnection(); 
+		Connection connection = null; 
+		Statement statement = null;
+		ResultSet resultSet = null;
 		
 		try {			
 			
+			connection = dbConnector.getConnection(); 
+			
 			if(connection == null || !connection.isValid(0)) { //Check if the application is not connected to the database.
 				//appFrame.triggerError(ApplicationFrame.ERROR_LOGIN_FAILED, "Login failed, there is no connection to the database.");
-				System.out.println(connection + " | " + connection.isValid(0) +  " | Failed at 1");
+				//System.out.println(connection + " | " + connection.isValid(0) +  " | Failed at 1");
 				return false;
 				//loginErrorLbl.setText("Login failed, there is no connection to the database.");
 			} else {
 			
-				Statement statement = connection.createStatement();
+				statement = connection.createStatement();
 				
-				ResultSet resultSet = statement.executeQuery("SELECT * FROM `users` WHERE `username` = '"+username+"'");
+				resultSet = statement.executeQuery("SELECT * FROM `users` WHERE `username` = '"+username+"'");
 				
 				if(resultSet.next()) { //If their username exists in the database.
 					//System.out.println("Username: [" + username + "] | Admin ID: [" + resultSet.getInt("adminId") + "]"); //Debugging
@@ -254,15 +258,36 @@ public class AppManager {
 				} else {
 					appFrame.triggerError(ApplicationFrame.ERROR_LOGIN_FAILED, "Login failed, the username you have specified does not exist.");
 					//loginErrorLbl.setText("Login failed, the username you have specified does not exist.");
-					System.out.println("Failed at 4");
+					//System.out.println("Failed at 4");
 					return false;
 				}
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			System.out.println("Failed at 5");
 			return false;
-		}
+		} finally {
+			if(connection != null) {
+				try {
+					connection.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			if(statement != null) { 
+				try {
+					statement.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			if(resultSet != null) {				
+				try {
+					resultSet.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}	
 		
 		return true;			
 	}
@@ -304,6 +329,73 @@ public class AppManager {
 		Object[][] rowData = Customer.convertObjectsToRowData(this, objectList);
 		
 		return rowData;
+	}
+	
+	//Send a query to the database. Could be an INSERT query or an UPDATE query.
+	public void updateDatabase(String tableName, Object objectToUpdate) {
+		
+		Connection connection = null;
+		Statement statement = null;
+		
+		String query = null;
+		
+		try {
+			
+			connection = dbConnector.getConnection();
+			
+			switch(tableName) {
+			
+				case "CUSTOMERS": {
+					Customer customer = (Customer) objectToUpdate;
+					
+					if(customer.getCustomerNumber() > 0) { //If the customer already exists and needs to be updated.
+						
+						query = "UPDATE `customers` SET `first_name` = '"+customer.getFirstName()+"', `last_name` = '"+customer.getLastName()+"', `address_one` = '"+customer.getAddressOne()+"', `address_two` = '"+customer.getAddressTwo()+"', `address_city` = '"+customer.getAddressCity()+
+								"', `address_country` = '"+customer.getAddressCountry()+"' WHERE `customer_number` = '"+customer.getCustomerNumber()+"'";
+						System.out.println("UPDATE QUERY: " + query);
+					} else { //If the customer is being created.
+						
+						query = "INSERT INTO `customers` (`first_name`, `last_name`, `address_one`, `address_two`, `address_city`, `address_country`) VALUES ('"+customer.getFirstName()+"', '"+customer.getLastName()+"', '"+customer.getAddressOne()+"','"+customer.getAddressTwo()+"',"
+								+ "'"+customer.getAddressCity()+"', '"+customer.getAddressCountry()+"')";
+						System.out.println("INSERT QUERY: " + query);
+					}
+					
+					statement = connection.createStatement();
+					
+					statement.executeUpdate(query);
+					
+					break;
+				}
+				case "EMPLOYEES": {
+			
+					break;
+				}
+				case "USERS": {
+		
+					break;
+				}
+		
+			}
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if(connection != null) {
+				try {
+					connection.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			if(statement != null) { 
+				try {
+					statement.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
+		
 	}
 		
 }

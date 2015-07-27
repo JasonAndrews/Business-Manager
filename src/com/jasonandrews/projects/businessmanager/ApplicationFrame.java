@@ -536,47 +536,8 @@ public class ApplicationFrame extends JFrame {
 		JButton newCustomerBtn = new JButton("New customer");
 		newCustomerBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				Object[][] tableData = {
-						{"0434", "Jayceon", "Zrews"},	
-						{"0003", "Jayceon", "Andrews"},
-						{"0001", "Jayceon", "Dndrews"},
-						{"0055", "Jayceon", "Cndrews"},
-						{"0105", "Jayceon", "Rndrews"},
-						{"0565", "Jayceon", "Endrews"},
-						{"0335", "Jayceon", "Fndrews"},
-						{"0006", "Jayceon", "Hndrews"},
-						{"0115", "Jayceon", "Xndrews"},
-						{"0095", "Jayceon", "Lndrews"},
-						{"0033", "Jayceon", "Gndrews"},
-						{"1015", "Jayceon", "Rndrews"},
-						{"1555", "Jayceon", "Vndrews"},
-						{"0002", "Jayceon", "Sndrews"},
-						{"0555", "Jayceon", "Kndrews"},
-						{"0335", "Jayceon", "Ondrews"},	
-						{"0434", "Jayceon", "Zrews"},	
-						{"0003", "Jayceon", "Andrews"},
-						{"0001", "Jayceon", "Dndrews"},
-						{"0055", "Jayceon", "Cndrews"},
-						{"0105", "Jayceon", "Rndrews"},
-						{"0565", "Jayceon", "Endrews"},
-						{"0335", "Jayceon", "Fndrews"},
-						{"0006", "Jayceon", "Hndrews"},
-						{"0115", "Jayceon", "Xndrews"},
-						{"0095", "Jayceon", "Lndrews"},
-						{"0033", "Jayceon", "Gndrews"},
-						{"1015", "Jayceon", "Rndrews"},
-						{"1555", "Jayceon", "Vndrews"},
-						{"0002", "Jayceon", "Sndrews"},
-						{"0555", "Jayceon", "Kndrews"},
-						{"0335", "Jayceon", "Ondrews"},		
-						{"0003", "Robert", "Stark"}
-						
-				};
-				
-				DefaultTableModel model = (DefaultTableModel) customersTable.getModel();
-				for(int row = 0; row < tableData.length; ++row) {
-					model.addRow(tableData[row]);
-				}
+				popupFrame.fillInForm("CUSTOMER",  new Customer());
+				popupFrame.setVisible(true);			
 			}
 		});
 		newCustomerBtn.setLocation(10, 23);
@@ -661,11 +622,11 @@ public class ApplicationFrame extends JFrame {
 				//System.out.println("VIEWING");
 				int selectedRow = customersTable.getSelectedRow();
 				
-				if(selectedRow >= 0) {
-					popupFrame.fillInForm("CUSTOMER",  ((Customer) customerList.get(selectedRow)).getCustomerInformation());
-				}
-				popupFrame.setVisible(true);			
-				customerOptionsPopup.setVisible(false);
+				if(selectedRow >= 0) { //Make sure the selected row is valid.
+					popupFrame.fillInForm("CUSTOMER",  customerList.get(selectedRow));
+					popupFrame.setVisible(true);
+					customerOptionsPopup.setVisible(false);
+				}				
 			}
 		});
 		popupViewMnItem.addMouseMotionListener(new MouseMotionListener() {
@@ -760,8 +721,7 @@ public class ApplicationFrame extends JFrame {
 						
 						//Get the location of the mouse when the user clicked. Will be used to display the popup menu.
 						int mouseX = MouseInfo.getPointerInfo().getLocation().x; 
-						int mouseY = MouseInfo.getPointerInfo().getLocation().y;
-						
+						int mouseY = MouseInfo.getPointerInfo().getLocation().y;						
 						
 						customerOptionsPopup.setLocation(mouseX, mouseY); //Reposition the popup menu.
 						customerOptionsPopup.setVisible(true); //Show the popup menu.
@@ -812,11 +772,12 @@ public class ApplicationFrame extends JFrame {
 					//If the search field is just left as "Search...", then select everything from the table.
 					if(customerSearchTextField.getText().equals("Search...")) query = "SELECT * FROM `customers`";
 					
-					//Get the row data from the query (called from AppManager).
-					customerList = appManager.getTableRowData("CUSTOMERS", query); 
-					Object[][] rowData = appManager.getRowData("CUSTOMER", customerList);
+					//Get the list of Customer objects generated from the query. Then get an array containing all the data from the objects so it can be displayed in the table.
+					customerList = appManager.getTableRowData("CUSTOMERS", query);  
+					Object[][] rowData = appManager.getRowData("CUSTOMER", customerList); 
 					
 					DefaultTableModel tableModel = new DefaultTableModel(rowData, columnNames) {
+						//Overriding the method so no cell is editable.
 						@Override
 					    public boolean isCellEditable(int row, int column) {
 					       //all cells false
@@ -828,8 +789,15 @@ public class ApplicationFrame extends JFrame {
 				} else {
 					//If both of the checkboxes are unticked, then simply show them a row with the "Please tick atleast one of the checkboxes" notice.
 					String[] temp = new String[]{""};
-					customersTable.setModel(new DefaultTableModel(null, temp));
-					DefaultTableModel model = (DefaultTableModel) customersTable.getModel();
+					DefaultTableModel model = new DefaultTableModel(null, temp) {
+						@Override
+						public boolean isCellEditable(int row, int column) {
+							//all cells false
+							return false;
+						}
+					};
+					customersTable.setModel(model);
+					model = (DefaultTableModel) customersTable.getModel();
 					
 					model.addRow(new String[]{"Please tick atleast one of the checkboxes."});
 					

@@ -13,6 +13,10 @@ public class Customer {
 	private String addressCity;
 	private String addressCountry;
 	
+	public Customer() { //Used for creating a new customer.
+		super();		
+	}
+	
 	public Customer(int customerNumber, String firstName, String lastName, String addressOne, String addressTwo, String addressCity, String addressCountry) {
 		this.customerNumber = customerNumber;
 		this.firstName = firstName;
@@ -52,5 +56,32 @@ public class Customer {
 			index++;
 		}		
 		return rowData;
+	}
+	
+	public int getCustomerNumber() {
+		return this.customerNumber;
+	}
+	public String getFirstName() {
+		return this.firstName;
+	}
+	
+	public String getLastName() {
+		return this.lastName;
+	}
+	
+	public String getAddressOne() {
+		return this.addressOne;
+	}
+	
+	public String getAddressTwo() {
+		return this.addressTwo;
+	}
+	
+	public String getAddressCity() {
+		return this.addressCity;
+	}
+	
+	public String getAddressCountry() {
+		return this.addressCountry;
 	}
 }
