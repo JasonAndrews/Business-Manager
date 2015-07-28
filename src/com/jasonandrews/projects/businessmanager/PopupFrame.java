@@ -171,8 +171,7 @@ public class PopupFrame extends JFrame {
 		c_confirmBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
-				
-				if(c_isCreatingNewCustomer) { //If they clicked the button when it said "Create".
+				if(c_isCreatingNewCustomer) { //If the user clicked the button when it said "Create".
 					Customer customer = (Customer) loadedObject; //Cast the loaded object to a customer object so we can call Customer methods.
 					customer.update(c_firstNameTextField.getText(), c_lastNameTextField.getText(), c_addressOneTextField.getText(), c_addressTwoTextField.getText(), c_addressCityTextField.getText(), c_addressCountryTextField.getText());
 					appManager.updateDatabase("CUSTOMERS", customer);

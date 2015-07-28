@@ -537,7 +537,8 @@ public class ApplicationFrame extends JFrame {
 		newCustomerBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				popupFrame.fillInForm("CUSTOMER",  new Customer());
-				popupFrame.setVisible(true);			
+				popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
+				popupFrame.setVisible(true);	
 			}
 		});
 		newCustomerBtn.setLocation(10, 23);
@@ -624,6 +625,7 @@ public class ApplicationFrame extends JFrame {
 				
 				if(selectedRow >= 0) { //Make sure the selected row is valid.
 					popupFrame.fillInForm("CUSTOMER",  customerList.get(selectedRow));
+					popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
 					popupFrame.setVisible(true);
 					customerOptionsPopup.setVisible(false);
 				}				
