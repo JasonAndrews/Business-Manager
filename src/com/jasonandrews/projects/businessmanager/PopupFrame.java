@@ -85,18 +85,19 @@ public class PopupFrame extends JFrame {
 		
 		JLabel firstNameLbl = new JLabel("First Name:");
 		firstNameLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		firstNameLbl.setBounds(124, 58, 68, 14);
+		firstNameLbl.setBounds(61, 56, 99, 14);
 		customerPanel.add(firstNameLbl);
 		
 		JLabel c_lastNameLbl = new JLabel("Last Name:");
 		c_lastNameLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		c_lastNameLbl.setBounds(124, 80, 68, 14);
+		c_lastNameLbl.setBounds(61, 78, 99, 14);
 		customerPanel.add(c_lastNameLbl);
 		
 		c_firstNameTextField = new JTextField();
 		c_firstNameTextField.setBorder(new LineBorder(Color.BLACK));
 		c_firstNameTextField.setEditable(false);
-		c_firstNameTextField.setBounds(202, 55, 136, 20);
+		c_firstNameTextField.setBackground(Color.WHITE);
+		c_firstNameTextField.setBounds(170, 53, 136, 20);
 		customerPanel.add(c_firstNameTextField);
 		c_firstNameTextField.setColumns(10);
 		
@@ -104,67 +105,73 @@ public class PopupFrame extends JFrame {
 		c_lastNameTextField.setBorder(new LineBorder(Color.BLACK));
 		c_lastNameTextField.setEditable(false);
 		c_lastNameTextField.setColumns(10);
-		c_lastNameTextField.setBounds(202, 77, 136, 20);
+		c_lastNameTextField.setBackground(Color.WHITE);
+		c_lastNameTextField.setBounds(170, 75, 136, 20);
 		customerPanel.add(c_lastNameTextField);
 		
 		JLabel c_customerNoLbl = new JLabel("Customer Number:");
 		c_customerNoLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		c_customerNoLbl.setBounds(89, 30, 103, 14);
+		c_customerNoLbl.setBounds(42, 28, 118, 14);
 		customerPanel.add(c_customerNoLbl);
 		
 		c_customerNoTextField = new JTextField();
 		c_customerNoTextField.setBorder(new LineBorder(Color.BLACK));
 		c_customerNoTextField.setEditable(false);
+		c_customerNoTextField.setBackground(Color.WHITE);
 		c_customerNoTextField.setColumns(10);
-		c_customerNoTextField.setBounds(202, 27, 136, 20);
+		c_customerNoTextField.setBounds(170, 25, 136, 20);
 		customerPanel.add(c_customerNoTextField);
 		
 		JLabel c_addressTwoLbl = new JLabel("Address Two:");
 		c_addressTwoLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		c_addressTwoLbl.setBounds(124, 129, 68, 14);
+		c_addressTwoLbl.setBounds(61, 127, 99, 14);
 		customerPanel.add(c_addressTwoLbl);
 		
 		JLabel c_addressOneLbl = new JLabel("Address One:");
 		c_addressOneLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		c_addressOneLbl.setBounds(124, 107, 68, 14);
+		c_addressOneLbl.setBounds(61, 105, 99, 14);
 		customerPanel.add(c_addressOneLbl);
 		
 		c_addressOneTextField = new JTextField();
 		c_addressOneTextField.setBorder(new LineBorder(Color.BLACK));
 		c_addressOneTextField.setEditable(false);
+		c_addressOneTextField.setBackground(Color.WHITE);
 		c_addressOneTextField.setColumns(10);
-		c_addressOneTextField.setBounds(202, 104, 136, 20);
+		c_addressOneTextField.setBounds(170, 102, 136, 20);
 		customerPanel.add(c_addressOneTextField);
 		
 		c_addressTwoTextField = new JTextField();
 		c_addressTwoTextField.setBorder(new LineBorder(Color.BLACK));
 		c_addressTwoTextField.setEditable(false);
+		c_addressTwoTextField.setBackground(Color.WHITE);
 		c_addressTwoTextField.setColumns(10);
-		c_addressTwoTextField.setBounds(202, 126, 136, 20);
+		c_addressTwoTextField.setBounds(170, 124, 136, 20);
 		customerPanel.add(c_addressTwoTextField);
 		
 		JLabel c_addressCountryLbl = new JLabel("Country:");
 		c_addressCountryLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		c_addressCountryLbl.setBounds(124, 175, 68, 14);
+		c_addressCountryLbl.setBounds(61, 173, 99, 14);
 		customerPanel.add(c_addressCountryLbl);
 		
 		JLabel c_addressCityLbl = new JLabel("City:");
 		c_addressCityLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		c_addressCityLbl.setBounds(124, 153, 68, 14);
+		c_addressCityLbl.setBounds(61, 151, 99, 14);
 		customerPanel.add(c_addressCityLbl);
 		
 		c_addressCityTextField = new JTextField();
 		c_addressCityTextField.setBorder(new LineBorder(Color.BLACK));
 		c_addressCityTextField.setEditable(false);
+		c_addressCityTextField.setBackground(Color.WHITE);
 		c_addressCityTextField.setColumns(10);
-		c_addressCityTextField.setBounds(202, 150, 136, 20);
+		c_addressCityTextField.setBounds(170, 148, 136, 20);
 		customerPanel.add(c_addressCityTextField);
 		
 		c_addressCountryTextField = new JTextField();
 		c_addressCountryTextField.setBorder(new LineBorder(Color.BLACK));
 		c_addressCountryTextField.setEditable(false);
+		c_addressCountryTextField.setBackground(Color.WHITE);
 		c_addressCountryTextField.setColumns(10);
-		c_addressCountryTextField.setBounds(202, 172, 136, 20);
+		c_addressCountryTextField.setBounds(170, 170, 136, 20);
 		customerPanel.add(c_addressCountryTextField);
 		
 		c_confirmBtn = new JButton("Edit");
@@ -195,7 +202,10 @@ public class PopupFrame extends JFrame {
 					customer.update(c_firstNameTextField.getText(), c_lastNameTextField.getText(), c_addressOneTextField.getText(), c_addressTwoTextField.getText(), c_addressCityTextField.getText(), c_addressCountryTextField.getText());
 					appManager.updateDatabase("CUSTOMERS", customer);
 					
-					setVisible(false); //Hide the frame.
+					c_isEditingCustomer = true;
+					c_confirmBtn.setText("Edit");
+					toggleFormEditable("CUSTOMERS", false);
+					//setVisible(false); //Hide the frame.
 					//resetForm(PopupFrame.FORM_TYPE_CUSTOMER);
 				}				
 			}
@@ -261,7 +271,7 @@ public class PopupFrame extends JFrame {
 					
 					c_confirmBtn.setText("Create");
 					
-					toggleFormEditable(FORM_TYPE_CUSTOMER, true);
+					toggleFormEditable("CUSTOMERS", true);
 				}
 				break;
 			}
@@ -281,30 +291,20 @@ public class PopupFrame extends JFrame {
 		}
 	}
 	
-	private void toggleFormEditable(int formType, boolean toggle) {
+	private void toggleFormEditable(String formType, boolean toggle) {
 		
 		switch(formType) {
-			case FORM_TYPE_CUSTOMER: {
-				if(toggle) {
-					c_firstNameTextField.setEditable(true);
-					c_lastNameTextField.setEditable(true);
-					c_addressOneTextField.setEditable(true);
-					c_addressTwoTextField.setEditable(true);
-					c_addressCityTextField.setEditable(true);
-					c_addressCountryTextField.setEditable(true);
-				} else {
-					c_firstNameTextField.setEditable(false);
-					c_lastNameTextField.setEditable(false);
-					c_addressOneTextField.setEditable(false);
-					c_addressTwoTextField.setEditable(false);
-					c_addressCityTextField.setEditable(false);
-					c_addressCountryTextField.setEditable(false);
-				}
+			case "CUSTOMERS": {			
+				c_firstNameTextField.setEditable(toggle);
+				c_lastNameTextField.setEditable(toggle);
+				c_addressOneTextField.setEditable(toggle);
+				c_addressTwoTextField.setEditable(toggle);
+				c_addressCityTextField.setEditable(toggle);
+				c_addressCountryTextField.setEditable(toggle);				
 			}
-			case FORM_TYPE_EMPLOYEE: { }
-			case FORM_TYPE_USER: { }
-		}
-		
+			case "EMPLOYEES": { }
+			case "USERS": { }
+		}		
 	}
 	
 	private void resetForm(int formType) {

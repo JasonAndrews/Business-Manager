@@ -73,9 +73,9 @@ public class ApplicationFrame extends JFrame {
 
 	private AppManager appManager;
 	
-	private PopupFrame popupFrame;
+	private PopupFrame popupFrame;	
 	private JPanel currentPanel;
-	
+		
 	private JPanel mainMenuPanel;
 	private JPanel configurePanel;
 	private JPanel loginPanel;
@@ -96,6 +96,7 @@ public class ApplicationFrame extends JFrame {
 	private String url;
 	private String user;
 	private String password;
+	private String[] c_columnNames;
 
 	private Connection connection;
 
@@ -706,8 +707,8 @@ public class ApplicationFrame extends JFrame {
 		customersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		customersTable.setColumnSelectionAllowed(false);
 		customersTable.setCellEditor(null);
-		final String[] columnNames = {"Customer No.", "First Name", "Last Name"};
-		customersTable.setModel(new DefaultTableModel(null, columnNames));		
+		c_columnNames = new String[]{"Customer No.", "First Name", "Last Name"};
+		customersTable.setModel(new DefaultTableModel(null, c_columnNames));		
 		customersTable.addMouseListener(new MouseListener() {			
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -759,11 +760,11 @@ public class ApplicationFrame extends JFrame {
 				if(customerNoChckbx.isSelected() || customerNameChckbx.isSelected()) {
 					query += "WHERE ";
 					
-					//Alter the query depending on if the search by employee number check box is ticked.
+					//Concat the query depending on if the search by employee number check box is ticked.
 					if(customerNoChckbx.isSelected()) { 
 						query += "`customer_number` LIKE '"+customerSearchTextField.getText()+"%' ";
 					}
-					//Alter the query depending on if the search by customer name check box is ticked.
+					//Concat the query depending on if the search by customer name check box is ticked.
 					if(customerNameChckbx.isSelected()) {
 						
 						if(customerNoChckbx.isSelected()) query += "OR "; //Easy way to alter the query so the query will work properly. "OR " is needed for the query to actually work if both checkboxes are ticked.
@@ -776,17 +777,9 @@ public class ApplicationFrame extends JFrame {
 					
 					//Get the list of Customer objects generated from the query. Then get an array containing all the data from the objects so it can be displayed in the table.
 					customerList = appManager.getTableRowData("CUSTOMERS", query);  
-					Object[][] rowData = appManager.getRowData("CUSTOMER", customerList); 
 					
-					DefaultTableModel tableModel = new DefaultTableModel(rowData, columnNames) {
-						//Overriding the method so no cell is editable.
-						@Override
-					    public boolean isCellEditable(int row, int column) {
-					       //all cells false
-					       return false;
-					    }
-					};
-					customersTable.setModel(tableModel);
+					
+					refreshTable("CUSTOMERS", customerList);					
 					
 				} else {
 					//If both of the checkboxes are unticked, then simply show them a row with the "Please tick atleast one of the checkboxes" notice.
@@ -810,10 +803,7 @@ public class ApplicationFrame extends JFrame {
 		refreshCustomersTableBtn.setBounds(10, 60, 40, 40);
 		ImageIcon refreshImageIcon = new ImageIcon("lib/images/refresh_image_icon");
 		refreshCustomersTableBtn.setIcon(refreshImageIcon);
-		customersPanel.add(refreshCustomersTableBtn);
-				
-		
-		
+		customersPanel.add(refreshCustomersTableBtn);	
 	}
 	
 	/*
@@ -1024,6 +1014,46 @@ public class ApplicationFrame extends JFrame {
 		
 		if(currentPanel != null && currentPanel != mainMenuPanel && currentPanel != configurePanel && currentPanel != loginPanel) {
 			currentPanel.add(homeMenuBar);
+		}
+	}
+	
+	/*
+	 * Refresh the data within the appropriate table with the information taken from the list of objects (Customers, Employees, Users).
+	 */
+	public void refreshTable(String tableName, ArrayList<Object> objectList) {
+		String[] columnNames = null;
+		Object[][] rowData = null;
+		JTable table = null;
+		
+		switch(tableName) {
+		
+			case "CUSTOMERS": {
+				columnNames = c_columnNames;				
+				table = customersTable;
+				
+				rowData = appManager.getRowData("CUSTOMER", customerList);
+				
+				break;
+			} 
+			case "EMPLOYEES": {
+				break;
+			}
+			case "USERS": {
+				break;
+			}
+		}		 
+		
+		if(table != null) {
+			//Create a new table model for the table.
+			DefaultTableModel tableModel = new DefaultTableModel(rowData, columnNames) {
+				//Overriding the method so no cell is editable.
+				@Override
+			    public boolean isCellEditable(int row, int column) {
+			       //all cells false
+			       return false;
+			    }
+			};
+			table.setModel(tableModel); //Set the tables model.
 		}
 	}
 	
