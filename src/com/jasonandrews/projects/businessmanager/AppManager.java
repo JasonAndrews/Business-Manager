@@ -1,6 +1,11 @@
 package com.jasonandrews.projects.businessmanager;
 
 import java.awt.Color;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,8 +13,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import javax.swing.JFrame;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
 
 /* 
  * This class will be the core of the application. It will handle most non-related GUI actions.
@@ -19,27 +30,33 @@ public class AppManager {
 
 	private DatabaseConnector dbConnector;
 	private ApplicationFrame appFrame;
-	
+
 	private String[] customerTableColumns;
 	private String[] customerTableRowData;
 	
 	private String[] employeeTableColumns;
 	private String[] employeeTableRowData;
 	
+	private ArrayList<User> userList;
 	private boolean loggedIn;
+	
 	
 	public AppManager() {
 		//this.appFrame = appFrame;
 		
 		this.loggedIn = false;
 		
+		
+		
 		//dbConnector = new DatabaseConnector("", "", "");
 		
 		customerTableColumns = new String[]{"Customer No.", "First Name", "Last Name"};
 		
+		//loadUsers();
 		//firstTimeUseCheck();
 		
 	}
+	
 	
 	//Get the column names for a table (employee or customer).
 	String[] getTableColumnNames(String tableName) {
@@ -64,7 +81,7 @@ public class AppManager {
 	}
 	
 	//Get row data depending on the query passed.
-	ArrayList<Object> getTableRowData(String tableName, String query) {
+	ArrayList<Entity> getTableRowData(String tableName, String query) {
 		System.out.println("QUERY: ["+query+"]");
 		Object[][] rowData = null;
 		
@@ -72,7 +89,7 @@ public class AppManager {
 		Statement statement = null;
 		ResultSet resultSet = null;
 		
-		ArrayList<Object> objectList = null;
+		ArrayList<Entity> objectList = null;
 		
 		try {
 			
@@ -89,7 +106,7 @@ public class AppManager {
 			
 			rowData = new Object[count][this.getTableColumnCount(tableName)];
 			
-			objectList = new ArrayList<Object>();
+			objectList = new ArrayList<Entity>();
 			//System.out.println("Counted rows: " + count);
 			
 			int arrayRow = 0;
@@ -158,13 +175,18 @@ public class AppManager {
 		
 		dbConnector = new DatabaseConnector(url, user, password);	
 		
+		if(dbConnector.getConnection() == null) { //If the firstTimeUseCheck returns false, then there is a connection issue.
+			System.out.println("Failed connection.");
+			return false;
+		}
+		
 		firstTimeUseCheck();
 		
 		return true;
 	}
 	
 	//Check if this is the first time the application has been used previously (no users within the database).
-	private void firstTimeUseCheck() {		
+	private boolean firstTimeUseCheck() {		
 		
 		Connection connection = null;
 		Statement statement = null;
@@ -188,6 +210,66 @@ public class AppManager {
 				
 				//POPUP DIALOG STATING "Because this is the first time you are using the application, an account with the username 'admin' and the password 'password' was created for you. You may add new users once logged in and you can also delete the temporary account provided.
 			}
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return false;
+		} finally {
+			if(connection != null) {
+				try {
+					connection.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			if(statement != null) { 
+				try {
+					statement.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			if(resultSet != null) {				
+				try {
+					resultSet.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}		
+		
+		return true;
+	}
+	
+	
+	/*
+	 * Loads all users from the database into the application.
+	 */
+	public void loadUsers() { 
+		
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet resultSet = null;
+		
+		try {
+			
+			connection = dbConnector.getConnection();
+			
+			statement = connection.createStatement();
+			
+			resultSet = statement.executeQuery("SELECT * from `users`");
+			
+			userList = new ArrayList<User>(); //Initialize a new ArrayList to store User objects.
+			User tempUser = null; 
+			
+			while(resultSet.next()) {
+				tempUser = new User(resultSet.getInt("user_number"), resultSet.getString("username"), resultSet.getString("password"), resultSet.getBoolean("admin"));
+				
+				System.out.println(tempUser.getInformation());
+				
+				userList.add(tempUser);
+			}
+			
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {
@@ -212,11 +294,13 @@ public class AppManager {
 					ex.printStackTrace();
 				}
 			}
-		}		
+		}
+		
 	}
 	
-	
-	
+	/*
+	 * Log a user into the application.
+	 */
 	public boolean loginUser(String username, String password) {
 		
 		Connection connection = null; 
@@ -325,7 +409,7 @@ public class AppManager {
 		return columns;
 	}
 	
-	public Object[][] getRowData(String tableName, ArrayList<Object> objectList) {
+	public Object[][] getRowData(String tableName, ArrayList<Entity> objectList) {
 		Object[][] rowData = Customer.convertObjectsToRowData(this, objectList);
 		
 		return rowData;

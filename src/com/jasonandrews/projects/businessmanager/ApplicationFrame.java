@@ -22,10 +22,14 @@ import javax.swing.JButton;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import javax.swing.ImageIcon;
 import javax.swing.JTextField;
@@ -68,10 +72,22 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 public class ApplicationFrame extends JFrame {
 
+	private static final String CHECK_MARK_CHARACTER = "\u2713";
+	private static final String X_MARK_CHARACTER = "\u2716";
+	private static final Color COLOR_RED = new Color(255, 51, 51);
+	private static final Color COLOR_GREEN = new Color(0, 118, 0);
+	private static final int guiLocationSubtractor = 35; 
+	
 	private AppManager appManager;
+
+	private String fileDirectory;
+	private Properties properties;
 	
 	private PopupFrame popupFrame;	
 	private JPanel currentPanel;
@@ -88,7 +104,11 @@ public class ApplicationFrame extends JFrame {
 	private JTextField urlTextField;
 	private JTextField userTextField;
 	private JTextField passwordTextField;
+	private JCheckBox configureSaveDetailsChckbx;
+	private JCheckBox loginSaveDetailsChckbx;
 	
+	private JLabel mainMenuConnectionLb;
+	private JLabel mainMenuConnectionLbStatus;
 	private JLabel statusResultLbl;
 	private JLabel errorLbl;
 	private JLabel loginErrorLbl;
@@ -97,10 +117,6 @@ public class ApplicationFrame extends JFrame {
 	private String user;
 	private String password;
 	private String[] c_columnNames;
-
-	private Connection connection;
-
-	private boolean popupIsShown;
 	
 	private static final Color BUTTON_BACKGROUND_COLOR = Color.BLACK;
 	private static final Color BUTTON_FOREGROUND_COLOR = Color.WHITE;
@@ -108,19 +124,13 @@ public class ApplicationFrame extends JFrame {
 	private JPasswordField loginPasswordField;
 	private JTextField customerSearchTextField;
 	
-	private JMenuBar homeMenuBar;
+	private JMenuBar homeMenuBar;	
 	
+	private ArrayList<Entity> customerList; //A list of customer objects represented in the current customer table.
 	
-	private JFrame customerInternalFrame;
-	private JTextField firstNameTextField;
-	private JTextField lastNameTextField;
-	private JTextField customerNoTextField;
-	private JTextField addressOneTextField;
-	private JTextField addressTwoTextField;
-	private JTextField addressCityTextField;
-	private JTextField addressCountryTextField;
-	
-	private ArrayList<Object> customerList; //A list of customer objects represented in the current customer table.
+	private JButton viewCustomerBtn;
+	private JButton editCustomerBtn;
+	private JButton deleteCustomerBtn;
 	
 	/**
 	 * @wbp.nonvisual location=82,359
@@ -135,44 +145,53 @@ public class ApplicationFrame extends JFrame {
 		
 		setTitle("Business Manager");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		WindowAdapter exitListener = new WindowAdapter() {
+
+	            @Override
+	            public void windowClosing(WindowEvent e) {
+	            	//The application has been shut down.
+	            	//Store the properties (such as the database information.)
+	            	
+	            	storeProperties();
+	            }
+		};
+		addWindowListener(exitListener);
 		setBounds(100, 100, 687, 490);
 		setResizable(false);		
 		getContentPane().setLayout(new CardLayout(0, 0));
 		
-		popupFrame = new PopupFrame(appManager);
+		popupFrame = new PopupFrame(this, appManager);
 		
 		addMouseListener(new MouseListener() {
 
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				System.out.println("FRAME - click.");
+				//System.out.println("FRAME - click.");
+				int mouseX = MouseInfo.getPointerInfo().getLocation().x; 
+				int mouseY = MouseInfo.getPointerInfo().getLocation().y;
+				//System.out.println("X: " + mouseX + " | Y: " + mouseY);
 				//customerOptionsPopup.setVisible(false);
 				
+				//Hide the 'View', 'Edit' and 'Delete' buttons when the user deselects a row.
+				if((customersTable != null && customersTable.getSelectedRow() < 0)/* || ((employeesTable != null && employeesTable.getSelectedRow() > -1)) || ((usersTable != null && usersTable.getSelectedRow() > -1))*/) {
+					customersTable.clearSelection();
+					viewCustomerBtn.setVisible(false);
+					editCustomerBtn.setVisible(false);
+					deleteCustomerBtn.setVisible(false);
+				}				
 			}
 
 			@Override
-			public void mouseEntered(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseEntered(MouseEvent arg0) { }
 
 			@Override
-			public void mouseExited(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseExited(MouseEvent arg0) { }
 
 			@Override
-			public void mousePressed(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mousePressed(MouseEvent arg0) { }
 
 			@Override
-			public void mouseReleased(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseReleased(MouseEvent arg0) { }
 			
 		});
 		
@@ -192,6 +211,18 @@ public class ApplicationFrame extends JFrame {
 		mainMenuPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		mainMenuPanel.setLayout(null);		
 		
+		mainMenuConnectionLb = new JLabel("Connected: ");
+		mainMenuConnectionLb.setHorizontalAlignment(SwingConstants.RIGHT);
+		mainMenuConnectionLb.setBounds(500, 15, 70, 10);
+		mainMenuPanel.add(mainMenuConnectionLb);
+		
+		
+		
+		mainMenuConnectionLbStatus = new JLabel(X_MARK_CHARACTER);
+		mainMenuConnectionLbStatus.setForeground(COLOR_RED);
+		mainMenuConnectionLbStatus.setHorizontalAlignment(SwingConstants.RIGHT);
+		mainMenuConnectionLbStatus.setBounds(515, 15, 70, 10);
+		mainMenuPanel.add(mainMenuConnectionLbStatus);
 		
 		JButton configurationBtn = new JButton("Configuration");		
 		configurationBtn.setToolTipText("Configure the database settings.");
@@ -233,11 +264,16 @@ public class ApplicationFrame extends JFrame {
 				if(!appManager.testConnectionToDatabase(url, user, password)) { //If the connection failed, then give them the error on the main menu.
 					errorLbl.setText("Could not connect, please enter the correct credentials on the Configuration form.");		
 					statusResultLbl.setText("Could not connect.");
-					statusResultLbl.setForeground(Color.RED);			
+					statusResultLbl.setForeground(COLOR_RED);			
+					
+					mainMenuConnectionLbStatus.setText(X_MARK_CHARACTER);
+					mainMenuConnectionLbStatus.setForeground(COLOR_RED);
 					
 				} else { 
 					errorLbl.setText("");
-					statusResultLbl.setForeground(Color.GREEN);
+					mainMenuConnectionLbStatus.setText(CHECK_MARK_CHARACTER);
+					mainMenuConnectionLbStatus.setForeground(COLOR_GREEN);
+					statusResultLbl.setForeground(COLOR_GREEN);
 					statusResultLbl.setText("Connected.");
 				}
 			}
@@ -248,8 +284,8 @@ public class ApplicationFrame extends JFrame {
 		mainMenuPanel.add(quickConnectBtn);
 		
 		errorLbl = new JLabel("");
-		errorLbl.setForeground(Color.RED);
-		errorLbl.setBounds(112, 301, 454, 14);
+		errorLbl.setForeground(COLOR_RED);
+		errorLbl.setBounds(100, 301, 540, 14);
 		mainMenuPanel.add(errorLbl);
 				
 		//Configure Panel
@@ -268,11 +304,11 @@ public class ApplicationFrame extends JFrame {
 		configurePanel.add(statusTextLbl);
 		
 		statusResultLbl = new JLabel("Not connected.");
-		statusResultLbl.setForeground(Color.RED);
+		statusResultLbl.setForeground(COLOR_RED);
 		statusResultLbl.setBounds(324, 111, 124, 14);
 		configurePanel.add(statusResultLbl);
 		
-		urlTextField = new JTextField("jdbc:mysql://localhost:3306/employee_manager");
+		urlTextField = new JTextField("");
 		urlTextField.setBounds(242, 142, 226, 20);
 		configurePanel.add(urlTextField);
 		urlTextField.setColumns(10);
@@ -282,7 +318,7 @@ public class ApplicationFrame extends JFrame {
 		urlLbl.setBounds(173, 145, 61, 14);
 		configurePanel.add(urlLbl);
 		
-		userTextField = new JTextField("root");
+		userTextField = new JTextField("");
 		userTextField.setColumns(10);
 		userTextField.setBounds(242, 173, 226, 20);
 		configurePanel.add(userTextField);
@@ -301,6 +337,12 @@ public class ApplicationFrame extends JFrame {
 		passwordTextField.setBounds(242, 204, 226, 20);
 		configurePanel.add(passwordTextField);
 		
+		configureSaveDetailsChckbx = new JCheckBox("Save details");
+		configureSaveDetailsChckbx.setBackground(Color.WHITE);
+		configureSaveDetailsChckbx.setBounds(375, 225, 97, 23);
+		configureSaveDetailsChckbx.setSelected(true);
+		configurePanel.add(configureSaveDetailsChckbx);
+		
 		JButton connectBtn = new JButton("Test Connection");
 		connectBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -309,13 +351,19 @@ public class ApplicationFrame extends JFrame {
 				String user = userTextField.getText();
 				String password = passwordTextField.getText();
 				
-				//Attempt to connect to the database using the credentials.
+				//Test the connection to the database using the specified credentials.
 				if(appManager.testConnectionToDatabase(url, user, password)) {
-					statusResultLbl.setForeground(Color.GREEN);
+					//The connection succeeded.
+					statusResultLbl.setForeground(COLOR_GREEN);
 					statusResultLbl.setText("Connected.");
+					mainMenuConnectionLbStatus.setText(CHECK_MARK_CHARACTER);
+					mainMenuConnectionLbStatus.setForeground(COLOR_GREEN);
 				} else {
+					//The connection failed.
 					statusResultLbl.setText("Could not connect.");
-					statusResultLbl.setForeground(Color.RED);	
+					statusResultLbl.setForeground(COLOR_RED);	
+					mainMenuConnectionLbStatus.setText(X_MARK_CHARACTER);
+					mainMenuConnectionLbStatus.setForeground(COLOR_RED);
 				}
 				//try connect to the database specified.				
 				
@@ -326,7 +374,9 @@ public class ApplicationFrame extends JFrame {
 				
 			}
 		});
-		connectBtn.setBounds(272, 235, 83, 23);
+		connectBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		connectBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
+		connectBtn.setBounds(272, 250, 83, 23);
 		configurePanel.add(connectBtn);
 		
 		JButton resetBtn = new JButton("Reset");
@@ -337,7 +387,9 @@ public class ApplicationFrame extends JFrame {
 				passwordTextField.setText("");
 			}
 		});
-		resetBtn.setBounds(365, 235, 83, 23);
+		resetBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		resetBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
+		resetBtn.setBounds(365, 250, 83, 23);
 		configurePanel.add(resetBtn);
 		
 		JButton backBtn = new JButton("Back");
@@ -346,16 +398,20 @@ public class ApplicationFrame extends JFrame {
 				displayMainMenu();
 			}
 		});
-		backBtn.setBounds(312, 282, 89, 23);
+		backBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		backBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
+		backBtn.setBounds(312, 297, 89, 23);
 		configurePanel.add(backBtn);
 		
-		JSeparator separator = new JSeparator();
-		separator.setBounds(242, 129, 226, 2);
-		configurePanel.add(separator);
+		JSeparator configurationUpperSeparator = new JSeparator();
+		configurationUpperSeparator.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		configurationUpperSeparator.setBounds(242, 129, 226, 2);
+		configurePanel.add(configurationUpperSeparator);
 		
-		JSeparator separator_1 = new JSeparator();
-		separator_1.setBounds(242, 269, 226, 2);
-		configurePanel.add(separator_1);
+		JSeparator configurationLowerSeparator = new JSeparator();
+		configurationLowerSeparator.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		configurationLowerSeparator.setBounds(242, 284, 226, 2);
+		configurePanel.add(configurationLowerSeparator);
 		
 		
 		//Setting up the Login content pane.
@@ -368,7 +424,7 @@ public class ApplicationFrame extends JFrame {
 		
 		
 		loginErrorLbl = new JLabel("");
-		loginErrorLbl.setForeground(Color.RED);
+		loginErrorLbl.setForeground(COLOR_RED);
 		loginErrorLbl.setHorizontalAlignment(SwingConstants.CENTER);
 		loginErrorLbl.setBounds(169, 136, 380, 14);
 		loginPanel.add(loginErrorLbl);
@@ -412,26 +468,49 @@ public class ApplicationFrame extends JFrame {
 				}
 			}
 		});
-		
-		loginLoginBtn.setBounds(270, 226, 89, 23);
+		loginLoginBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		loginLoginBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
+		loginLoginBtn.setBounds(270, 240, 89, 23);		
 		loginPanel.add(loginLoginBtn);
 		
-		JButton logiClearBtn = new JButton("Clear");
-		logiClearBtn.setBounds(369, 226, 89, 23);
-		loginPanel.add(logiClearBtn);
+		JButton loginClearBtn = new JButton("Clear");
+		loginClearBtn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				loginUsernameTextField.setText("");
+				loginPasswordField.setText("");
+			}
+			
+		});
+		loginClearBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		loginClearBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
+		loginClearBtn.setBounds(369, 240, 89, 23);
+		loginPanel.add(loginClearBtn);
+		
+		loginSaveDetailsChckbx = new JCheckBox("Save details");
+		loginSaveDetailsChckbx.setBackground(Color.WHITE);
+		loginSaveDetailsChckbx.setBounds(375, 215, 97, 23);
+		loginSaveDetailsChckbx.setSelected(true);
+		loginPanel.add(loginSaveDetailsChckbx);
 		
 		JSeparator loginSeparator = new JSeparator();
-		loginSeparator.setBounds(260, 260, 207, 2);
+		loginSeparator.setBackground(Color.BLACK);
+		loginSeparator.setBounds(260, 275, 207, 2);
 		loginPanel.add(loginSeparator);
 		
 		JButton loginBackBtn = new JButton("Back");
 		loginBackBtn.addActionListener(new ActionListener() {
+			
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				displayMainMenu();				
 			}
 			
 		});
-		loginBackBtn.setBounds(324, 273, 89, 23);		
+		loginBackBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		loginBackBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
+		loginBackBtn.setBounds(324, 288, 89, 23);		
 		loginPanel.add(loginBackBtn);
 		
 		
@@ -537,15 +616,73 @@ public class ApplicationFrame extends JFrame {
 		JButton newCustomerBtn = new JButton("New customer");
 		newCustomerBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				popupFrame.fillInForm("CUSTOMER",  new Customer());
-				popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
+				popupFrame.fillInForm("CUSTOMERS",  new Customer());
+				popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4)))); //Set the position of the PopupFrame.
 				popupFrame.setVisible(true);	
 			}
 		});
-		newCustomerBtn.setLocation(10, 23);
-		newCustomerBtn.setSize(118, 30);
+		newCustomerBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		newCustomerBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
+		newCustomerBtn.setBounds(20, 425, 120, 30);
 		customersPanel.add(newCustomerBtn);
+		newCustomerBtn.setVisible(false); //Hide this button for now.
 		
+		viewCustomerBtn = new JButton("View");
+		viewCustomerBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//View information about the customer.
+				int selectedRow = customersTable.getSelectedRow();
+				
+				if(selectedRow >= 0) { //Make sure the selected row is valid.
+					popupFrame.fillInForm("CUSTOMERS",  customerList.get(selectedRow));
+					popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
+					popupFrame.setVisible(true);
+					customerOptionsPopup.setVisible(false);
+				}	
+			}
+		});
+		viewCustomerBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		viewCustomerBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
+		viewCustomerBtn.setBounds(150, 425, 120, 30);
+		viewCustomerBtn.setVisible(false);
+		customersPanel.add(viewCustomerBtn);
+		
+		editCustomerBtn = new JButton("Edit");
+		editCustomerBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//Edit information about the customer (can also be done when viewing the customer, but this is direct.)
+				
+				int selectedRow = customersTable.getSelectedRow();
+				
+				if(selectedRow >= 0) { //Make sure the selected row is valid.
+					popupFrame.fillInForm("CUSTOMERS",  customerList.get(selectedRow));
+					popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
+					popupFrame.setVisible(true);
+					popupFrame.setEditingForm("CUSTOMERS", true);
+					popupFrame.setFormEditable("CUSTOMERS", true);
+					customerOptionsPopup.setVisible(false);
+				}	
+			}
+		});
+		editCustomerBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		editCustomerBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
+		editCustomerBtn.setBounds(300, 425, 120, 30);
+		editCustomerBtn.setVisible(false);
+		customersPanel.add(editCustomerBtn);
+		
+		deleteCustomerBtn = new JButton("Delete");
+		deleteCustomerBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//Delete the customer from the database.
+			}
+		});
+		deleteCustomerBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		deleteCustomerBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
+		deleteCustomerBtn.setBounds(450, 425, 120, 30);
+		deleteCustomerBtn.setVisible(false);
+		customersPanel.add(deleteCustomerBtn);
+		
+		//The search text field the user can use to filter the customers shown.
 		customerSearchTextField = new JTextField();
 		customerSearchTextField.addFocusListener(new FocusAdapter() {
 			@Override
@@ -560,20 +697,20 @@ public class ApplicationFrame extends JFrame {
 			}
 		});
 		customerSearchTextField.setText("Search...");
-		customerSearchTextField.setBounds(55, 72, 165, 20);
+		customerSearchTextField.setBounds(55, 72 - guiLocationSubtractor, 165, 20);
 		customersPanel.add(customerSearchTextField);
 		customerSearchTextField.setColumns(10);
 		
 		final JCheckBox customerNoChckbx = new JCheckBox("Customer No.");
 		customerNoChckbx.setBackground(Color.WHITE);
 		customerNoChckbx.setSelected(true);
-		customerNoChckbx.setBounds(236, 71, 102, 23);
+		customerNoChckbx.setBounds(236, 71 - guiLocationSubtractor, 102, 23);
 		customersPanel.add(customerNoChckbx);
 		
 		final JCheckBox customerNameChckbx = new JCheckBox("Name");
 		customerNameChckbx.setBackground(Color.WHITE);
 		customerNameChckbx.setSelected(true);
-		customerNameChckbx.setBounds(346, 71, 102, 23);
+		customerNameChckbx.setBounds(346, 71 - guiLocationSubtractor, 102, 23);
 		customersPanel.add(customerNameChckbx);
 		
 		//Popup Menu (When a user left clicks a row, a menu will pop up with a list of different options). 
@@ -589,7 +726,7 @@ public class ApplicationFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				//System.out.println("CLOSING");
 				customerOptionsPopup.setVisible(false);
-				popupIsShown = false;
+				//popupIsShown = false;
 			}
 		});
 		popupCloseMnItem.addMouseMotionListener(new MouseMotionListener() {
@@ -598,7 +735,7 @@ public class ApplicationFrame extends JFrame {
 
 			@Override
 			public void mouseMoved(MouseEvent arg0) {				
-				popupCloseMnItem.setForeground(Color.RED);
+				popupCloseMnItem.setForeground(COLOR_RED);
 				popupViewMnItem.setForeground(Color.BLACK);
 				popupEditMnItem.setForeground(Color.BLACK);
 				popupDeleteMnItem.setForeground(Color.BLACK);
@@ -625,7 +762,7 @@ public class ApplicationFrame extends JFrame {
 				int selectedRow = customersTable.getSelectedRow();
 				
 				if(selectedRow >= 0) { //Make sure the selected row is valid.
-					popupFrame.fillInForm("CUSTOMER",  customerList.get(selectedRow));
+					popupFrame.fillInForm("CUSTOMERS",  customerList.get(selectedRow));
 					popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
 					popupFrame.setVisible(true);
 					customerOptionsPopup.setVisible(false);
@@ -694,7 +831,7 @@ public class ApplicationFrame extends JFrame {
 		//Customer Table
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBackground(Color.WHITE);
-		scrollPane.setBounds(10, 103, 661, 348);
+		scrollPane.setBounds(10, 103 - guiLocationSubtractor, 661, 348);
 		customersPanel.add(scrollPane);
 
 		customersTable = new JTable();
@@ -726,14 +863,23 @@ public class ApplicationFrame extends JFrame {
 						int mouseX = MouseInfo.getPointerInfo().getLocation().x; 
 						int mouseY = MouseInfo.getPointerInfo().getLocation().y;						
 						
-						customerOptionsPopup.setLocation(mouseX, mouseY); //Reposition the popup menu.
-						customerOptionsPopup.setVisible(true); //Show the popup menu.
-						customerOptionsPopup.requestFocus();
-						popupIsShown = true;
+						viewCustomerBtn.setVisible(true);
+						editCustomerBtn.setVisible(true);
+						deleteCustomerBtn.setVisible(true);
+						
+						//customerOptionsPopup.setLocation(mouseX, mouseY); //Reposition the popup menu.
+						//customerOptionsPopup.setVisible(true); //Show the popup menu.
+						//customerOptionsPopup.requestFocus();
+						
+						
+						//popupIsShown = true;
 					} else {
+						viewCustomerBtn.setVisible(false);
+						editCustomerBtn.setVisible(false);
+						deleteCustomerBtn.setVisible(false);
 						if(customerOptionsPopup != null) {
 							customerOptionsPopup.setVisible(false); //Hide the popup menu.
-							popupIsShown = false;
+							//popupIsShown = false;
 						}
 					}
 				}
@@ -779,7 +925,7 @@ public class ApplicationFrame extends JFrame {
 					customerList = appManager.getTableRowData("CUSTOMERS", query);  
 					
 					
-					refreshTable("CUSTOMERS", customerList);					
+					refreshTable("CUSTOMERS");					
 					
 				} else {
 					//If both of the checkboxes are unticked, then simply show them a row with the "Please tick atleast one of the checkboxes" notice.
@@ -800,7 +946,7 @@ public class ApplicationFrame extends JFrame {
 			}
 		});
 		refreshCustomersTableBtn.setBorderPainted(false);
-		refreshCustomersTableBtn.setBounds(10, 60, 40, 40);
+		refreshCustomersTableBtn.setBounds(10, 60 - guiLocationSubtractor, 40, 40);
 		ImageIcon refreshImageIcon = new ImageIcon("lib/images/refresh_image_icon");
 		refreshCustomersTableBtn.setIcon(refreshImageIcon);
 		customersPanel.add(refreshCustomersTableBtn);	
@@ -968,6 +1114,11 @@ public class ApplicationFrame extends JFrame {
 		homePanel.setVisible(true);
 	}
 	
+	//Return the currently loaded ArrayList of customers.
+	public ArrayList<Entity> getCustomerList() {
+		return customerList;
+	}
+	
 	//Get the text the user has entered into the 'Search' part of the customers area.
 	public String getCustomerTableSearchQuery() {
 		return (customerSearchTextField.getText());
@@ -1020,7 +1171,7 @@ public class ApplicationFrame extends JFrame {
 	/*
 	 * Refresh the data within the appropriate table with the information taken from the list of objects (Customers, Employees, Users).
 	 */
-	public void refreshTable(String tableName, ArrayList<Object> objectList) {
+	public void refreshTable(String tableName) {
 		String[] columnNames = null;
 		Object[][] rowData = null;
 		JTable table = null;
@@ -1057,139 +1208,124 @@ public class ApplicationFrame extends JFrame {
 		}
 	}
 	
-}
-
-
-/*
-
-// Creates a table, adds a scroll to it and fills in the table with the dummy info. 
-String[] columns = {"Employee Number", "First Name", "Surname", "Age"};
-
-Object[][] tableData = {
-		{"0434", "Jayceon", "Zrews", "22"},	
-		{"0003", "Jayceon", "Andrews", "22"},
-		{"0001", "Jayceon", "Dndrews", "22"},
-		{"0055", "Jayceon", "Cndrews", "22"},
-		{"0105", "Jayceon", "Rndrews", "22"},
-		{"0565", "Jayceon", "Endrews", "22"},
-		{"0335", "Jayceon", "Fndrews", "22"},
-		{"0006", "Jayceon", "Hndrews", "22"},
-		{"0115", "Jayceon", "Xndrews", "22"},
-		{"0095", "Jayceon", "Lndrews", "22"},
-		{"0033", "Jayceon", "Gndrews", "22"},
-		{"1015", "Jayceon", "Rndrews", "22"},
-		{"1555", "Jayceon", "Vndrews", "22"},
-		{"0002", "Jayceon", "Sndrews", "22"},
-		{"0555", "Jayceon", "Kndrews", "22"},
-		{"0335", "Jayceon", "Ondrews", "22"},
+	/*
+	 * Loads the properties file, if it exists.
+	 * Check if the configuration file exists. If it does, load the properties. If it doesn't, create the directory (if needed) and file.
+	 */
+	public void loadProperties() {	
 		
-		{"0003", "Robert", "Stark", "26"}
+		FileInputStream fis = null;
+		FileOutputStream fos = null;
+		File dirCheck = null;
 		
-};
-
-
-JScrollPane scrollPane = new JScrollPane();
-scrollPane.setBounds(103, 125, 350, 200);
-contentPane.add(scrollPane);
-
-table_1 = new JTable();
-scrollPane.setViewportView(table_1);
-
-table_1.setAutoCreateRowSorter(true);
-table_1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-table_1.setColumnSelectionAllowed(true);
-table_1.setModel(new DefaultTableModel(tableData, columns));
-table_1.setBorder(new LineBorder(new Color(0, 0, 0)));
-
-*/
-
-/*
-//Connect to the database with the given credentials.
-boolean connectToDatabase(String url, String user, String password) {		
+		try {
 			
-	//Add a thread here.
-	try {			
-		
-		if(connection != null && connection.isValid(0)) { //If there's already a connection, close it before continuing.
-			System.out.println("Already has a connection.");
-			connection.close(); //Close the connection.
-		}
-		
-		//Some debugging.
-		//System.out.println("Attempting to connect to URL: [" + url + "] | USER: [" + user + "] | PASSWORD: [" + password + "]");
-		
-		connection = DriverManager.getConnection(url, user, password);
-		
-		statusResultLbl.setForeground(Color.GREEN);
-		statusResultLbl.setText("Connected.");
-		
-		//Check if this is the first time the application has been used (no users within the database). 
-		firstTimeUseCheck();
-	} catch(Exception ex) {
-		statusResultLbl.setText("Could not connect.");
-		statusResultLbl.setForeground(Color.RED);	
-		return false;
+			properties = new Properties();
+			
+			fileDirectory = (System.getProperty("user.home")+"\\Business Manager\\config.ini");			
+			dirCheck = new File(fileDirectory); //Create a new file (to check if it exists.)
+			
+			if(dirCheck.exists()) { //The file exists.
+				
+				fis = new FileInputStream(fileDirectory); //Create a new FileInputStream for the configuration file.
+				
+				properties.load(fis); //Load the properties from the file.
+				
+				//Set the details on the configuration form to the details that were saved.
+				urlTextField.setText(properties.getProperty("dbUrl"));
+				userTextField.setText(properties.getProperty("dbUser"));
+				passwordTextField.setText(properties.getProperty("dbPassword"));
+				
+				//Set the details on the login form to the details that were saved.
+				loginUsernameTextField.setText(properties.getProperty("loginUser"));
+				loginPasswordField.setText(properties.getProperty("loginPassword"));	
+				
+			} else { //The file doesn't exist.
+				
+				dirCheck = new File(System.getProperty("user.home")+"\\Business Manager"); //Create a new file to see if the directory exists.
+				if(!dirCheck.exists()) dirCheck.mkdirs(); //Create the directory if it doesn't exist (the previous check is if the file exists.)
+				
+				fos = new FileOutputStream(fileDirectory); //Create a new file so we can store the properties in it.				
+				
+				properties.setProperty("dbUrl", "");
+				properties.setProperty("dbUser", "");
+				properties.setProperty("dbPassword", "");
+				
+				properties.setProperty("loginUser", "");
+				properties.setProperty("loginPassword", "");
+				
+				properties.store(fos, "");
+			}			
+			
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			
+		} finally {
+			if(fis != null) {
+				try {
+					fis.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			if(fos != null) {
+				try {
+					fos.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}		
 	}
 	
-	//String url = "jdbc:mysql://localhost:3306/employee_manager";
-	//String user = "root";
-	//String pw = "";
- 
-	return true;
-}
-
-//Attempts to log a user into the application through the Login screen.
-void loginUser(String username, String password) {
-	
-	try {
+	public void storeProperties() {
 		
-		if(connection == null || !connection.isValid(0)) { //Check if the application is not connected to the database.
-			loginErrorLbl.setText("Login failed, there is no connection to the database.");
-		} else {
+		FileOutputStream fos = null;
 		
-			Statement statement = connection.createStatement();
+		try {
 			
-			ResultSet resultSet = statement.executeQuery("SELECT * FROM `users` WHERE `username` = '"+username+"'");
+			fos = new FileOutputStream(fileDirectory);
 			
-			if(resultSet.next()) { //If their username exists in the database.
-				//System.out.println("Username: [" + username + "] | Admin ID: [" + resultSet.getInt("adminId") + "]"); //Debugging
-				String hashedPassword = SHA1(password);
-				//System.out.println("PASSWORD: " + password + " | HASHED: " + hashedPassword);
-				
-				//Retrieve the password and compare the stored password with the password specified by the user.
-				if(!hashedPassword.equals(resultSet.getString("password"))) { //If the passwords do not match.
-					loginErrorLbl.setText("Login failed, you have entered an incorrect password.");
-				} else {
-					//Continue onto the next pane where most of the content will actually be.
-					//Check if the user is an administrator.
-				}
-				
+			//Check if the 'Save details' button is selected under the Configuration panel.
+			if(configureSaveDetailsChckbx.isSelected()) {
+				//if it is selected, save the details.
+				properties.setProperty("dbUrl", urlTextField.getText());
+				properties.setProperty("dbUser", userTextField.getText());
+				properties.setProperty("dbPassword", passwordTextField.getText());
 			} else {
-				loginErrorLbl.setText("Login failed, the username you have specified does not exist.");
+				//if it's not selected, do not save the details.
+				properties.setProperty("dbUrl", "");
+				properties.setProperty("dbUser", "");
+				properties.setProperty("dbPassword", "");
+			}
+			
+			if(loginSaveDetailsChckbx.isSelected()) {
+				//if it is selected, save the details.
+				properties.setProperty("loginUser", loginUsernameTextField.getText());
+				properties.setProperty("loginPassword", new String(loginPasswordField.getPassword()));	
+			} else {
+				//if it's not selected, do not save the details.
+				properties.setProperty("loginUser", "");
+				properties.setProperty("loginPassword", "");
+			}
+			
+			
+			
+			properties.store(fos, null);
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if(fos != null) {
+				try { 
+					fos.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
 			}
 		}
-	} catch (Exception ex) {
-		ex.printStackTrace();
-	}			
-}
-
-//Checks whether or not the application has been used previously (there's no users created yet).
-void firstTimeUseCheck() throws SQLException, NoSuchAlgorithmException {
-	if(connection == null) return;
-	
-	Statement statement = connection.createStatement(); //Creates a statement.
-	
-	ResultSet resultSet = statement.executeQuery("SELECT * FROM `users`"); //Executes a SELECT query and store the result set.
-	
-	if(!resultSet.next()) { //There's no users, which means this is the first time the application has been used. 
 		
-		String newUserQuery = "INSERT INTO `users` (`username`, `password`, `admin`) VALUES ('admin', '" + SHA1("password") + "', '1')"; //Creating a string that will store the INSERT query for the new user.
-		//System.out.println("QUERY: " + newUserQuery);
-		statement.executeUpdate(newUserQuery); //Execute the query.
-		
-		loginUsernameTextField.setText("admin");
-		loginPasswordField.setText("password");
 	}
+	
 }
-
-*/

@@ -1,8 +1,9 @@
 package com.jasonandrews.projects.businessmanager;
 
+//String url = "jdbc:mysql://localhost:3306/TABLE_NAME";
+//String user = "root";
+//String pw = "";
 
-import java.awt.Color;
-import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 
 public class DatabaseConnector {
@@ -26,26 +27,17 @@ public class DatabaseConnector {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		
-		
 	}
 	
 	//Return the connection object.
-	public Connection getConnection() {
-		
+	public Connection getConnection() {		
 		try {
 			
-			//Some debugging.
-			//System.out.println("Attempting to connect to URL: [" + url + "] | USER: [" + user + "] | PASSWORD: [" + password + "]");
-			//System.out.println(url + " | " + user + " | " + " | " + password);
 			connection = DriverManager.getConnection(url, user, password);
 			
-			//return true;
 		} catch(Exception ex) {
 			ex.printStackTrace();
-			//return false;
-		} 
-		
+		} 		
 		return connection;
 	}
 	

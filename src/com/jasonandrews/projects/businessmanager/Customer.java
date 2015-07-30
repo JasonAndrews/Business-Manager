@@ -2,7 +2,7 @@ package com.jasonandrews.projects.businessmanager;
 
 import java.util.ArrayList;
 
-public class Customer {
+public class Customer extends Entity {
 	
 	
 	private int customerNumber;
@@ -38,7 +38,7 @@ public class Customer {
 		this.addressCountry = addressCountry;
 	}
 	
-	public Object[] getCustomerInformation() {
+	public Object[] getInformation() {
 		Object[] info = {this.customerNumber, this.firstName, this.lastName, this.addressOne, this.addressTwo, this.addressCity, this.addressCountry};		
 		return info;
 	}
@@ -47,12 +47,12 @@ public class Customer {
 	 * Static method.
 	 * Convert the customer objects to arrays so that they can be displayed on a table. 
 	 */
-	public static Object[][] convertObjectsToRowData(AppManager appManager, ArrayList<Object> objectList) {
+	public static Object[][] convertObjectsToRowData(AppManager appManager, ArrayList<Entity> objectList) {
 		Object[][] rowData = new Object[objectList.size()][appManager.getTableColumnCount("CUSTOMER")];		
 		
 		int index = 0;
 		for(Object customer : objectList) {
-			rowData[index] = ((Customer) customer).getCustomerInformation();
+			rowData[index] = ((Customer) customer).getInformation();
 			index++;
 		}		
 		return rowData;
