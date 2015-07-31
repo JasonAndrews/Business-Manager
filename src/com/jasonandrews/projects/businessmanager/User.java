@@ -20,7 +20,20 @@ public class User extends Entity {
 		return info;
 	}
 	
+	public int getUserNumber() {
+		return this.userNumber;
+	}
+	
+	public String getUsername() {
+		return this.username;
+	}
+	
+	public String getPassword() {
+		return this.password;
+	}
+	
 	public boolean isAdmin() {
 		return this.isAdmin;
 	}
+	
 }

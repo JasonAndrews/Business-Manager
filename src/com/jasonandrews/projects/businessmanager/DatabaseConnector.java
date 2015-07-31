@@ -17,18 +17,7 @@ public class DatabaseConnector {
 		this.user = user;
 		this.password = password;
 	}
-	
-	//Close the connection to the database.
-	public void close() {
-		try {
-			if(connection != null) {
-		}
-			connection.close(); //Close the connection.
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
-	
+		
 	//Return the connection object.
 	public Connection getConnection() {		
 		try {
