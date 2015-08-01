@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.swing.ImageIcon;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -1060,7 +1062,11 @@ public class ApplicationFrame extends JFrame {
 	
 	public static final int ERROR_CONNECTION_FAILED = 1;
 	public static final int ERROR_CONNECTION_DROPPED = 2;
-	public static final int ERROR_LOGIN_FAILED = 3;  
+	public static final int ERROR_LOGIN_FAILED = 3; 
+	
+	public static final int SUCCESS_CONNECTION_PASSED = 1;
+	
+	private JOptionPane errorDialog;
 	
 	/*
 	 * A way to trigger error messages within the application. 
@@ -1068,8 +1074,34 @@ public class ApplicationFrame extends JFrame {
 	 */
 	public void triggerError(int errorID, String message) {
 		switch(errorID) {
-			case ERROR_LOGIN_FAILED: { loginErrorLbl.setText(message); break; }
-			
+			case ERROR_CONNECTION_FAILED: {
+				
+				//Show them a dialog (JOptionPane) that waits until they click 'Ok' if the database connection fails.
+				errorDialog = new JOptionPane();
+				JOptionPane.showMessageDialog(
+						this,
+					    message,
+					    "Connection error",
+					    JOptionPane.ERROR_MESSAGE);
+				errorDialog.setVisible(true);
+				break; 
+			}
+			case ERROR_LOGIN_FAILED: { 
+				loginErrorLbl.setText(message);
+				break; 
+			}			
+		}
+	}
+	
+	/*
+	 * A way to trigger a success within the application. An example would be to change the connection status if the connection to the database was successful. 
+	 */
+	public void triggerSuccess(int successID) {
+		switch(successID) {
+			case SUCCESS_CONNECTION_PASSED: {
+				
+				break; 
+			}			
 		}
 	}
 	
@@ -1324,8 +1356,9 @@ public class ApplicationFrame extends JFrame {
 					ex.printStackTrace();
 				}
 			}
-		}
-		
+		}		
 	}
+	
+	
 	
 }

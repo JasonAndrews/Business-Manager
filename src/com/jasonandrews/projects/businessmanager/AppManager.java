@@ -173,7 +173,7 @@ public class AppManager {
 	public boolean testConnectionToDatabase(String url, String user, String password) {
 		//Add a thread here.
 		
-		dbConnector = new DatabaseConnector(url, user, password);	
+		dbConnector = new DatabaseConnector(this.appFrame, url, user, password);	
 		
 		if(dbConnector.getConnection() == null) { //If the firstTimeUseCheck returns false, then there is a connection issue.
 			System.out.println("Failed connection.");
