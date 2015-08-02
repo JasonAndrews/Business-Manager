@@ -24,46 +24,19 @@ public class DatabaseConnector {
 	}
 		
 	//Return the connection object.
-	public Connection getConnection() {
-		
-		SwingWorker<Integer, Integer> sw = null;
-		
-		sw = new SwingWorker<Integer, Integer>() {
-
-			@Override
-			protected Integer doInBackground() {
-				try {
-					
-					
-					//System.out.println("Attempting connection..");
-					connection = DriverManager.getConnection(url, user, password);
-					
-				} catch(Exception ex) {
-					ex.printStackTrace();
-				}
-				return 1;
-			}
+	public Connection getConnection() {		
+		try {
 			
-			@Override
-			protected void done() {
-				
-				//System.out.println("Finished attempting connection..");
-				
-				if(connection == null) {
-					//System.out.println("Connection attempt failed..");
-					appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "The connection to the database failed!\n\nPlease ensure your configuration credentials are correct!");
-				} else {
-					//System.out.println("Connection attempt succeeded..");
-					connection = null;
-					appFrame.triggerSuccess(ApplicationFrame.SUCCESS_CONNECTION_PASSED); //DO SOMETHING TO SHOW THE CONNECTION ACTUALLY WORKED HERE!! LIKE to show the 'checkmark'.					
-				}
-			}
+			//Attempt to connect to the database.
+			connection = DriverManager.getConnection(url, user, password);
 			
-		};
-		sw.execute();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}	
 		
 		return connection;
-	}
+	}	
+	
 	
 
 }

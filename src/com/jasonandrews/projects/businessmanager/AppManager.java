@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.swing.JFrame;
+import javax.swing.SwingWorker;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -172,11 +173,11 @@ public class AppManager {
 	
 	public boolean testConnectionToDatabase(String url, String user, String password) {
 		//Add a thread here.
-		
+		//System.out.println("testConnectionToDatabase()..");
 		dbConnector = new DatabaseConnector(this.appFrame, url, user, password);	
 		
 		if(dbConnector.getConnection() == null) { //If the firstTimeUseCheck returns false, then there is a connection issue.
-			System.out.println("Failed connection.");
+			//System.out.println("Failed connection.");
 			return false;
 		}
 		
@@ -204,9 +205,7 @@ public class AppManager {
 				
 				String newUserQuery = "INSERT INTO `users` (`username`, `password`, `admin`) VALUES ('admin', '" + Encryption.hash("password") + "', '1')"; //Creating a string that will store the INSERT query for the new user.
 				//System.out.println("QUERY: " + newUserQuery);
-				statement.executeUpdate(newUserQuery); //Execute the query.
-				
-				appFrame.setLoginFields("admin", "password");
+				statement.executeUpdate(newUserQuery); //Execute the query.			
 				
 				//POPUP DIALOG STATING "Because this is the first time you are using the application, an account with the username 'admin' and the password 'password' was created for you. You may add new users once logged in and you can also delete the temporary account provided.
 			}
@@ -301,54 +300,41 @@ public class AppManager {
 	/*
 	 * Log a user into the application.
 	 */
-	public boolean loginUser(String username, String password) {
-		
+	public boolean loginUser(String username, String password) {		
+				
 		Connection connection = null; 
 		Statement statement = null;
 		ResultSet resultSet = null;
 		
 		try {			
-			
 			connection = dbConnector.getConnection(); 
-			
-			if(connection == null || !connection.isValid(0)) { //Check if the application is not connected to the database.
-				//appFrame.triggerError(ApplicationFrame.ERROR_LOGIN_FAILED, "Login failed, there is no connection to the database.");
-				//System.out.println(connection + " | " + connection.isValid(0) +  " | Failed at 1");
-				return false;
-				//loginErrorLbl.setText("Login failed, there is no connection to the database.");
-			} else {
-			
+
+			if(connection != null) { //Check if the application successfully connected to the database.
+				//The connection succeeded.
+				
 				statement = connection.createStatement();
 				
 				resultSet = statement.executeQuery("SELECT * FROM `users` WHERE `username` = '"+username+"'");
 				
-				if(resultSet.next()) { //If their username exists in the database.
-					//System.out.println("Username: [" + username + "] | Admin ID: [" + resultSet.getInt("adminId") + "]"); //Debugging
+				//Check if the result set has atleast one row of data.
+				if(resultSet.next()) { 
+					//If their username exists in the database.
 					String hashedPassword = Encryption.hash(password);
 					//System.out.println("PASSWORD: " + password + " | HASHED: " + hashedPassword);
 					
 					//Retrieve the password and compare the stored password with the password specified by the user.
-					if(!hashedPassword.equals(resultSet.getString("password"))) { //If the passwords do not match.
-						appFrame.triggerError(ApplicationFrame.ERROR_LOGIN_FAILED, "Login failed, you have entered an incorrect password.");
-						//loginErrorLbl.setText("Login failed, you have entered an incorrect password.");
+					if(hashedPassword.equals(resultSet.getString("password"))) { //If the passwords do not match.
+						//The passwords did match so return true. 
+						return true;
 					} else {
-						//THEY LOGGED IN SUCCESSFULLY
-						loggedIn = true;
-						appFrame.displayHome();
-						//Continue onto the next HOME panel where most of the content will actually be.
-						//Check if the user is an administrator.
-					}			
-					
-				} else {
-					appFrame.triggerError(ApplicationFrame.ERROR_LOGIN_FAILED, "Login failed, the username you have specified does not exist.");
-					//loginErrorLbl.setText("Login failed, the username you have specified does not exist.");
-					//System.out.println("Failed at 4");
-					return false;
+						//The passwords did not match so return false.
+						return false;
+					}					
 				}
-			}
+			} 
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return false;
 		} finally {
 			if(connection != null) {
 				try {
@@ -371,9 +357,8 @@ public class AppManager {
 					ex.printStackTrace();
 				}
 			}
-		}	
-		
-		return true;			
+		}
+		return false;
 	}
 	
 	public void setApplicationFrame(ApplicationFrame appFrame) {

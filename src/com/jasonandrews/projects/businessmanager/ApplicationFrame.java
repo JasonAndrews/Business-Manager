@@ -42,6 +42,7 @@ import javax.swing.JSeparator;
 import javax.swing.JFormattedTextField;
 import javax.swing.JTabbedPane;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingWorker;
 
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
@@ -86,6 +87,7 @@ public class ApplicationFrame extends JFrame {
 	private static final Color COLOR_GREEN = new Color(0, 118, 0);
 	private static final int guiLocationSubtractor = 35; 
 	
+	private ApplicationFrame appFrame; //Self reference object - used in particular instances.
 	private AppManager appManager;
 
 	private String fileDirectory;
@@ -115,9 +117,6 @@ public class ApplicationFrame extends JFrame {
 	private JLabel errorLbl;
 	private JLabel loginErrorLbl;
 	
-	private String url;
-	private String user;
-	private String password;
 	private String[] c_columnNames;
 	
 	private static final Color BUTTON_BACKGROUND_COLOR = Color.BLACK;
@@ -142,7 +141,8 @@ public class ApplicationFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public ApplicationFrame(AppManager appManager) {		
+	public ApplicationFrame(AppManager appManager) {	
+		this.appFrame = this; 
 		this.appManager = appManager;
 		
 		setTitle("Business Manager");
@@ -236,12 +236,13 @@ public class ApplicationFrame extends JFrame {
 		});
 		configurationBtn.setBackground(BUTTON_BACKGROUND_COLOR);
 		configurationBtn.setForeground(BUTTON_FOREGROUND_COLOR);
-		configurationBtn.setBounds(268, 213, 122, 33);
+		configurationBtn.setBounds(268, 169, 122, 33);
 		mainMenuPanel.add(configurationBtn);
 		
 		JButton loginBtn = new JButton("Login");
 		loginBtn.addActionListener(new ActionListener() {			
-			public void actionPerformed(ActionEvent arg0) {				
+			public void actionPerformed(ActionEvent arg0) {	
+				
 				displayLogin();
 			}				
 		});
@@ -251,13 +252,22 @@ public class ApplicationFrame extends JFrame {
 		mainMenuPanel.add(loginBtn);
 		
 		JButton exitBtn = new JButton("Exit");
+		exitBtn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				dispatchEvent(new WindowEvent(appFrame, WindowEvent.WINDOW_CLOSING)); //Exit the application.				
+			}
+			
+		});
 		exitBtn.setBackground(BUTTON_BACKGROUND_COLOR);
 		exitBtn.setForeground(BUTTON_FOREGROUND_COLOR);
-		exitBtn.setBounds(268, 257, 122, 33);
+		exitBtn.setBounds(268, 213, 122, 33);
 		mainMenuPanel.add(exitBtn);
-				
-		JButton quickConnectBtn = new JButton("Quick Connect");
-		quickConnectBtn.addActionListener(new ActionListener() {
+		
+		/*
+		JButton testConnectionBtn = new JButton("Test Connection");
+		testConnectionBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String url = urlTextField.getText();
 				String user = userTextField.getText();
@@ -280,11 +290,11 @@ public class ApplicationFrame extends JFrame {
 				}
 			}
 		});
-		quickConnectBtn.setBackground(BUTTON_BACKGROUND_COLOR);
-		quickConnectBtn.setForeground(BUTTON_FOREGROUND_COLOR);
-		quickConnectBtn.setBounds(268, 169, 122, 33);
-		mainMenuPanel.add(quickConnectBtn);
-		
+		testConnectionBtn.setBackground(BUTTON_BACKGROUND_COLOR);
+		testConnectionBtn.setForeground(BUTTON_FOREGROUND_COLOR);		
+		testConnectionBtn.setBounds(268, 257, 122, 33);
+		mainMenuPanel.add(testConnectionBtn);
+		*/
 		errorLbl = new JLabel("");
 		errorLbl.setForeground(COLOR_RED);
 		errorLbl.setBounds(100, 301, 540, 14);
@@ -450,33 +460,57 @@ public class ApplicationFrame extends JFrame {
 		loginPasswordField.setBounds(260, 194, 207, 21);
 		loginPanel.add(loginPasswordField);
 		
-		JButton loginLoginBtn = new JButton("Login");
-		loginLoginBtn.addActionListener(new ActionListener() {
+		JButton login_loginBtn = new JButton("Login");
+		login_loginBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {		
 				
-				loginErrorLbl.setText(""); //Resetting the error message so users can see the next error message.
+				SwingWorker<Integer, Integer> sw = null;
 				
-				char[] passwordArray = loginPasswordField.getPassword();
-				String password = new String(passwordArray);
-				String username = loginUsernameTextField.getText();
-				//System.out.println(connection);
-				if(appManager.loginUser(username, password)) {
-					System.out.println("Logged in - ApplicationFrame");
-					//They logged in. Load next panel.
-				} else {
+				sw = new SwingWorker<Integer, Integer>() {
+
+					@Override
+					protected Integer doInBackground() {
+						
+						loginErrorLbl.setText(""); //Resetting the error message.
+						
+						//Test the connection to the database.
+						if(appManager.testConnectionToDatabase(urlTextField.getText(), userTextField.getText(), passwordTextField.getText())) {							
+							//There was a connection.
+							appFrame.triggerSuccess(ApplicationFrame.SUCCESS_CONNECTION_PASSED); //DO SOMETHING TO SHOW THE CONNECTION ACTUALLY WORKED HERE!! LIKE to show the 'checkmark'.
+							
+							//Attempt to log the user in.
+							char[] passwordArray = loginPasswordField.getPassword();
+							String password = new String(passwordArray);
+							String username = loginUsernameTextField.getText();							
+												
+							//Attempt to log the user in (check if his username and password are correct).
+							if(appManager.loginUser(username, password)) {
+								//The user successfully logged in.
+								displayHome();
+							} else {
+								//The user failed to log in.
+								triggerError(ApplicationFrame.ERROR_LOGIN_FAILED, "Login failed, you have entered an incorrect username and/or password.");
+							}
+							
+						} else {
+							//The connection failed.
+							appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "The connection to the database failed!\n\nPlease ensure your configuration credentials are correct!");
+						}
+												
+						return null;
+					}
 					
-					//They failed to login.
-					System.out.println("Failed Logged in - ApplicationFrame");
-				}
+				};				
+				sw.execute();
 			}
 		});
-		loginLoginBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
-		loginLoginBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
-		loginLoginBtn.setBounds(270, 240, 89, 23);		
-		loginPanel.add(loginLoginBtn);
+		login_loginBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		login_loginBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
+		login_loginBtn.setBounds(270, 240, 89, 23);		
+		loginPanel.add(login_loginBtn);
 		
-		JButton loginClearBtn = new JButton("Clear");
-		loginClearBtn.addActionListener(new ActionListener() {
+		JButton login_clearBtn = new JButton("Clear");
+		login_clearBtn.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -485,10 +519,10 @@ public class ApplicationFrame extends JFrame {
 			}
 			
 		});
-		loginClearBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
-		loginClearBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
-		loginClearBtn.setBounds(369, 240, 89, 23);
-		loginPanel.add(loginClearBtn);
+		login_clearBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		login_clearBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
+		login_clearBtn.setBounds(369, 240, 89, 23);
+		loginPanel.add(login_clearBtn);
 		
 		loginSaveDetailsChckbx = new JCheckBox("Save details");
 		loginSaveDetailsChckbx.setBackground(Color.WHITE);
@@ -501,8 +535,8 @@ public class ApplicationFrame extends JFrame {
 		loginSeparator.setBounds(260, 275, 207, 2);
 		loginPanel.add(loginSeparator);
 		
-		JButton loginBackBtn = new JButton("Back");
-		loginBackBtn.addActionListener(new ActionListener() {
+		JButton login_backBtn = new JButton("Back");
+		login_backBtn.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -510,10 +544,10 @@ public class ApplicationFrame extends JFrame {
 			}
 			
 		});
-		loginBackBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
-		loginBackBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
-		loginBackBtn.setBounds(324, 288, 89, 23);		
-		loginPanel.add(loginBackBtn);
+		login_backBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
+		login_backBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
+		login_backBtn.setBounds(324, 288, 89, 23);		
+		loginPanel.add(login_backBtn);
 		
 		
 		
@@ -532,13 +566,7 @@ public class ApplicationFrame extends JFrame {
 		JMenu applicationMenu = new JMenu("Application");
 		homeMenuBar.add(applicationMenu);
 		
-		JMenuItem exitMnItem = new JMenuItem("Exit");
-		exitMnItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("EXIT");
-			}
-		});
-		applicationMenu.add(exitMnItem);
+		
 		
 		JMenuItem homeMnItem = new JMenuItem("Home");
 		applicationMenu.add(homeMnItem);
@@ -546,6 +574,13 @@ public class ApplicationFrame extends JFrame {
 		JMenuItem mainMenuMnItem = new JMenuItem("Main Menu");
 		applicationMenu.add(mainMenuMnItem);
 		
+		JMenuItem exitMnItem = new JMenuItem("Exit");
+		exitMnItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				System.out.println("EXIT");
+			}
+		});
+		applicationMenu.add(exitMnItem);
 		
 		JMenu customersMenu = new JMenu("Customers");
 		homeMenuBar.add(customersMenu);
@@ -933,6 +968,11 @@ public class ApplicationFrame extends JFrame {
 					//If both of the checkboxes are unticked, then simply show them a row with the "Please tick atleast one of the checkboxes" notice.
 					String[] temp = new String[]{""};
 					DefaultTableModel model = new DefaultTableModel(null, temp) {
+						/**
+						 * 
+						 */
+						private static final long serialVersionUID = 1L;
+
 						@Override
 						public boolean isCellEditable(int row, int column) {
 							//all cells false
@@ -952,109 +992,10 @@ public class ApplicationFrame extends JFrame {
 		ImageIcon refreshImageIcon = new ImageIcon("lib/images/refresh_image_icon");
 		refreshCustomersTableBtn.setIcon(refreshImageIcon);
 		customersPanel.add(refreshCustomersTableBtn);	
-	}
-	
-	/*
-	private void createInternalFrames() {
-		customerInternalFrame = new JFrame();
-		JPanel panel = new JPanel();
-		
-		customerInternalFrame.setBounds(getLocation().x + (getWidth() / 4), getLocation().y + (getHeight() / 4), 450, 300);
-		customerInternalFrame.setResizable(false);
-		panel.setLayout(null);
-		
-		JLabel firstNameLbl = new JLabel("First Name:");
-		firstNameLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		firstNameLbl.setBounds(123, 37, 68, 14);
-		panel.add(firstNameLbl);
-		
-		JLabel lastNameLbl = new JLabel("Last Name:");
-		lastNameLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		lastNameLbl.setBounds(123, 59, 68, 14);
-		panel.add(lastNameLbl);
-		
-		firstNameTextField = new JTextField();
-		firstNameTextField.setEditable(false);
-		firstNameTextField.setBounds(201, 34, 136, 20);
-		panel.add(firstNameTextField);
-		firstNameTextField.setColumns(10);
-		
-		lastNameTextField = new JTextField();
-		lastNameTextField.setEditable(false);
-		lastNameTextField.setColumns(10);
-		lastNameTextField.setBounds(201, 56, 136, 20);
-		panel.add(lastNameTextField);
-		
-		JLabel customerNoLbl = new JLabel("Customer Number:");
-		customerNoLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		customerNoLbl.setBounds(88, 9, 103, 14);
-		panel.add(customerNoLbl);
-		
-		customerNoTextField = new JTextField();
-		customerNoTextField.setEditable(false);
-		customerNoTextField.setColumns(10);
-		customerNoTextField.setBounds(201, 6, 136, 20);
-		panel.add(customerNoTextField);
-		
-		JLabel addressTwoLbl = new JLabel("Address Two:");
-		addressTwoLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		addressTwoLbl.setBounds(123, 108, 68, 14);
-		panel.add(addressTwoLbl);
-		
-		JLabel addressOneLbl = new JLabel("Address One:");
-		addressOneLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		addressOneLbl.setBounds(123, 86, 68, 14);
-		panel.add(addressOneLbl);
-		
-		addressOneTextField = new JTextField();
-		addressOneTextField.setEditable(false);
-		addressOneTextField.setColumns(10);
-		addressOneTextField.setBounds(201, 83, 136, 20);
-		panel.add(addressOneTextField);
-		
-		addressTwoTextField = new JTextField();
-		addressTwoTextField.setEditable(false);
-		addressTwoTextField.setColumns(10);
-		addressTwoTextField.setBounds(201, 105, 136, 20);
-		panel.add(addressTwoTextField);
-		
-		JLabel addressCountryLbl = new JLabel("Country:");
-		addressCountryLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		addressCountryLbl.setBounds(123, 154, 68, 14);
-		panel.add(addressCountryLbl);
-		
-		JLabel addressCityLbl = new JLabel("City:");
-		addressCityLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		addressCityLbl.setBounds(123, 132, 68, 14);
-		panel.add(addressCityLbl);
-		
-		addressCityTextField = new JTextField();
-		addressCityTextField.setEditable(false);
-		addressCityTextField.setColumns(10);
-		addressCityTextField.setBounds(201, 129, 136, 20);
-		panel.add(addressCityTextField);
-		
-		addressCountryTextField = new JTextField();
-		addressCountryTextField.setEditable(false);
-		addressCountryTextField.setColumns(10);
-		addressCountryTextField.setBounds(201, 151, 136, 20);
-		panel.add(addressCountryTextField);
-		
-		JButton confirmBtn = new JButton("Edit");
-		confirmBtn.setBounds(102, 237, 89, 23);
-		panel.add(confirmBtn);
-		
-		JButton closeBtn = new JButton("Close");
-		closeBtn.setBounds(201, 237, 89, 23);
-		panel.add(closeBtn);
-		
-		customerInternalFrame.setContentPane(panel);
-	}
-	*/
-	
+	}	
 	
 	//Sets the Login screens username and password.
-	public void setLoginFields(String username, String password) {	
+	public void login_setLoginFields(String username, String password) {	
 		loginUsernameTextField.setText(username);
 		loginPasswordField.setText(password);		
 	}
@@ -1070,7 +1011,7 @@ public class ApplicationFrame extends JFrame {
 	
 	/*
 	 * A way to trigger error messages within the application. 
-	 * In most instances, this will just show an error message in a label.
+	 * In most instances, this will just show an error message in a label or a popup dialog.
 	 */
 	public void triggerError(int errorID, String message) {
 		switch(errorID) {
@@ -1094,7 +1035,8 @@ public class ApplicationFrame extends JFrame {
 	}
 	
 	/*
-	 * A way to trigger a success within the application. An example would be to change the connection status if the connection to the database was successful. 
+	 * A way to trigger a success within the application. 
+	 * An example would be to change the connection status if the connection to the database was successful. 
 	 */
 	public void triggerSuccess(int successID) {
 		switch(successID) {
@@ -1311,8 +1253,11 @@ public class ApplicationFrame extends JFrame {
 		}		
 	}
 	
+	/*
+	 * Save all appropriate data into the config.ini file.
+	 * Saved properties depend on what the user wants saved, for example, ticking the checkbox for the database configuration will save the credentials.
+	 */
 	public void storeProperties() {
-		
 		FileOutputStream fos = null;
 		
 		try {
@@ -1321,7 +1266,7 @@ public class ApplicationFrame extends JFrame {
 			
 			//Check if the 'Save details' button is selected under the Configuration panel.
 			if(configureSaveDetailsChckbx.isSelected()) {
-				//if it is selected, save the details.
+				//if it is selected, save the details.	
 				properties.setProperty("dbUrl", urlTextField.getText());
 				properties.setProperty("dbUser", userTextField.getText());
 				properties.setProperty("dbPassword", passwordTextField.getText());

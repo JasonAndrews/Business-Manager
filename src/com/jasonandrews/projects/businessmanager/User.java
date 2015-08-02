@@ -15,8 +15,7 @@ public class User extends Entity {
 	}
 	
 	public Object[] getInformation() {
-		Object info[] = {userNumber, username, password, isAdmin};
-		
+		Object info[] = {userNumber, username, password, isAdmin};		
 		return info;
 	}
 	
