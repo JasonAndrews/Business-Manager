@@ -207,11 +207,21 @@ public class ApplicationFrame extends JFrame {
 	//Create the content panes that will be used. These are essentially the different screens of the application, such as the main menu and login screens.
 	void createContentPanels() {			
 		
+		//Loading screen panel.
+		ImageIcon loadingScreenImageIcon = new ImageIcon("lib/images/please_wait_loading_default_02.gif");
+		loadingScreenImage = new JLabel();
+		loadingScreenImage.setBounds(0, 0, getWidth(), (getHeight() - 100));
+		loadingScreenImage.setHorizontalAlignment(SwingConstants.CENTER);
+		loadingScreenImage.setIcon(loadingScreenImageIcon);
+		
 		//Main Menu Panel.
 		mainMenuPanel = new JPanel();
 		mainMenuPanel.setBackground(Color.WHITE);
 		mainMenuPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		mainMenuPanel.setLayout(null);		
+		
+		mainMenuPanel.add(loadingScreenImage);
+		loadingScreenImage.setVisible(false);
 		
 		mainMenuConnectionLb = new JLabel("Connected: ");
 		mainMenuConnectionLb.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -359,24 +369,42 @@ public class ApplicationFrame extends JFrame {
 		connectBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
-				String url = urlTextField.getText();
-				String user = userTextField.getText();
-				String password = passwordTextField.getText();
+				showLoadingScreen();
 				
-				//Test the connection to the database using the specified credentials.
-				if(appManager.testConnectionToDatabase(url, user, password)) {
-					//The connection succeeded.
-					statusResultLbl.setForeground(COLOR_GREEN);
-					statusResultLbl.setText("Connected.");
-					mainMenuConnectionLbStatus.setText(CHECK_MARK_CHARACTER);
-					mainMenuConnectionLbStatus.setForeground(COLOR_GREEN);
-				} else {
-					//The connection failed.
-					statusResultLbl.setText("Could not connect.");
-					statusResultLbl.setForeground(COLOR_RED);	
-					mainMenuConnectionLbStatus.setText(X_MARK_CHARACTER);
-					mainMenuConnectionLbStatus.setForeground(COLOR_RED);
-				}
+				SwingWorker<Integer, Integer> sw = null;
+				
+				sw = new SwingWorker<Integer, Integer>() {
+
+					@Override
+					protected Integer doInBackground() throws Exception {
+						String url = urlTextField.getText();
+						String user = userTextField.getText();
+						String password = passwordTextField.getText();
+						
+						//Test the connection to the database using the specified credentials.
+						if(appManager.testConnectionToDatabase(url, user, password)) {
+							//The connection succeeded.
+							statusResultLbl.setForeground(COLOR_GREEN);
+							statusResultLbl.setText("Connected.");
+							mainMenuConnectionLbStatus.setText(CHECK_MARK_CHARACTER);
+							mainMenuConnectionLbStatus.setForeground(COLOR_GREEN);
+							
+							hideLoadingScreen();
+						} else {
+							//The connection failed.
+							statusResultLbl.setText("Could not connect.");
+							statusResultLbl.setForeground(COLOR_RED);	
+							mainMenuConnectionLbStatus.setText(X_MARK_CHARACTER);
+							mainMenuConnectionLbStatus.setForeground(COLOR_RED);
+							hideLoadingScreen();
+						}
+						
+						return null;
+					}
+					
+				};
+				sw.execute();
+				
 				//try connect to the database specified.				
 				
 				//String url = "jdbc:mysql://localhost:3306/employee_manager";
@@ -464,6 +492,9 @@ public class ApplicationFrame extends JFrame {
 		login_loginBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {		
 				
+				
+				showLoadingScreen();
+				
 				SwingWorker<Integer, Integer> sw = null;
 				
 				sw = new SwingWorker<Integer, Integer>() {
@@ -486,15 +517,20 @@ public class ApplicationFrame extends JFrame {
 							//Attempt to log the user in (check if his username and password are correct).
 							if(appManager.loginUser(username, password)) {
 								//The user successfully logged in.
+								hideLoadingScreen();
 								displayHome();
 							} else {
 								//The user failed to log in.
+								hideLoadingScreen();
 								triggerError(ApplicationFrame.ERROR_LOGIN_FAILED, "Login failed, you have entered an incorrect username and/or password.");
+								
 							}
 							
 						} else {
 							//The connection failed.
+							hideLoadingScreen();
 							appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "The connection to the database failed!\n\nPlease ensure your configuration credentials are correct!");
+							
 						}
 												
 						return null;
@@ -1000,6 +1036,38 @@ public class ApplicationFrame extends JFrame {
 		loginPasswordField.setText(password);		
 	}
 	
+	//Shows the loading screen on a particular panel.
+	public void showLoadingScreen() {
+		
+		
+		if(loadingScreenImage != null) {
+			
+			if(currentPanel != null) {
+				Component[] comps = currentPanel.getComponents();
+				for(Component c : comps) {
+					c.setVisible(false);
+				}
+			}
+			
+			System.out.println("Showing loading screen");
+			loadingScreenImage.setVisible(true);
+		}
+	}
+	
+	public void hideLoadingScreen() {
+		if(loadingScreenImage != null) {
+			
+			if(currentPanel != null) {
+				Component[] comps = currentPanel.getComponents();
+				for(Component c : comps) {
+					c.setVisible(true);
+				}
+			}
+			
+			System.out.println("Hiding loading screen");
+			loadingScreenImage.setVisible(false);
+		}
+	}
 	
 	public static final int ERROR_CONNECTION_FAILED = 1;
 	public static final int ERROR_CONNECTION_DROPPED = 2;
@@ -1046,6 +1114,8 @@ public class ApplicationFrame extends JFrame {
 			}			
 		}
 	}
+	
+	
 	
 	//Display the content pane that contains all the elements for the main menu screen.
 	void displayMainMenu() {		
@@ -1122,6 +1192,8 @@ public class ApplicationFrame extends JFrame {
 		});
 	}
 	
+	private JLabel loadingScreenImage;
+	
 	/*
 	 * This will internally handle the showing/hiding of different panels. It will also move the JMenuBar around so it fits on all panels where appropiate.
 	 * 
@@ -1134,12 +1206,28 @@ public class ApplicationFrame extends JFrame {
 			currentPanel.remove(homeMenuBar);			
 		}
 		
+		if(currentPanel != null) {
+			Component[] comps = currentPanel.getComponents();
+			for(Component c : comps) {
+				if(c == loadingScreenImage) { //If the loading screen label is on the current (will be the previous after reassignment) panel.
+					
+					currentPanel.remove(c); //Remove the component (loading screen label)
+				}
+			}
+		}
+		
 		this.currentPanel = panel;
-		if(currentPanel != null) this.currentPanel.setVisible(true);
+		if(currentPanel != null) {
+			this.currentPanel.setVisible(true);
+			currentPanel.add(loadingScreenImage);
+			loadingScreenImage.setVisible(false);
+		}
 		
 		if(currentPanel != null && currentPanel != mainMenuPanel && currentPanel != configurePanel && currentPanel != loginPanel) {
 			currentPanel.add(homeMenuBar);
 		}
+		
+		
 	}
 	
 	/*
