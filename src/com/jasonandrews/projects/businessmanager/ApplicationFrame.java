@@ -145,6 +145,7 @@ public class ApplicationFrame extends JFrame {
 		this.appFrame = this; 
 		this.appManager = appManager;
 		
+		
 		setTitle("Business Manager");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		WindowAdapter exitListener = new WindowAdapter() {
@@ -512,7 +513,7 @@ public class ApplicationFrame extends JFrame {
 							//Attempt to log the user in.
 							char[] passwordArray = loginPasswordField.getPassword();
 							String password = new String(passwordArray);
-							String username = loginUsernameTextField.getText();							
+							String username = loginUsernameTextField.getText();
 												
 							//Attempt to log the user in (check if his username and password are correct).
 							if(appManager.loginUser(username, password)) {
