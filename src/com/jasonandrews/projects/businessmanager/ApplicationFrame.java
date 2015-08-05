@@ -93,7 +93,7 @@ public class ApplicationFrame extends JFrame {
 	private String fileDirectory;
 	private Properties properties;
 	
-	private PopupFrame popupFrame;	
+	private PopupDialog popupFrame;	
 	private JPanel currentPanel;
 		
 	private JPanel mainMenuPanel;
@@ -163,7 +163,7 @@ public class ApplicationFrame extends JFrame {
 		setResizable(false);		
 		getContentPane().setLayout(new CardLayout(0, 0));
 		
-		popupFrame = new PopupFrame(this, appManager);
+		popupFrame = new PopupDialog(this, appManager);
 		
 		addMouseListener(new MouseListener() {
 
