@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 public class Customer extends Entity {
 	
-	
 	private int customerNumber;
 	private String firstName;
 	private String lastName;
@@ -14,7 +13,7 @@ public class Customer extends Entity {
 	private String addressCountry;
 	
 	public Customer() { //Used for creating a new customer.
-		super();		
+		super(); //Call the parents default constructor.
 	}
 	
 	public Customer(int customerNumber, String firstName, String lastName, String addressOne, String addressTwo, String addressCity, String addressCountry) {
@@ -26,7 +25,7 @@ public class Customer extends Entity {
 		this.addressCity = addressCity;
 		this.addressCountry = addressCountry;
 		
-		System.out.println("NEW CUSTOMER: " + customerNumber + " " + firstName + " " + lastName + " " + addressOne + " " + addressTwo + " " + addressCity + " " + addressCountry);
+		//System.out.println("NEW CUSTOMER: " + customerNumber + " " + firstName + " " + lastName + " " + addressOne + " " + addressTwo + " " + addressCity + " " + addressCountry); //Debugging.
 	}
 	
 	public void update(String firstName, String lastName, String addressOne, String addressTwo, String addressCity, String addressCountry) {

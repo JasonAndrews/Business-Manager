@@ -25,6 +25,12 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import javax.swing.JCheckBox;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class PopupDialog extends JDialog {
 	
@@ -118,9 +124,10 @@ public class PopupDialog extends JDialog {
 		c_customerNoLbl.setBounds(42, 28, 118, 14);
 		customersFormPanel.add(c_customerNoLbl);
 		
-		c_customerNoTextField = new JTextField();
-		c_customerNoTextField.setBorder(new LineBorder(Color.BLACK));
+		c_customerNoTextField = new JTextField();	
 		c_customerNoTextField.setEditable(false);
+		
+		c_customerNoTextField.setBorder(new LineBorder(Color.BLACK));
 		c_customerNoTextField.setBackground(Color.WHITE);
 		c_customerNoTextField.setColumns(10);
 		c_customerNoTextField.setBounds(170, 25, 136, 20);

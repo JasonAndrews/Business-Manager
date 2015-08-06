@@ -13,11 +13,9 @@ public class DatabaseConnector {
 	private String user;
 	private String password;
 	private Connection connection;
-	
-	private ApplicationFrame appFrame;
-	
-	public DatabaseConnector(ApplicationFrame appFrame, String url, String user, String password) {
-		this.appFrame = appFrame;
+		
+	public DatabaseConnector(String url, String user, String password) {
+		
 		this.url = url;
 		this.user = user;
 		this.password = password;
@@ -36,7 +34,5 @@ public class DatabaseConnector {
 		
 		return connection;
 	}	
-	
-	
 
 }

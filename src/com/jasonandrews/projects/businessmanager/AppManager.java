@@ -1,27 +1,16 @@
+/**
+ * @author Jason Andrews
+ * @version 0.30
+ * @dependencies ApplicationFrame.java, DatabaseConnector.java
+ */
+
 package com.jasonandrews.projects.businessmanager;
 
-import java.awt.Color;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
-
-import javax.swing.JFrame;
-import javax.swing.SwingWorker;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
 
 /* 
  * This class will be the core of the application. It will handle most non-related GUI actions.
@@ -42,20 +31,8 @@ public class AppManager {
 	private boolean loggedIn;
 	
 	
-	public AppManager() {
-		//this.appFrame = appFrame;
-		
-		this.loggedIn = false;
-		
-		
-		
-		//dbConnector = new DatabaseConnector("", "", "");
-		
-		customerTableColumns = new String[]{"Customer No.", "First Name", "Last Name"};
-		
-		//loadUsers();
-		//firstTimeUseCheck();
-		
+	public AppManager() {		
+		this.customerTableColumns = new String[]{"Customer No.", "First Name", "Last Name"};		
 	}
 	
 	
@@ -83,8 +60,6 @@ public class AppManager {
 	
 	//Get row data depending on the query passed.
 	ArrayList<Entity> getTableRowData(String tableName, String query) {
-		System.out.println("QUERY: ["+query+"]");
-		Object[][] rowData = null;
 		
 		Connection connection = null;
 		Statement statement = null;
@@ -100,17 +75,10 @@ public class AppManager {
 			
 			resultSet = statement.executeQuery(query);			
 			
-			int count = 0;
-			resultSet.last();
-			count = resultSet.getRow();
-			resultSet.beforeFirst();
-			
-			rowData = new Object[count][this.getTableColumnCount(tableName)];
-			
 			objectList = new ArrayList<Entity>();
 			//System.out.println("Counted rows: " + count);
 			
-			int arrayRow = 0;
+			
 			
 			
 			//NEED A THREAD HERE!!
@@ -119,17 +87,10 @@ public class AppManager {
 				//Switch to the appropriate case so the data is loaded correctly.
 				switch(tableName) {
 					case "CUSTOMERS": {
-						objectList.add(new Customer(resultSet.getInt("customer_number"), resultSet.getString("first_name"), resultSet.getString("last_name"), resultSet.getString("address_one"), resultSet.getString("address_two"), resultSet.getString("address_city"), resultSet.getString("address_country")));
-						//Load the data into the array.
-						//rowData[arrayRow][0] = resultSet.getInt("customer_number");
-						//rowData[arrayRow][1] = resultSet.getString("first_name");
-						//rowData[arrayRow][2] = resultSet.getString("last_name");
-						//rowData[arrayRow][3] = resultSet.getString("address_one");
-						//rowData[arrayRow][4] = resultSet.getString("address_two");
-						//rowData[arrayRow][5] = resultSet.getString("address_city");
-						//rowData[arrayRow][6] = resultSet.getString("address_country");
 						
-						//System.out.println(rowData[arrayRow][0] + " | " + rowData[arrayRow][1] + " | " + rowData[arrayRow][2]); //DEBUGGING.
+						//Add a new Customer object with the given information to the ArrayList.
+						objectList.add(new Customer(resultSet.getInt("customer_number"), resultSet.getString("first_name"), resultSet.getString("last_name"), resultSet.getString("address_one"), resultSet.getString("address_two"), resultSet.getString("address_city"), resultSet.getString("address_country")));						
+						
 						break;
 					}
 					case "EMPLOYEES": {
@@ -138,9 +99,7 @@ public class AppManager {
 					case "USERS": {
 						break;
 					}
-				}
-				
-				++arrayRow; //Increment the index for the array.				
+				}				
 			}
 			
 		} catch (Exception ex) {
@@ -171,18 +130,16 @@ public class AppManager {
 		return objectList;	//return the row of data.
 	}
 	
-	public boolean testConnectionToDatabase(String url, String user, String password) {
-		//Add a thread here.
-		//System.out.println("testConnectionToDatabase()..");
-		dbConnector = new DatabaseConnector(this.appFrame, url, user, password);	
+	/*
+	 * Test the connection to the database. This is only used from the Configuration screen so users can see if they're credentials are correct.
+	 */
+	public boolean testConnectionToDatabase(String url, String user, String password) {		
 		
-		if(dbConnector.getConnection() == null) { //If the firstTimeUseCheck returns false, then there is a connection issue.
-			//System.out.println("Failed connection.");
+		DatabaseConnector dbConn = new DatabaseConnector(url, user, password);
+		
+		if(dbConn.getConnection() == null) { //If the Connection object that was returned is null, then the connection failed and so return false.
 			return false;
-		}
-		
-		firstTimeUseCheck();
-		
+		}		
 		return true;
 	}
 	
@@ -264,7 +221,7 @@ public class AppManager {
 			while(resultSet.next()) {
 				tempUser = new User(resultSet.getInt("user_number"), resultSet.getString("username"), resultSet.getString("password"), resultSet.getBoolean("admin"));
 				
-				System.out.println(tempUser.getInformation());
+				//System.out.println(tempUser.getInformation()); //Debugging.
 				
 				userList.add(tempUser);
 			}
@@ -298,66 +255,42 @@ public class AppManager {
 	}
 	
 	/*
-	 * Log a user into the application.
+	 * Attempt to log a user into the application.
+	 * Load all the users from the database.
+	 * Compare the given password (from the Login Form) with each of the User object's password.
 	 */
 	public boolean loginUser(String username, String password) {		
-				
-		Connection connection = null; 
-		Statement statement = null;
-		ResultSet resultSet = null;
-		
-		try {			
-			connection = dbConnector.getConnection(); 
-
-			if(connection != null) { //Check if the application successfully connected to the database.
-				//The connection succeeded.
-				
-				statement = connection.createStatement();
-				
-				resultSet = statement.executeQuery("SELECT * FROM `users` WHERE `username` = '"+username+"'");
-				
-				//Check if the result set has atleast one row of data.
-				if(resultSet.next()) { 
-					//If their username exists in the database.
-					String hashedPassword = Encryption.hash(password);
-					//System.out.println("PASSWORD: " + password + " | HASHED: " + hashedPassword);
-					
-					//Retrieve the password and compare the stored password with the password specified by the user.
-					if(hashedPassword.equals(resultSet.getString("password"))) { //If the passwords do not match.
-						//The passwords did match so return true. 
-						return true;
-					} else {
-						//The passwords did not match so return false.
-						return false;
-					}					
+		System.out.println(dbConnector);
+		try {
+			//Create a new DatabaseConnector object.
+			Properties properties = this.appFrame.getProperties();
+			dbConnector = new DatabaseConnector(properties.getProperty("dbUrl"), properties.getProperty("dbUser"), properties.getProperty("dbPassword"));
+			
+			
+			
+			//Load all of the users from the database.
+			this.loadUsers();
+			
+			//Check the number of users within the ArrayList. If it's less than one, then create a temporary user with the credentials; Username: "admin", Password: "password".
+			if(this.userList.size() < 1) {
+				this.firstTimeUseCheck(); //Checks if there is any users within the database. If there isn't, create one with the credentials; Username: "admin", Password: "password".
+			}
+			
+			//A for-each loop that loops through every user within the ArrayList.
+			for(User user : userList) {
+				System.out.println("Comparing passwords...");
+				//Compare the username and password entered in by the user from the Login Form with that of the User object's username and password.
+				if(username.equals(user.getUsername()) && Encryption.hash(password).equals(user.getPassword())) {
+					System.out.println("The passwords matched!");
+					//The passwords match so return true.
+					return true; 
 				}
-			} 
+			}
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
-		} finally {
-			if(connection != null) {
-				try {
-					connection.close();
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-			if(statement != null) { 
-				try {
-					statement.close();
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-			if(resultSet != null) {				
-				try {
-					resultSet.close();
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-		}
+		} 
+		
 		return false;
 	}
 	
