@@ -45,7 +45,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JMenuItem;
-
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 
@@ -61,6 +60,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
@@ -137,8 +137,7 @@ public class ApplicationFrame extends JFrame {
 	public ApplicationFrame(AppManager appManager) {	
 		this.appFrame = this; 
 		this.appManager = appManager;
-		
-		
+				
 		setTitle("Business Manager");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		WindowAdapter exitListener = new WindowAdapter() {
@@ -204,6 +203,12 @@ public class ApplicationFrame extends JFrame {
 		//Loading screen panel.
 		ImageIcon loadingScreenImageIcon = new ImageIcon("lib/images/please_wait_loading_default_02.gif");
 		loadingScreenImage = new JLabel();
+		loadingScreenImage.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				System.out.println("CLICKED LOADING SCREEN IMAGE");
+			}
+		});
 		loadingScreenImage.setBounds(0, 0, getWidth(), (getHeight() - 100));
 		loadingScreenImage.setHorizontalAlignment(SwingConstants.CENTER);
 		loadingScreenImage.setIcon(loadingScreenImageIcon);
@@ -213,6 +218,12 @@ public class ApplicationFrame extends JFrame {
 		mainMenuPanel.setBackground(Color.WHITE);
 		mainMenuPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		mainMenuPanel.setLayout(null);		
+		mainMenuPanel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				System.out.println("CLICKED MAIN MENU PANEL");
+			}
+		});
 		
 		mainMenuPanel.add(loadingScreenImage);
 		loadingScreenImage.setVisible(false);
@@ -235,7 +246,7 @@ public class ApplicationFrame extends JFrame {
 		mm_configurationBtn.setToolTipText("Configure the database settings.");
 		mm_configurationBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				displayConfiguration();
+				display("CONFIGURATION");
 				//When the Configure button is clicked/pressed.
 			}
 		});
@@ -248,7 +259,7 @@ public class ApplicationFrame extends JFrame {
 		mm_loginBtn.addActionListener(new ActionListener() {			
 			public void actionPerformed(ActionEvent arg0) {	
 				
-				displayLogin();
+				display("LOGIN");
 			}				
 		});
 		mm_loginBtn.setBackground(BUTTON_BACKGROUND_COLOR);
@@ -311,7 +322,13 @@ public class ApplicationFrame extends JFrame {
 		
 		//Creating the elements of the Configuration content pane.
 		configurePanel = new JPanel();
-		configurePanel.setBackground(Color.WHITE);
+		configurePanel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				System.out.println("CLICKED CONFIGURE PANEL");
+			}
+		});
+		configurePanel.setBackground(Color.WHITE);		
 		configurePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		configurePanel.setLayout(null);
 		configurePanel.setBounds(0,0,0,0);
@@ -449,7 +466,7 @@ public class ApplicationFrame extends JFrame {
 		JButton config_backBtn = new JButton("Back");
 		config_backBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				displayMainMenu();
+				display("MAIN MENU");
 			}
 		});
 		config_backBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
@@ -470,6 +487,12 @@ public class ApplicationFrame extends JFrame {
 		
 		//Setting up the Login content pane.
 		loginPanel = new JPanel();
+		loginPanel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				System.out.println("CLICKED LOGIN PANEL");
+			}
+		});
 		loginPanel.setBackground(Color.WHITE);
 		loginPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		loginPanel.setLayout(null);
@@ -529,13 +552,12 @@ public class ApplicationFrame extends JFrame {
 							//Attempt to log the user in (check if the username and password are correct).
 							if(appManager.loginUser(username, password)) {
 								//The user successfully logged in.
-								hideLoadingScreen();
-								displayHome();
+								//hideLoadingScreen(); //Was causing a bug where once the user successfully logged in, a blank gray panel would only be shown.
+								display("HOME");
 							} else {
 								//The user failed to log in.
 								hideLoadingScreen();
-								triggerError(ApplicationFrame.ERROR_LOGIN_FAILED, "Login failed, you have entered an incorrect username and/or password.");
-								
+								triggerError(ApplicationFrame.ERROR_LOGIN_FAILED, "Login failed, you have entered an incorrect username and/or password.");								
 							}
 							
 						} else {
@@ -588,7 +610,7 @@ public class ApplicationFrame extends JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				displayMainMenu();				
+				display("MAIN MENU");				
 			}
 			
 		});
@@ -617,16 +639,34 @@ public class ApplicationFrame extends JFrame {
 		
 		
 		JMenuItem homeMnItem = new JMenuItem("Home");
+		homeMnItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				display("LOGIN");
+			}
+		});
 		applicationMenu.add(homeMnItem);
 		
 		JMenuItem mainMenuMnItem = new JMenuItem("Main Menu");
+		mainMenuMnItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				display("MAIN MENU");			
+			}	
+			
+		});
 		applicationMenu.add(mainMenuMnItem);
 		
 		JMenuItem exitMnItem = new JMenuItem("Exit");
 		exitMnItem.addActionListener(new ActionListener() {
+
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("EXIT");
+				dispatchEvent(new WindowEvent(appFrame, WindowEvent.WINDOW_CLOSING)); //Exit the application.				
 			}
+			
 		});
 		applicationMenu.add(exitMnItem);
 		
@@ -694,7 +734,13 @@ public class ApplicationFrame extends JFrame {
 		
 		
 		//Customers Panel
-		customersPanel = new JPanel();		
+		customersPanel = new JPanel();	
+		customersPanel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				System.out.println("CLICKED LOGIN PANEL");
+			}
+		});
 		customersPanel.setBackground(Color.WHITE);
 		customersPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		customersPanel.setLayout(null);
@@ -1043,19 +1089,25 @@ public class ApplicationFrame extends JFrame {
 		customersPanel.add(cust_refreshTableBtn);	
 	}	
 	
-	//Sets the Login screens username and password.
+	/**
+	 * Sets the Login screen's username and password fields.
+	 * @param username
+	 * @param password
+	 */
 	public void login_setLoginFields(String username, String password) {	
 		login_usernameTextField.setText(username);
 		login_passwordField.setText(password);		
 	}
 	
-	//Shows the loading screen on a particular panel.
-	public void showLoadingScreen() {
-		
-		
+	/**
+	 * Show the loading screen on a particular panel.
+	 */
+	public void showLoadingScreen() {	
+		System.out.println("Attempting to show the loading screen");
 		if(loadingScreenImage != null) {
-			
+			System.out.println("Attempting to show the loading screen 02");
 			if(currentPanel != null) {
+				System.out.println("Attempting to show the loading screen 03");
 				Component[] comps = currentPanel.getComponents();
 				for(Component c : comps) {
 					c.setVisible(false);
@@ -1067,10 +1119,15 @@ public class ApplicationFrame extends JFrame {
 		}
 	}
 	
+	/**
+	 * Hide the loading screen.
+	 */
 	public void hideLoadingScreen() {
+		System.out.println("Attempting to hide the loading screen");
 		if(loadingScreenImage != null) {
-			
+			System.out.println("Attempting to hide the loading screen part 2");
 			if(currentPanel != null) {
+				System.out.println("Attempting to hide the loading screen 3");
 				Component[] comps = currentPanel.getComponents();
 				for(Component c : comps) {
 					c.setVisible(true);
@@ -1115,9 +1172,10 @@ public class ApplicationFrame extends JFrame {
 		}
 	}
 	
-	/*
+	/**
 	 * A way to trigger a success within the application. 
 	 * An example would be to change the connection status if the connection to the database was successful. 
+	 * Currently unused.
 	 */
 	public void triggerSuccess(int successID) {
 		switch(successID) {
@@ -1128,43 +1186,68 @@ public class ApplicationFrame extends JFrame {
 		}
 	}
 	
-	
-	void display(JPanel panel) {
-		
-	}
+	/**
+	 * Display a JPanel depending on the given name.
+	 * To display the main menu, display("MAIN MENU") would work.
+	 */
 	void display(String panelName) {
-		switch(panelName) {
-		
+		//System.out.println("Attempting to display.. " + panelName);
+		JPanel panelToDisplay = null;
+		switch(panelName) {		
 			case "MAIN MENU": {
-				display(mainMenuPanel);
+				//configurePanel.setVisible(false);
+				//loginPanel.setVisible(false);
+				//homePanel.setVisible(false);				
+				//setContentPane(mainMenuPanel);
+				panelToDisplay = mainMenuPanel;
 				break;
 			}
 			case "CONFIGURATION": {
-				display(configurePanel);
+				//mainMenuPanel.setVisible(false);
+				//loginPanel.setVisible(false);
+			//	homePanel.setVisible(false);
+				
+				//setContentPane(configurePanel);
+				//configurePanel.setVisible(true);
+				panelToDisplay = configurePanel;
 				break;
 			}
 			case "LOGIN": {
-				display(loginPanel);
+				//mainMenuPanel.setVisible(false);
+				//configurePanel.setVisible(false);
+				//homePanel.setVisible(false);
+				
+				//setContentPane(loginPanel);
+				//loginPanel.setVisible(true);
+				panelToDisplay = loginPanel;
 				break;
-			}
-			
+			}	
 			case "HOME": {
-				display(homePanel);
+				//mainMenuPanel.setVisible(false);
+				//configurePanel.setVisible(false);
+				//loginPanel.setVisible(false);
+				
+				//setContentPane(homePanel);
+				//homePanel.setVisible(true);
+				panelToDisplay = homePanel;
 				break;
 			}
 		}
+
+		if(panelToDisplay != null) setContentPane(panelToDisplay); 
 	}
 	
+	/*
 	//Display the content pane that contains all the elements for the main menu screen.
 	void displayMainMenu() {		
 		//mm_errorLbl.setText("");
-		
 		configurePanel.setVisible(false);
 		loginPanel.setVisible(false);
 		homePanel.setVisible(false);
 		
 		mainMenuPanel.setVisible(true);
 		setContentPane(mainMenuPanel);
+		
 	}
 	
 	//Display the content pane that contains all the elements for the configuration screen.
@@ -1195,18 +1278,28 @@ public class ApplicationFrame extends JFrame {
 		setContentPane(homePanel);
 		homePanel.setVisible(true);
 	}
+	*/
 	
-	//Return the currently loaded ArrayList of customers.
+	/**
+	 * Return the currently loaded ArrayList of customers.
+	 * @return
+	 */
 	public ArrayList<Entity> getCustomerList() {
 		return customerList;
 	}
 	
-	//Get the text the user has entered into the 'Search' part of the customers area.
+	/**
+	 * Get the text the user has entered into the 'Search' part of the customers area.
+	 * @return
+	 */
 	public String getCustomerTableSearchQuery() {
 		return (cust_searchTextField.getText());
 	}
 	
-	//Get the text the user has entered into the 'Search' part of the employees area.
+	/**
+	 * Get the text the user has entered into the 'Search' part of the employees area.
+	 * @return
+	 */
 	public String getEmployeeTableSearchQuery() { //#WIP
 		//return (employeeSearchTextField.getText());
 		return null;
@@ -1232,9 +1325,9 @@ public class ApplicationFrame extends JFrame {
 	
 	private JLabel loadingScreenImage;
 	
-	/*
+	/**
 	 * This will internally handle the showing/hiding of different panels. It will also move the JMenuBar around so it fits on all panels where appropiate.
-	 * 
+	 * @param panel
 	 */
 	public void setContentPane(JPanel panel) {
 		if(currentPanel != null) currentPanel.setVisible(false);
@@ -1268,8 +1361,9 @@ public class ApplicationFrame extends JFrame {
 		
 	}
 	
-	/*
+	/**
 	 * Refresh the data within the appropriate table with the information taken from the list of objects (Customers, Employees, Users).
+	 * @param tableName
 	 */
 	public void refreshTable(String tableName) {
 		String[] columnNames = null;
@@ -1308,16 +1402,17 @@ public class ApplicationFrame extends JFrame {
 		}
 	}
 	
-	/*
+	/**
 	 * Returns the Properties object.
+	 * @return
 	 */
 	public Properties getProperties() {		
 		return this.properties;
 	}
 	
-	/*
+	/**
 	 * Loads the properties file, if it exists.
-	 * Check if the configuration file exists. If it does, load the properties. If it doesn't, create the directory (if needed) and file.
+	 * Checks if the configuration file exists. If it does, load the properties from the file. If it doesn't, create the directory (if needed) and file.
 	 */
 	public void loadProperties() {	
 		
@@ -1386,7 +1481,7 @@ public class ApplicationFrame extends JFrame {
 		}		
 	}
 	
-	/*
+	/**
 	 * Save all appropriate data into the config.ini file.
 	 * Saved properties depend on what the user wants saved, for example, ticking the checkbox for the database configuration will save the credentials.
 	 */
@@ -1419,8 +1514,6 @@ public class ApplicationFrame extends JFrame {
 				properties.setProperty("loginUser", "");
 				properties.setProperty("loginPassword", "");
 			}
-			
-			
 			
 			properties.store(fos, null);
 			

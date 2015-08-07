@@ -65,6 +65,7 @@ public class PopupDialog extends JDialog {
 	
 	
 	public PopupDialog(ApplicationFrame appFrame, AppManager appManager) {
+		
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentHidden(ComponentEvent arg0) {
@@ -90,6 +91,12 @@ public class PopupDialog extends JDialog {
 		
 		//Customer Panel.
 		customersFormPanel = new JPanel();
+		customersFormPanel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				System.out.println("CLICKED CUSTOMER PANEL");
+			}
+		});
 		getContentPane().add(customersFormPanel, "name_26635925853738");
 		customersFormPanel.setLayout(null);
 		
