@@ -1,10 +1,3 @@
-/**
- * @author Jason Andrews
- * @version 0.30
- * @dependencies AppManager.java, PopupDialog.java
- * 
- */
-
 package com.jasonandrews.projects.businessmanager;
 
 import java.awt.MouseInfo;
@@ -66,20 +59,30 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-/*
+/**
+ * @author Jason Andrews
+ * @version 0.30
+ * @dependencies AppManager.java, PopupDialog.java
+ * 
  * This is the core class behind the application. It internally handles almost all of the GUI elements (exceptions being the popup dialogs that display information or errors.)
  * Variables / Object Reference Variables have been prefixed so that it is more clear as to what panel they belong too.
- * For example, a JButton on the Login Form will be prefixed with 'login_' so it may appear as follows: login_loginBtn.
- * 
+ * For example, a JButton on the Login Form will be prefixed with 'login_' so it may appear as follows: login_loginBtn. 
+ * Prefixes:
+ * - Main Menu = mm_
+ * - Configuration - config_
+ * - Login - login_
+ * - Home - home_
+ * - Customer - cust_
+ * - Employee - emp_
+ * - User - user_
  */
-
 public class ApplicationFrame extends JFrame {
 
 	private static final String CHECK_MARK_CHARACTER = "\u2713";
 	private static final String X_MARK_CHARACTER = "\u2716";
 	private static final Color COLOR_RED = new Color(255, 51, 51);
 	private static final Color COLOR_GREEN = new Color(0, 118, 0);
-	private static final int guiLocationSubtractor = 35; 
+	//private static final int guiLocationSubtractor = 35; 
 	
 	private ApplicationFrame appFrame; //Self reference object variable - used in particular instances.
 	private AppManager appManager;
@@ -90,12 +93,12 @@ public class ApplicationFrame extends JFrame {
 	private PopupDialog popupFrame;	
 	private JPanel currentPanel;
 		
-	private JPanel mainMenuPanel;
-	private JPanel configurePanel;
-	private JPanel loginPanel;
-	private JPanel homePanel;
+	private JPanel mm_contentPanel;
+	private JPanel config_contentPanel;
+	private JPanel login_contentPanel;
+	private JPanel home_contentPanel;
 	
-	private JPanel customersPanel;
+	private JPanel cust_contentPanel;
 	
 	private JTable cust_customersTable;
 	private JTextField config_urlTextField;
@@ -107,10 +110,10 @@ public class ApplicationFrame extends JFrame {
 	//private JLabel mainMenuConnectionLb;
 	//private JLabel mainMenuConnectionLbStatus;
 	private JLabel config_statusResultLbl;
-	private JLabel mm_errorLbl;
+	//private JLabel mm_errorLbl;
 	private JLabel login_errorLbl;
 	
-	private String[] c_columnNames;
+	private String[] cust_tableColumnNames;
 	
 	private static final Color BUTTON_BACKGROUND_COLOR = Color.BLACK;
 	private static final Color BUTTON_FOREGROUND_COLOR = Color.WHITE;
@@ -118,9 +121,11 @@ public class ApplicationFrame extends JFrame {
 	private JPasswordField login_passwordField;
 	private JTextField cust_searchTextField;
 	
-	private JMenuBar home_menuBar;	
+	private JMenuBar menu_menuBar;	
 	
 	private ArrayList<Entity> customerList; //A list of customer objects represented in the current customer table.
+	
+	private JButton cust_refreshTableBtn;
 	
 	private JButton cust_viewCustomerBtn;
 	private JButton cust_editCustomerBtn;
@@ -132,7 +137,8 @@ public class ApplicationFrame extends JFrame {
 	private final JPopupMenu popup_optionsPopup = new JPopupMenu(); //The popup that appears when a user selects a row within a table. 
 
 	/**
-	 * Create the frame.
+	 * 
+	 * @param appManager
 	 */
 	public ApplicationFrame(AppManager appManager) {	
 		this.appFrame = this; 
@@ -194,38 +200,35 @@ public class ApplicationFrame extends JFrame {
 		//createInternalFrames();	
 				
 		//super.setContentPane(customersPanel);
-		setContentPane(mainMenuPanel);
+		setContentPane(mm_contentPanel);
 	}
 	
-	//Create the content panes that will be used. These are essentially the different screens of the application, such as the main menu and login screens.
+	/**
+	 * Create the content panels that will be used within the application. 
+	 * These are essentially the different screens of the application, such as the main menu and login screens.
+	 */
 	void createContentPanels() {			
 		
 		//Loading screen panel.
 		ImageIcon loadingScreenImageIcon = new ImageIcon("lib/images/please_wait_loading_default_02.gif");
 		loadingScreenImage = new JLabel();
-		loadingScreenImage.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				System.out.println("CLICKED LOADING SCREEN IMAGE");
-			}
-		});
 		loadingScreenImage.setBounds(0, 0, getWidth(), (getHeight() - 100));
 		loadingScreenImage.setHorizontalAlignment(SwingConstants.CENTER);
 		loadingScreenImage.setIcon(loadingScreenImageIcon);
 		
 		//Main Menu Panel.
-		mainMenuPanel = new JPanel();
-		mainMenuPanel.setBackground(Color.WHITE);
-		mainMenuPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		mainMenuPanel.setLayout(null);		
-		mainMenuPanel.addMouseListener(new MouseAdapter() {
+		mm_contentPanel = new JPanel();
+		mm_contentPanel.setBackground(Color.WHITE);
+		mm_contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		mm_contentPanel.setLayout(null);		
+		mm_contentPanel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				System.out.println("CLICKED MAIN MENU PANEL");
 			}
 		});
 		
-		mainMenuPanel.add(loadingScreenImage);
+		mm_contentPanel.add(loadingScreenImage);
 		loadingScreenImage.setVisible(false);
 		
 		/*
@@ -253,7 +256,7 @@ public class ApplicationFrame extends JFrame {
 		mm_configurationBtn.setBackground(BUTTON_BACKGROUND_COLOR);
 		mm_configurationBtn.setForeground(BUTTON_FOREGROUND_COLOR);
 		mm_configurationBtn.setBounds(268, 169, 122, 33);
-		mainMenuPanel.add(mm_configurationBtn);
+		mm_contentPanel.add(mm_configurationBtn);
 		
 		JButton mm_loginBtn = new JButton("Login");
 		mm_loginBtn.addActionListener(new ActionListener() {			
@@ -265,7 +268,7 @@ public class ApplicationFrame extends JFrame {
 		mm_loginBtn.setBackground(BUTTON_BACKGROUND_COLOR);
 		mm_loginBtn.setForeground(BUTTON_FOREGROUND_COLOR);
 		mm_loginBtn.setBounds(268, 128, 122, 33);		
-		mainMenuPanel.add(mm_loginBtn);
+		mm_contentPanel.add(mm_loginBtn);
 		
 		JButton mm_exitBtn = new JButton("Exit");
 		mm_exitBtn.addActionListener(new ActionListener() {
@@ -279,7 +282,7 @@ public class ApplicationFrame extends JFrame {
 		mm_exitBtn.setBackground(BUTTON_BACKGROUND_COLOR);
 		mm_exitBtn.setForeground(BUTTON_FOREGROUND_COLOR);
 		mm_exitBtn.setBounds(268, 213, 122, 33);
-		mainMenuPanel.add(mm_exitBtn);
+		mm_contentPanel.add(mm_exitBtn);
 		
 		/*
 		JButton mm_testConnectionBtn = new JButton("Test Connection");
@@ -321,27 +324,27 @@ public class ApplicationFrame extends JFrame {
 		
 		
 		//Creating the elements of the Configuration content pane.
-		configurePanel = new JPanel();
-		configurePanel.addMouseListener(new MouseAdapter() {
+		config_contentPanel = new JPanel();
+		config_contentPanel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				System.out.println("CLICKED CONFIGURE PANEL");
 			}
 		});
-		configurePanel.setBackground(Color.WHITE);		
-		configurePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		configurePanel.setLayout(null);
-		configurePanel.setBounds(0,0,0,0);
+		config_contentPanel.setBackground(Color.WHITE);		
+		config_contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		config_contentPanel.setLayout(null);
+		config_contentPanel.setBounds(0,0,0,0);
 		
 		JLabel config_statusTextLbl = new JLabel("Status:");
 		config_statusTextLbl.setHorizontalAlignment(SwingConstants.RIGHT);
 		config_statusTextLbl.setBounds(253, 111, 61, 14);
-		configurePanel.add(config_statusTextLbl);
+		config_contentPanel.add(config_statusTextLbl);
 		
 		config_statusResultLbl = new JLabel("Not connected.");
 		config_statusResultLbl.setForeground(COLOR_RED);
 		config_statusResultLbl.setBounds(324, 111, 124, 14);
-		configurePanel.add(config_statusResultLbl);
+		config_contentPanel.add(config_statusResultLbl);
 		
 		config_urlTextField = new JTextField("");
 		config_urlTextField.addKeyListener(new KeyAdapter() {
@@ -352,12 +355,12 @@ public class ApplicationFrame extends JFrame {
 		});
 		config_urlTextField.setBounds(242, 142, 226, 20);
 		config_urlTextField.setColumns(10);
-		configurePanel.add(config_urlTextField);
+		config_contentPanel.add(config_urlTextField);
 		
 		JLabel config_urlLbl = new JLabel("URL:");
 		config_urlLbl.setHorizontalAlignment(SwingConstants.RIGHT);
 		config_urlLbl.setBounds(173, 145, 61, 14);
-		configurePanel.add(config_urlLbl);
+		config_contentPanel.add(config_urlLbl);
 		
 		config_userTextField = new JTextField("");
 		config_userTextField.addKeyListener(new KeyAdapter() {
@@ -368,17 +371,17 @@ public class ApplicationFrame extends JFrame {
 		});
 		config_userTextField.setColumns(10);
 		config_userTextField.setBounds(242, 173, 226, 20);
-		configurePanel.add(config_userTextField);
+		config_contentPanel.add(config_userTextField);
 		
 		JLabel config_userLbl = new JLabel("User:");
 		config_userLbl.setHorizontalAlignment(SwingConstants.RIGHT);
 		config_userLbl.setBounds(173, 176, 61, 14);
-		configurePanel.add(config_userLbl);
+		config_contentPanel.add(config_userLbl);
 		
 		JLabel config_pwLbl = new JLabel("Password:");
 		config_pwLbl.setHorizontalAlignment(SwingConstants.RIGHT);
 		config_pwLbl.setBounds(151, 207, 83, 14);
-		configurePanel.add(config_pwLbl);
+		config_contentPanel.add(config_pwLbl);
 		
 		config_passwordTextField = new JPasswordField();
 		config_passwordTextField.addKeyListener(new KeyAdapter() {
@@ -388,13 +391,13 @@ public class ApplicationFrame extends JFrame {
 			}
 		});
 		config_passwordTextField.setBounds(242, 204, 226, 20);
-		configurePanel.add(config_passwordTextField);
+		config_contentPanel.add(config_passwordTextField);
 		
 		config_saveDetailsChckbx = new JCheckBox("Save details");
 		config_saveDetailsChckbx.setBackground(Color.WHITE);
 		config_saveDetailsChckbx.setBounds(375, 225, 97, 23);
 		config_saveDetailsChckbx.setSelected(true);
-		configurePanel.add(config_saveDetailsChckbx);
+		config_contentPanel.add(config_saveDetailsChckbx);
 		
 		JButton config_testConnectionBtn = new JButton("Test Connection");
 		config_testConnectionBtn.addActionListener(new ActionListener() {
@@ -448,7 +451,7 @@ public class ApplicationFrame extends JFrame {
 		config_testConnectionBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
 		config_testConnectionBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
 		config_testConnectionBtn.setBounds(272, 250, 83, 23);
-		configurePanel.add(config_testConnectionBtn);
+		config_contentPanel.add(config_testConnectionBtn);
 		
 		JButton config_resetFormBtn = new JButton("Reset");
 		config_resetFormBtn.addActionListener(new ActionListener() {
@@ -461,7 +464,7 @@ public class ApplicationFrame extends JFrame {
 		config_resetFormBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
 		config_resetFormBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
 		config_resetFormBtn.setBounds(365, 250, 83, 23);
-		configurePanel.add(config_resetFormBtn);
+		config_contentPanel.add(config_resetFormBtn);
 		
 		JButton config_backBtn = new JButton("Back");
 		config_backBtn.addActionListener(new ActionListener() {
@@ -472,31 +475,31 @@ public class ApplicationFrame extends JFrame {
 		config_backBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
 		config_backBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
 		config_backBtn.setBounds(312, 297, 89, 23);
-		configurePanel.add(config_backBtn);
+		config_contentPanel.add(config_backBtn);
 		
 		JSeparator config_upperSeparator = new JSeparator();
 		config_upperSeparator.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
 		config_upperSeparator.setBounds(242, 129, 226, 2);
-		configurePanel.add(config_upperSeparator);
+		config_contentPanel.add(config_upperSeparator);
 		
 		JSeparator config_lowerSeparator = new JSeparator();
 		config_lowerSeparator.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
 		config_lowerSeparator.setBounds(242, 284, 226, 2);
-		configurePanel.add(config_lowerSeparator);
+		config_contentPanel.add(config_lowerSeparator);
 		
 		
 		//Setting up the Login content pane.
-		loginPanel = new JPanel();
-		loginPanel.addMouseListener(new MouseAdapter() {
+		login_contentPanel = new JPanel();
+		login_contentPanel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				System.out.println("CLICKED LOGIN PANEL");
 			}
 		});
-		loginPanel.setBackground(Color.WHITE);
-		loginPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		loginPanel.setLayout(null);
-		loginPanel.setBounds(0,0,0,0);
+		login_contentPanel.setBackground(Color.WHITE);
+		login_contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		login_contentPanel.setLayout(null);
+		login_contentPanel.setBounds(0,0,0,0);
 		
 		
 		
@@ -504,26 +507,26 @@ public class ApplicationFrame extends JFrame {
 		login_errorLbl.setForeground(COLOR_RED);
 		login_errorLbl.setHorizontalAlignment(SwingConstants.CENTER);
 		login_errorLbl.setBounds(125, 136, 420, 14);
-		loginPanel.add(login_errorLbl);
+		login_contentPanel.add(login_errorLbl);
 		
 		JLabel login_usernameLbl = new JLabel("Username:");
 		login_usernameLbl.setHorizontalAlignment(SwingConstants.RIGHT);
 		login_usernameLbl.setBounds(169, 160, 81, 22);
-		loginPanel.add(login_usernameLbl);
+		login_contentPanel.add(login_usernameLbl);
 		
 		login_usernameTextField = new JTextField();
 		login_usernameTextField.setBounds(260, 161, 207, 20);
-		loginPanel.add(login_usernameTextField);
+		login_contentPanel.add(login_usernameTextField);
 		login_usernameTextField.setColumns(10);
 		
 		JLabel login_passwordLbl = new JLabel("Password:");
 		login_passwordLbl.setHorizontalAlignment(SwingConstants.RIGHT);
 		login_passwordLbl.setBounds(169, 193, 81, 22);
-		loginPanel.add(login_passwordLbl);
+		login_contentPanel.add(login_passwordLbl);
 		
 		login_passwordField = new JPasswordField();
 		login_passwordField.setBounds(260, 194, 207, 21);
-		loginPanel.add(login_passwordField);
+		login_contentPanel.add(login_passwordField);
 		
 		JButton login_loginBtn = new JButton("Login");
 		login_loginBtn.addActionListener(new ActionListener() {
@@ -577,7 +580,7 @@ public class ApplicationFrame extends JFrame {
 		login_loginBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
 		login_loginBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
 		login_loginBtn.setBounds(270, 240, 89, 23);		
-		loginPanel.add(login_loginBtn);
+		login_contentPanel.add(login_loginBtn);
 		
 		JButton login_clearBtn = new JButton("Clear");
 		login_clearBtn.addActionListener(new ActionListener() {
@@ -592,18 +595,18 @@ public class ApplicationFrame extends JFrame {
 		login_clearBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
 		login_clearBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
 		login_clearBtn.setBounds(369, 240, 89, 23);
-		loginPanel.add(login_clearBtn);
+		login_contentPanel.add(login_clearBtn);
 		
 		login_saveDetailsChckbx = new JCheckBox("Save details");
 		login_saveDetailsChckbx.setBackground(Color.WHITE);
 		login_saveDetailsChckbx.setBounds(375, 215, 97, 23);
 		login_saveDetailsChckbx.setSelected(true);
-		loginPanel.add(login_saveDetailsChckbx);
+		login_contentPanel.add(login_saveDetailsChckbx);
 		
 		JSeparator login_separator = new JSeparator();
 		login_separator.setBackground(Color.BLACK);
 		login_separator.setBounds(260, 275, 207, 2);
-		loginPanel.add(login_separator);
+		login_contentPanel.add(login_separator);
 		
 		JButton login_backBtn = new JButton("Back");
 		login_backBtn.addActionListener(new ActionListener() {
@@ -617,39 +620,38 @@ public class ApplicationFrame extends JFrame {
 		login_backBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
 		login_backBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
 		login_backBtn.setBounds(324, 288, 89, 23);		
-		loginPanel.add(login_backBtn);
-		
+		login_contentPanel.add(login_backBtn);
 		
 		
 		
 		
 		//Home Panel
-		homePanel = new JPanel();
-		homePanel.setBackground(Color.WHITE);
-		homePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		homePanel.setLayout(null);
+		home_contentPanel = new JPanel();
+		home_contentPanel.setBackground(Color.WHITE);
+		home_contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		home_contentPanel.setLayout(null);
 		
-		home_menuBar = new JMenuBar();
-		home_menuBar.setBounds(0, 0, 681, 21);
-		homePanel.add(home_menuBar);
+		menu_menuBar = new JMenuBar();
+		menu_menuBar.setBounds(0, 0, 681, 21);
+		home_contentPanel.add(menu_menuBar);
 		
 		JMenu applicationMenu = new JMenu("Application");
-		home_menuBar.add(applicationMenu);
+		menu_menuBar.add(applicationMenu);
 		
 		
 		
-		JMenuItem homeMnItem = new JMenuItem("Home");
-		homeMnItem.addActionListener(new ActionListener() {
+		JMenuItem menu_homeMnItem = new JMenuItem("Home");
+		menu_homeMnItem.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				display("LOGIN");
+				display("HOME");
 			}
 		});
-		applicationMenu.add(homeMnItem);
+		applicationMenu.add(menu_homeMnItem);
 		
-		JMenuItem mainMenuMnItem = new JMenuItem("Main Menu");
-		mainMenuMnItem.addActionListener(new ActionListener() {
+		JMenuItem menu_logoutMnItem = new JMenuItem("Logout");
+		menu_logoutMnItem.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -657,10 +659,10 @@ public class ApplicationFrame extends JFrame {
 			}	
 			
 		});
-		applicationMenu.add(mainMenuMnItem);
+		applicationMenu.add(menu_logoutMnItem);
 		
-		JMenuItem exitMnItem = new JMenuItem("Exit");
-		exitMnItem.addActionListener(new ActionListener() {
+		JMenuItem menu_exitMnItem = new JMenuItem("Exit");
+		menu_exitMnItem.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -668,51 +670,51 @@ public class ApplicationFrame extends JFrame {
 			}
 			
 		});
-		applicationMenu.add(exitMnItem);
+		applicationMenu.add(menu_exitMnItem);
 		
 		JMenu customersMenu = new JMenu("Customers");
-		home_menuBar.add(customersMenu);
+		menu_menuBar.add(customersMenu);
 		
-		JMenuItem viewCustomersMnItem = new JMenuItem("View");
-		viewCustomersMnItem.addActionListener(new ActionListener() {
+		JMenuItem menu_viewCustomersMnItem = new JMenuItem("View");
+		menu_viewCustomersMnItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				//currentPanel.setVisible(false);
-				setContentPane(customersPanel);
+				setContentPane(cust_contentPanel);
 			}
 		});
-		customersMenu.add(viewCustomersMnItem);
+		customersMenu.add(menu_viewCustomersMnItem);
 		
-		JMenuItem newCustomersMnItem = new JMenuItem("New");
-		customersMenu.add(newCustomersMnItem);
+		JMenuItem menu_newCustomersMnItem = new JMenuItem("New");
+		customersMenu.add(menu_newCustomersMnItem);
 		
-		JMenu employeesMenu = new JMenu("Employees");
-		home_menuBar.add(employeesMenu);
+		JMenu menu_employeesMenu = new JMenu("Employees");
+		menu_menuBar.add(menu_employeesMenu);
 		
-		JMenuItem viewEmployeesMnItem = new JMenuItem("View");
-		employeesMenu.add(viewEmployeesMnItem);
+		JMenuItem menu_viewEmployeesMnItem = new JMenuItem("View");
+		menu_employeesMenu.add(menu_viewEmployeesMnItem);
 		
-		JMenuItem newEmployeesMnItem = new JMenuItem("New");
-		employeesMenu.add(newEmployeesMnItem);
+		JMenuItem menu_newEmployeesMnItem = new JMenuItem("New");
+		menu_employeesMenu.add(menu_newEmployeesMnItem);
 		
-		JMenu settingsMenu = new JMenu("Settings");
-		home_menuBar.add(settingsMenu);
+		JMenu menu_settingsMenu = new JMenu("Settings");
+		menu_menuBar.add(menu_settingsMenu);
 		
-		JMenu accountMenu = new JMenu("Account");
-		home_menuBar.add(accountMenu);
+		JMenu menu_accountMenu = new JMenu("Account");
+		menu_menuBar.add(menu_accountMenu);
 		
-		JMenuItem changePasswordMnItem = new JMenuItem("Change password");
-		accountMenu.add(changePasswordMnItem);
+		JMenuItem menu_changePasswordMnItem = new JMenuItem("Change password");
+		menu_accountMenu.add(menu_changePasswordMnItem);
 		
-		JMenu adminMenu = new JMenu("Admin");
-		home_menuBar.add(adminMenu);
+		JMenu menu_adminMenu = new JMenu("Admin");
+		menu_menuBar.add(menu_adminMenu);
 		
-		JMenuItem newUserMnItem = new JMenuItem("New User");
-		newUserMnItem.addActionListener(new ActionListener() {
+		JMenuItem menu_newUserMnItem = new JMenuItem("New User");
+		menu_newUserMnItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				System.out.println("Yooo");
 			}
 		});
-		adminMenu.add(newUserMnItem);
+		menu_adminMenu.add(menu_newUserMnItem);
 		//homePanel.setLayout(null);		
 		
 		JLabel home_appTitleLbl = new JLabel("Business Manager Application");
@@ -720,30 +722,25 @@ public class ApplicationFrame extends JFrame {
 		home_appTitleLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
 		home_appTitleLbl.setFont(new Font("Tahoma", Font.PLAIN, 17));
 		home_appTitleLbl.setHorizontalAlignment(SwingConstants.CENTER);
-		homePanel.add(home_appTitleLbl);
+		home_contentPanel.add(home_appTitleLbl);
 		
 		JLabel home_homeLbl = new JLabel("Home");
 		home_homeLbl.setBounds(5, 102, 671, 75);
 		home_homeLbl.setHorizontalAlignment(SwingConstants.CENTER);
-		homePanel.add(home_homeLbl);
+		home_contentPanel.add(home_homeLbl);
 		
 		JTextPane home_newsTextPane = new JTextPane();
 		home_newsTextPane.setBounds(5, 167, 666, 285);
 		home_newsTextPane.setEditable(false);
-		homePanel.add(home_newsTextPane);
+		home_newsTextPane.setText("\u2022 This application is currently in the BETA stage of development.\n\u2022 Please provide feedback to the developer by emailing jasonandrews271192@gmail.com, thanks!");
+		home_contentPanel.add(home_newsTextPane);
 		
 		
-		//Customers Panel
-		customersPanel = new JPanel();	
-		customersPanel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				System.out.println("CLICKED LOGIN PANEL");
-			}
-		});
-		customersPanel.setBackground(Color.WHITE);
-		customersPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		customersPanel.setLayout(null);
+		//Customers Panel		
+		cust_contentPanel = new JPanel();
+		cust_contentPanel.setBackground(Color.WHITE);
+		cust_contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		cust_contentPanel.setLayout(null);
 		
 		JButton cust_newCustomerBtn = new JButton("New customer");
 		cust_newCustomerBtn.addActionListener(new ActionListener() {
@@ -756,7 +753,7 @@ public class ApplicationFrame extends JFrame {
 		cust_newCustomerBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
 		cust_newCustomerBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
 		cust_newCustomerBtn.setBounds(20, 425, 120, 30);
-		customersPanel.add(cust_newCustomerBtn);
+		cust_contentPanel.add(cust_newCustomerBtn);
 		cust_newCustomerBtn.setVisible(false); //Hide this button for now.
 		
 		cust_viewCustomerBtn = new JButton("View");
@@ -777,7 +774,7 @@ public class ApplicationFrame extends JFrame {
 		cust_viewCustomerBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
 		cust_viewCustomerBtn.setBounds(150, 425, 120, 30);
 		cust_viewCustomerBtn.setVisible(false);
-		customersPanel.add(cust_viewCustomerBtn);
+		cust_contentPanel.add(cust_viewCustomerBtn);
 		
 		cust_editCustomerBtn = new JButton("Edit");
 		cust_editCustomerBtn.addActionListener(new ActionListener() {
@@ -800,7 +797,7 @@ public class ApplicationFrame extends JFrame {
 		cust_editCustomerBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
 		cust_editCustomerBtn.setBounds(300, 425, 120, 30);
 		cust_editCustomerBtn.setVisible(false);
-		customersPanel.add(cust_editCustomerBtn);
+		cust_contentPanel.add(cust_editCustomerBtn);
 		
 		cust_deleteCustomerBtn = new JButton("Delete");
 		cust_deleteCustomerBtn.addActionListener(new ActionListener() {
@@ -812,38 +809,55 @@ public class ApplicationFrame extends JFrame {
 		cust_deleteCustomerBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
 		cust_deleteCustomerBtn.setBounds(450, 425, 120, 30);
 		cust_deleteCustomerBtn.setVisible(false);
-		customersPanel.add(cust_deleteCustomerBtn);
+		cust_contentPanel.add(cust_deleteCustomerBtn);
 		
 		//The search text field the user can use to filter the customers shown.
 		cust_searchTextField = new JTextField();
+		cust_searchTextField.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				
+				//Basically do the same action that the cust_refreshTableBtn (the 'search' button) does.
+				ActionListener[] actionListeners = cust_refreshTableBtn.getActionListeners();				
+				for(ActionListener al : actionListeners) {
+					if(al != null) {
+						al.actionPerformed(arg0);
+						break;
+					}
+				}
+			}
+		});
+		//Add a focus adapter so we can set the textfields text according to what method is called.
 		cust_searchTextField.addFocusListener(new FocusAdapter() {
+			
 			@Override
 			public void focusGained(FocusEvent arg0) {
-				if(cust_searchTextField.getText().equals("Search...")) cust_searchTextField.setText("");
+				if(cust_searchTextField.getText().equals("Search...")) cust_searchTextField.setText(""); //Set the textfield's text to an empty string.
 			}
 			@Override
 			public void focusLost(FocusEvent arg0) {
 				if(cust_searchTextField.getText().length() == 0) {
-					cust_searchTextField.setText("Search...");
+					cust_searchTextField.setText("Search..."); //If the user never typed anything into the textfield, set the text to the default message.
 				}
 			}
 		});
 		cust_searchTextField.setText("Search...");
-		cust_searchTextField.setBounds(55, 72 - guiLocationSubtractor, 165, 20);
-		customersPanel.add(cust_searchTextField);
+		cust_searchTextField.setBounds(10, 30, 165, 20);		
+		cust_contentPanel.add(cust_searchTextField);
 		cust_searchTextField.setColumns(10);
 		
 		final JCheckBox cust_customerNoChckbx = new JCheckBox("Customer No.");
 		cust_customerNoChckbx.setBackground(Color.WHITE);
 		cust_customerNoChckbx.setSelected(true);
-		cust_customerNoChckbx.setBounds(236, 71 - guiLocationSubtractor, 102, 23);
-		customersPanel.add(cust_customerNoChckbx);
+		cust_customerNoChckbx.setBounds(236, 28, 102, 23);
+		cust_contentPanel.add(cust_customerNoChckbx);
 		
 		final JCheckBox cust_customerNameChckbx = new JCheckBox("Name");
 		cust_customerNameChckbx.setBackground(Color.WHITE);
 		cust_customerNameChckbx.setSelected(true);
-		cust_customerNameChckbx.setBounds(346, 71 - guiLocationSubtractor, 102, 23);
-		customersPanel.add(cust_customerNameChckbx);
+		cust_customerNameChckbx.setBounds(346, 28, 102, 23);
+		cust_contentPanel.add(cust_customerNameChckbx);
 		
 		//Popup Menu (When a user left clicks a row, a menu will pop up with a list of different options). 
 		final JMenuItem popup_closeMnItem = new JMenuItem("Close");
@@ -963,8 +977,8 @@ public class ApplicationFrame extends JFrame {
 		//Customer Table
 		JScrollPane cust_scrollPane = new JScrollPane();
 		cust_scrollPane.setBackground(Color.WHITE);
-		cust_scrollPane.setBounds(10, 103 - guiLocationSubtractor, 661, 348);
-		customersPanel.add(cust_scrollPane);
+		cust_scrollPane.setBounds(10, 60, 661, 348);
+		cust_contentPanel.add(cust_scrollPane);
 
 		cust_customersTable = new JTable();
 		cust_scrollPane.setViewportView(cust_customersTable);
@@ -976,8 +990,8 @@ public class ApplicationFrame extends JFrame {
 		cust_customersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		cust_customersTable.setColumnSelectionAllowed(false);
 		cust_customersTable.setCellEditor(null);
-		c_columnNames = new String[]{"Customer No.", "First Name", "Last Name"};
-		cust_customersTable.setModel(new DefaultTableModel(null, c_columnNames));		
+		cust_tableColumnNames = new String[]{"Customer No.", "First Name", "Last Name"};
+		cust_customersTable.setModel(new DefaultTableModel(null, cust_tableColumnNames));		
 		cust_customersTable.addMouseListener(new MouseListener() {			
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -1031,7 +1045,7 @@ public class ApplicationFrame extends JFrame {
 		});
 		
 		
-		JButton cust_refreshTableBtn = new JButton("R");
+		cust_refreshTableBtn = new JButton();		
 		cust_refreshTableBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String query = "SELECT * FROM `customers` ";
@@ -1083,10 +1097,12 @@ public class ApplicationFrame extends JFrame {
 			}
 		});
 		cust_refreshTableBtn.setBorderPainted(false);
-		cust_refreshTableBtn.setBounds(10, 60 - guiLocationSubtractor, 40, 40);
-		ImageIcon cust_refreshImageIcon = new ImageIcon("lib/images/refresh_image_icon");
+		cust_refreshTableBtn.setBackground(Color.WHITE);
+		cust_refreshTableBtn.setBounds(185, 25, 30, 30);
+		//ImageIcon cust_refreshImageIcon = new ImageIcon("lib/images/refresh_image_icon");
+		ImageIcon cust_refreshImageIcon = new ImageIcon("lib/images/table_search_button.png");
 		cust_refreshTableBtn.setIcon(cust_refreshImageIcon);
-		customersPanel.add(cust_refreshTableBtn);	
+		cust_contentPanel.add(cust_refreshTableBtn);	
 	}	
 	
 	/**
@@ -1189,6 +1205,7 @@ public class ApplicationFrame extends JFrame {
 	/**
 	 * Display a JPanel depending on the given name.
 	 * To display the main menu, display("MAIN MENU") would work.
+	 * @param panelName
 	 */
 	void display(String panelName) {
 		//System.out.println("Attempting to display.. " + panelName);
@@ -1199,7 +1216,8 @@ public class ApplicationFrame extends JFrame {
 				//loginPanel.setVisible(false);
 				//homePanel.setVisible(false);				
 				//setContentPane(mainMenuPanel);
-				panelToDisplay = mainMenuPanel;
+				appManager.setLoggedInUser(null);
+				panelToDisplay = mm_contentPanel;
 				break;
 			}
 			case "CONFIGURATION": {
@@ -1209,7 +1227,7 @@ public class ApplicationFrame extends JFrame {
 				
 				//setContentPane(configurePanel);
 				//configurePanel.setVisible(true);
-				panelToDisplay = configurePanel;
+				panelToDisplay = config_contentPanel;
 				break;
 			}
 			case "LOGIN": {
@@ -1218,8 +1236,7 @@ public class ApplicationFrame extends JFrame {
 				//homePanel.setVisible(false);
 				
 				//setContentPane(loginPanel);
-				//loginPanel.setVisible(true);
-				panelToDisplay = loginPanel;
+				panelToDisplay = login_contentPanel;
 				break;
 			}	
 			case "HOME": {
@@ -1229,7 +1246,7 @@ public class ApplicationFrame extends JFrame {
 				
 				//setContentPane(homePanel);
 				//homePanel.setVisible(true);
-				panelToDisplay = homePanel;
+				panelToDisplay = home_contentPanel;
 				break;
 			}
 		}
@@ -1282,7 +1299,7 @@ public class ApplicationFrame extends JFrame {
 	
 	/**
 	 * Return the currently loaded ArrayList of customers.
-	 * @return
+	 * @return The ArrayList of Customer objects. 
 	 */
 	public ArrayList<Entity> getCustomerList() {
 		return customerList;
@@ -1290,7 +1307,7 @@ public class ApplicationFrame extends JFrame {
 	
 	/**
 	 * Get the text the user has entered into the 'Search' part of the customers area.
-	 * @return
+	 * @return The text within the table's appropriate search field. 
 	 */
 	public String getCustomerTableSearchQuery() {
 		return (cust_searchTextField.getText());
@@ -1333,8 +1350,8 @@ public class ApplicationFrame extends JFrame {
 		if(currentPanel != null) currentPanel.setVisible(false);
 		super.setContentPane(panel);		
 		
-		if(currentPanel != null && currentPanel != mainMenuPanel && currentPanel != configurePanel && currentPanel != loginPanel) {
-			currentPanel.remove(home_menuBar);			
+		if(currentPanel != null && currentPanel != mm_contentPanel && currentPanel != config_contentPanel && currentPanel != login_contentPanel) {
+			currentPanel.remove(menu_menuBar);			
 		}
 		
 		if(currentPanel != null) {
@@ -1351,11 +1368,12 @@ public class ApplicationFrame extends JFrame {
 		if(currentPanel != null) {
 			this.currentPanel.setVisible(true);
 			currentPanel.add(loadingScreenImage);
-			loadingScreenImage.setVisible(false);
+			//loadingScreenImage.setVisible(false);
+			hideLoadingScreen();
 		}
 		
-		if(currentPanel != null && currentPanel != mainMenuPanel && currentPanel != configurePanel && currentPanel != loginPanel) {
-			currentPanel.add(home_menuBar);
+		if(currentPanel != null && currentPanel != mm_contentPanel && currentPanel != config_contentPanel && currentPanel != login_contentPanel) {
+			currentPanel.add(menu_menuBar);
 		}
 		
 		
@@ -1373,7 +1391,7 @@ public class ApplicationFrame extends JFrame {
 		switch(tableName) {
 		
 			case "CUSTOMERS": {
-				columnNames = c_columnNames;				
+				columnNames = cust_tableColumnNames;				
 				table = cust_customersTable;
 				
 				rowData = appManager.getRowData("CUSTOMER", customerList);
@@ -1404,7 +1422,7 @@ public class ApplicationFrame extends JFrame {
 	
 	/**
 	 * Returns the Properties object.
-	 * @return
+	 * @return The Properties object.
 	 */
 	public Properties getProperties() {		
 		return this.properties;

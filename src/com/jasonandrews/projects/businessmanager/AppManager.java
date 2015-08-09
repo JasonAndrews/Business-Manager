@@ -27,8 +27,8 @@ public class AppManager {
 	private String[] employeeTableColumns;
 	private String[] employeeTableRowData;
 	
-	private ArrayList<User> userList;
-	private boolean loggedIn;
+	private ArrayList<User> userList; //The list of User objects loaded from the database.
+	private User loggedInUser;
 	
 	
 	public AppManager() {		
@@ -259,8 +259,10 @@ public class AppManager {
 	 * Load all the users from the database.
 	 * Compare the given password (from the Login Form) with each of the User object's password.
 	 */
-	public boolean loginUser(String username, String password) {		
-		System.out.println(dbConnector);
+	public boolean loginUser(String username, String password) {	
+		
+		boolean successful = false;
+		
 		try {
 			//Create a new DatabaseConnector object.
 			Properties properties = this.appFrame.getProperties();
@@ -278,20 +280,64 @@ public class AppManager {
 			
 			//A for-each loop that loops through every user within the ArrayList.
 			for(User user : userList) {
-				System.out.println("Comparing passwords...");
 				//Compare the username and password entered in by the user from the Login Form with that of the User object's username and password.
-				if(username.equals(user.getUsername()) && Encryption.hash(password).equals(user.getPassword())) {
-					System.out.println("The passwords matched!");
+				if(username.equals(user.getUsername()) && Encryption.hash(password).equals(user.getPassword())) {					
 					//The passwords match so return true.
-					return true; 
+					this.loggedInUser = user;
+					successful = true; 
+					break;
 				}
 			}
+			
+			if(this.loggedInUser != null) recordLogin(this.loggedInUser);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		} 
 		
-		return false;
+		return successful;
+	}
+	
+	public void recordLogin(User user) {
+		Connection connection = null;
+		Statement statement = null;
+		
+		try {
+			
+			connection = dbConnector.getConnection();
+			
+			statement = connection.createStatement();
+			
+			java.util.Date dt = new java.util.Date();
+
+			java.text.SimpleDateFormat sdf = 
+			     new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			String currentTime = sdf.format(dt);
+			
+			statement.executeUpdate("UPDATE `users` SET `last_logon` = '" + currentTime + "' WHERE `user_number` = '" + user.getUserNumber() + "'");
+			
+			
+		} catch (Exception ex) {
+			
+			ex.printStackTrace();
+			
+		} finally {
+			if(connection != null) {
+				try {
+					connection.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			if(statement != null) { 
+				try {
+					statement.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	public void setApplicationFrame(ApplicationFrame appFrame) {
@@ -302,7 +348,13 @@ public class AppManager {
 	}
 	
 	public boolean isUserLoggedIn() {
-		return this.loggedIn;
+		return (this.loggedInUser != null);
+	}
+	public User getLoggedInUser() {
+		return this.loggedInUser;
+	}
+	public void setLoggedInUser(User user) {
+		this.loggedInUser = user;
 	}
 	
 	public int getTableColumnCount(String tableName) {
