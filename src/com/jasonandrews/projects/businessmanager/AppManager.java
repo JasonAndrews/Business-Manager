@@ -1,9 +1,3 @@
-/**
- * @author Jason Andrews
- * @version 0.30
- * @dependencies ApplicationFrame.java, DatabaseConnector.java
- */
-
 package com.jasonandrews.projects.businessmanager;
 
 import java.sql.Connection;
@@ -12,9 +6,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
 
-/* 
- * This class will be the core of the application. It will handle most non-related GUI actions.
- * 
+/**
+ * This class will be the core of the application. It will handle most non-related GUI actions, such as getting information from the MySQL database. 
+ * @author Jason Andrews
+ * @version 0.30
+ * @dependencies ApplicationFrame.java, DatabaseConnector.java
  */
 public class AppManager {
 
@@ -36,7 +32,11 @@ public class AppManager {
 	}
 	
 	
-	//Get the column names for a table (employee or customer).
+	/**
+	 * Get the column names for a table (employee or customer).
+	 * @param tableName
+	 * @return Return the column names for a table, depending on the String passed as a parameter.
+	 */
 	String[] getTableColumnNames(String tableName) {
 		String[] columnNames = null;
 		
@@ -58,7 +58,12 @@ public class AppManager {
 		return columnNames;
 	}
 	
-	//Get row data depending on the query passed.
+	/**
+	 * Get row data depending on the query passed.
+	 * @param tableName
+	 * @param query
+	 * @return Returns an ArrayList of child Entity objects, depending on the string tableName. Passing "CUSTOMERS" will result in an ArrayList of Customer objects being returned.
+	 */
 	ArrayList<Entity> getTableRowData(String tableName, String query) {
 		
 		Connection connection = null;
@@ -105,6 +110,7 @@ public class AppManager {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {
+			//Close all of the objects connections.
 			if(connection != null) {
 				try {
 					connection.close();
@@ -127,11 +133,16 @@ public class AppManager {
 				}
 			}
 		}		
-		return objectList;	//return the row of data.
+		return objectList;	//return the ArrayList of child Entity objects (Customer / Employee / User.)
 	}
 	
-	/*
-	 * Test the connection to the database. This is only used from the Configuration screen so users can see if they're credentials are correct.
+	/**
+	 * Test the connection to the database. 
+	 * This method is only used from the Configuration screen when users click the 'Test Connection' button so users can see if they're credentials are correct.
+	 * @param url
+	 * @param user
+	 * @param password
+	 * @return Returns whether or not the application successfully connected to the database.
 	 */
 	public boolean testConnectionToDatabase(String url, String user, String password) {		
 		
@@ -143,7 +154,10 @@ public class AppManager {
 		return true;
 	}
 	
-	//Check if this is the first time the application has been used previously (no users within the database).
+	/**
+	 * Check if this is the first time the application has been used previously (no users within the database).
+	 * @return Return's whether or not it's the applications first run time with the given database.
+	 */
 	private boolean firstTimeUseCheck() {		
 		
 		Connection connection = null;
@@ -198,7 +212,7 @@ public class AppManager {
 	}
 	
 	
-	/*
+	/**
 	 * Loads all users from the database into the application.
 	 */
 	public void loadUsers() { 

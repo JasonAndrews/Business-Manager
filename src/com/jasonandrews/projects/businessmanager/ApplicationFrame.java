@@ -138,7 +138,7 @@ public class ApplicationFrame extends JFrame {
 
 	/**
 	 * 
-	 * @param appManager
+	 * @param appManager - The AppManager object.
 	 */
 	public ApplicationFrame(AppManager appManager) {	
 		this.appFrame = this; 
@@ -679,7 +679,8 @@ public class ApplicationFrame extends JFrame {
 		menu_viewCustomersMnItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				//currentPanel.setVisible(false);
-				setContentPane(cust_contentPanel);
+				//setContentPane(cust_contentPanel);
+				display("CUSTOMER");
 			}
 		});
 		customersMenu.add(menu_viewCustomersMnItem);
@@ -1107,8 +1108,8 @@ public class ApplicationFrame extends JFrame {
 	
 	/**
 	 * Sets the Login screen's username and password fields.
-	 * @param username
-	 * @param password
+	 * @param username - Set the text in the usernames JTextField.
+	 * @param password - Set the text in the passwords JPasswordField.
 	 */
 	public void login_setLoginFields(String username, String password) {	
 		login_usernameTextField.setText(username);
@@ -1119,18 +1120,18 @@ public class ApplicationFrame extends JFrame {
 	 * Show the loading screen on a particular panel.
 	 */
 	public void showLoadingScreen() {	
-		System.out.println("Attempting to show the loading screen");
+		//System.out.println("Attempting to show the loading screen");
 		if(loadingScreenImage != null) {
-			System.out.println("Attempting to show the loading screen 02");
+			//System.out.println("Attempting to show the loading screen 02");
 			if(currentPanel != null) {
-				System.out.println("Attempting to show the loading screen 03");
+				//System.out.println("Attempting to show the loading screen 03");
 				Component[] comps = currentPanel.getComponents();
 				for(Component c : comps) {
-					c.setVisible(false);
+					//c.setVisible(false);
 				}
 			}
 			
-			System.out.println("Showing loading screen");
+			//System.out.println("Showing loading screen");
 			loadingScreenImage.setVisible(true);
 		}
 	}
@@ -1139,18 +1140,18 @@ public class ApplicationFrame extends JFrame {
 	 * Hide the loading screen.
 	 */
 	public void hideLoadingScreen() {
-		System.out.println("Attempting to hide the loading screen");
+		//System.out.println("Attempting to hide the loading screen");
 		if(loadingScreenImage != null) {
-			System.out.println("Attempting to hide the loading screen part 2");
+			//System.out.println("Attempting to hide the loading screen part 2");
 			if(currentPanel != null) {
-				System.out.println("Attempting to hide the loading screen 3");
+				//System.out.println("Attempting to hide the loading screen 3");
 				Component[] comps = currentPanel.getComponents();
 				for(Component c : comps) {
-					c.setVisible(true);
+					//c.setVisible(true);
 				}
 			}
 			
-			System.out.println("Hiding loading screen");
+			//System.out.println("Hiding loading screen");
 			loadingScreenImage.setVisible(false);
 		}
 	}
@@ -1163,9 +1164,11 @@ public class ApplicationFrame extends JFrame {
 	
 	private JOptionPane errorDialog;
 	
-	/*
+	/**
 	 * A way to trigger error messages within the application. 
 	 * In most instances, this will just show an error message in a label or a popup dialog.
+	 * @param errorID - The Error ID for the error.
+	 * @param message - The message that should be displayed to the user.
 	 */
 	public void triggerError(int errorID, String message) {
 		switch(errorID) {
@@ -1205,7 +1208,7 @@ public class ApplicationFrame extends JFrame {
 	/**
 	 * Display a JPanel depending on the given name.
 	 * To display the main menu, display("MAIN MENU") would work.
-	 * @param panelName
+	 * @param panelName - The name of the panel to display. Example - "HOME" would be used to display the home panel.
 	 */
 	void display(String panelName) {
 		//System.out.println("Attempting to display.. " + panelName);
@@ -1247,6 +1250,10 @@ public class ApplicationFrame extends JFrame {
 				//setContentPane(homePanel);
 				//homePanel.setVisible(true);
 				panelToDisplay = home_contentPanel;
+				break;
+			}
+			case "CUSTOMER": {
+				panelToDisplay = cust_contentPanel;
 				break;
 			}
 		}
@@ -1344,7 +1351,7 @@ public class ApplicationFrame extends JFrame {
 	
 	/**
 	 * This will internally handle the showing/hiding of different panels. It will also move the JMenuBar around so it fits on all panels where appropiate.
-	 * @param panel
+	 * @param panel - The JPanel to set as the JFrames content panel.
 	 */
 	public void setContentPane(JPanel panel) {
 		if(currentPanel != null) currentPanel.setVisible(false);
@@ -1367,7 +1374,7 @@ public class ApplicationFrame extends JFrame {
 		this.currentPanel = panel;
 		if(currentPanel != null) {
 			this.currentPanel.setVisible(true);
-			currentPanel.add(loadingScreenImage);
+			currentPanel.add(loadingScreenImage, 1);
 			//loadingScreenImage.setVisible(false);
 			hideLoadingScreen();
 		}
@@ -1376,9 +1383,23 @@ public class ApplicationFrame extends JFrame {
 			currentPanel.add(menu_menuBar);
 		}
 		
-		
 	}
 	
+	/**
+	 * Resets the elements of a JPanel. Some elements are meant to be hidden by default, this method does just that. 
+	 * @param panelName
+	 */
+	/*
+	private void resetPanelElements(String panelName) {
+		switch(panelName) {
+			case "CUSTOMERS": {
+				cust_viewCustomerBtn.setVisible(false);
+				cust_deleteCustomerBtn.setVisible(false);
+				cust_editCustomerBtn.setVisible(false);
+			}
+		}
+	}
+	*/
 	/**
 	 * Refresh the data within the appropriate table with the information taken from the list of objects (Customers, Employees, Users).
 	 * @param tableName
