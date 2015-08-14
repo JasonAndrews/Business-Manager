@@ -63,7 +63,11 @@ public class PopupDialog extends JDialog {
 	
 	//User related objects.
 	
-	
+	/**
+	 * Constructor.
+	 * @param appFrame - The ApplicationFrame object of the application.
+	 * @param appManager - The AppManager object of the application.
+	 */
 	public PopupDialog(ApplicationFrame appFrame, AppManager appManager) {
 		
 		addComponentListener(new ComponentAdapter() {
@@ -87,6 +91,9 @@ public class PopupDialog extends JDialog {
 		createPanels();
 	}
 	
+	/**
+	 * Creates the content panels for the dialog.
+	 */
 	private void createPanels() {
 		
 		//Customer Panel.
@@ -258,6 +265,12 @@ public class PopupDialog extends JDialog {
 		//User Panel.
 	}
 	
+	/**
+	 * Sets the editing state of the current form.
+	 * Example - Setting the customer form to be editable, so that the user may edit the customer's information.
+	 * @param String formType - The type of form to update, for example, "CUSTOMERS".
+	 * @param boolean editingForm - Whether to enable (true) or disable (false) the ability to edit the form.
+	 */
 	public void setEditingForm(String formType, boolean editingForm) {
 		switch(formType) {
 			case "CUSTOMERS": {				
@@ -275,7 +288,11 @@ public class PopupDialog extends JDialog {
 		}
 	}
 	
-	//Populate the form with the given information, depending on the given panel type.
+	/**
+	 * Populate the form with the given information, depending on the given panel type.
+	 * @param formType
+	 * @param entity
+	 */
 	public void fillInForm(String formType, Entity entity) {
 		this.loadedObject = entity;
 		c_isCreatingNewCustomer = false;

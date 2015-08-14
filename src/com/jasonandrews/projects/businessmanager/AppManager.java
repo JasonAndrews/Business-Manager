@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 /**
- * This class will be the core of the application. It will handle most non-related GUI actions, such as getting information from the MySQL database. 
+ * This class is the core of the application's back end work. It will handle most non-related GUI actions, such as getting information from the MySQL database. 
  * @author Jason Andrews
  * @version 0.30
  * @dependencies ApplicationFrame.java, DatabaseConnector.java
@@ -168,6 +168,8 @@ public class AppManager {
 			
 			connection = dbConnector.getConnection();
 			
+			if(connection == null) return false;
+			
 			statement = connection.createStatement(); //Creates a statement.
 			
 			resultSet = statement.executeQuery("SELECT * FROM `users`"); //Executes a SELECT query and store the result set.
@@ -225,6 +227,8 @@ public class AppManager {
 			
 			connection = dbConnector.getConnection();
 			
+			if(connection == null) return;
+			
 			statement = connection.createStatement();
 			
 			resultSet = statement.executeQuery("SELECT * from `users`");
@@ -267,11 +271,22 @@ public class AppManager {
 		}
 		
 	}
+	/**
+	 * Clears the ArrayList of User objects.
+	 */
+	public void clearUsers() {
+		if(userList != null) {
+			userList.clear();
+		}
+	}
 	
-	/*
+	/**
 	 * Attempt to log a user into the application.
 	 * Load all the users from the database.
 	 * Compare the given password (from the Login Form) with each of the User object's password.
+	 * @param username - The username for the User.
+	 * @param password - The password for the User.
+	 * @return Returns whether or not the User successfully logged in.
 	 */
 	public boolean loginUser(String username, String password) {	
 		
@@ -282,7 +297,7 @@ public class AppManager {
 			Properties properties = this.appFrame.getProperties();
 			dbConnector = new DatabaseConnector(properties.getProperty("dbUrl"), properties.getProperty("dbUser"), properties.getProperty("dbPassword"));
 			
-			
+			if(dbConnector == null) return false;
 			
 			//Load all of the users from the database.
 			this.loadUsers();
@@ -312,6 +327,10 @@ public class AppManager {
 		return successful;
 	}
 	
+	/**
+	 * Updates the User's `last_logon` field in the database table `users`.
+	 * @param user - The user that logged in.
+	 */
 	public void recordLogin(User user) {
 		Connection connection = null;
 		Statement statement = null;
@@ -322,6 +341,7 @@ public class AppManager {
 			
 			statement = connection.createStatement();
 			
+			//Get the current date and time so that it can be stored in the database.
 			java.util.Date dt = new java.util.Date();
 
 			java.text.SimpleDateFormat sdf = 

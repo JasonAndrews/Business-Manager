@@ -1,12 +1,13 @@
+
+package com.jasonandrews.projects.businessmanager;
+
+import java.awt.EventQueue;
 /**
+ * This class contains the main method for the application.
  * @author Jason Andrews
  * @version 1.0
  * @dependencies ApplicationFrame.java, AppManager.java
  */
-package com.jasonandrews.projects.businessmanager;
-
-import java.awt.EventQueue;
-
 public class BusinessManagerApp {
 
 	private static AppManager appManager;

@@ -1,3 +1,9 @@
+/*
+ * TO DO:
+ *	1) Change the whole "CUSTOMERS", "EMPLOYEES", "USERS" switch statements to take an ENUM so like Enum EntityTypes = {"CUSTOMERS", "EMPLOYEES", "USERS"}.
+ * 	2) A proper implementation of the loading screen bugging out when hovering over certain GUI elements (mouse hovering over them shows them).
+ */
+
 package com.jasonandrews.projects.businessmanager;
 
 import java.awt.MouseInfo;
@@ -64,7 +70,7 @@ import java.awt.event.WindowEvent;
  * @version 0.30
  * @dependencies AppManager.java, PopupDialog.java
  * 
- * This is the core class behind the application. It internally handles almost all of the GUI elements (exceptions being the popup dialogs that display information or errors.)
+ * This is the core class behind the application's GUI. It internally handles almost all of the GUI elements (exceptions being the popup dialogs that display information or errors.)
  * Variables / Object Reference Variables have been prefixed so that it is more clear as to what panel they belong too.
  * For example, a JButton on the Login Form will be prefixed with 'login_' so it may appear as follows: login_loginBtn. 
  * Prefixes:
@@ -157,7 +163,7 @@ public class ApplicationFrame extends JFrame {
 	            }
 		};
 		addWindowListener(exitListener);
-		setBounds(100, 100, 687, 490);
+		setBounds(100, 100, 750, 500);
 		setResizable(false);		
 		getContentPane().setLayout(new CardLayout(0, 0));
 		
@@ -399,7 +405,7 @@ public class ApplicationFrame extends JFrame {
 		config_saveDetailsChckbx.setSelected(true);
 		config_contentPanel.add(config_saveDetailsChckbx);
 		
-		JButton config_testConnectionBtn = new JButton("Test Connection");
+		JButton config_testConnectionBtn = new JButton("Test");
 		config_testConnectionBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
@@ -441,7 +447,7 @@ public class ApplicationFrame extends JFrame {
 				
 				//try connect to the database specified.				
 				
-				//String url = "jdbc:mysql://localhost:3306/employee_manager";
+				//String url = "jdbc:mysql://localhost:3306/business_manager";
 				//String user = "root";
 				//String pw = "";
 				
@@ -542,16 +548,20 @@ public class ApplicationFrame extends JFrame {
 						
 						login_errorLbl.setText(""); //Resetting the error message.
 						
+						//Update the database properties as the user may have altered the credentials for the database.
+						properties.setProperty("dbUrl", config_urlTextField.getText());
+						properties.setProperty("dbUser", config_userTextField.getText());
+						properties.setProperty("dbPassword", new String(config_passwordTextField.getPassword()));
+						
 						//Test the connection to the database.
 						if(appManager.testConnectionToDatabase(properties.getProperty("dbUrl"), properties.getProperty("dbUser"), properties.getProperty("dbPassword"))) {							
-							//There was a connection.
-							//appFrame.triggerSuccess(ApplicationFrame.SUCCESS_CONNECTION_PASSED); //DO SOMETHING TO SHOW THE CONNECTION ACTUALLY WORKED HERE!! LIKE to show the 'checkmark'.
+							//There connection attempt was successful.							
 							
-							//Attempt to log the user in.
+							//Get the username and password specified by the user.
 							char[] passwordArray = login_passwordField.getPassword();
 							String password = new String(passwordArray);
 							String username = login_usernameTextField.getText();
-												
+																		
 							//Attempt to log the user in (check if the username and password are correct).
 							if(appManager.loginUser(username, password)) {
 								//The user successfully logged in.
@@ -570,7 +580,7 @@ public class ApplicationFrame extends JFrame {
 							
 						}
 												
-						return null;
+						return 1;
 					}
 					
 				};				
@@ -725,10 +735,10 @@ public class ApplicationFrame extends JFrame {
 		home_appTitleLbl.setHorizontalAlignment(SwingConstants.CENTER);
 		home_contentPanel.add(home_appTitleLbl);
 		
-		JLabel home_homeLbl = new JLabel("Home");
-		home_homeLbl.setBounds(5, 102, 671, 75);
-		home_homeLbl.setHorizontalAlignment(SwingConstants.CENTER);
-		home_contentPanel.add(home_homeLbl);
+		JLabel home_informationLbl = new JLabel("Information");
+		home_informationLbl.setBounds(5, 102, 671, 75);
+		home_informationLbl.setHorizontalAlignment(SwingConstants.CENTER);
+		home_contentPanel.add(home_informationLbl);
 		
 		JTextPane home_newsTextPane = new JTextPane();
 		home_newsTextPane.setBounds(5, 167, 666, 285);
@@ -829,16 +839,17 @@ public class ApplicationFrame extends JFrame {
 				}
 			}
 		});
+		
 		//Add a focus adapter so we can set the textfields text according to what method is called.
 		cust_searchTextField.addFocusListener(new FocusAdapter() {
 			
 			@Override
 			public void focusGained(FocusEvent arg0) {
-				if(cust_searchTextField.getText().equals("Search...")) cust_searchTextField.setText(""); //Set the textfield's text to an empty string.
+				if(cust_searchTextField != null && cust_searchTextField.getText().equals("Search...")) cust_searchTextField.setText(""); //Set the textfield's text to an empty string.
 			}
 			@Override
 			public void focusLost(FocusEvent arg0) {
-				if(cust_searchTextField.getText().length() == 0) {
+				if(cust_searchTextField != null && cust_searchTextField.getText().length() == 0) {
 					cust_searchTextField.setText("Search..."); //If the user never typed anything into the textfield, set the text to the default message.
 				}
 			}
@@ -872,7 +883,7 @@ public class ApplicationFrame extends JFrame {
 		popup_closeMnItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				//System.out.println("CLOSING");
-				popup_optionsPopup.setVisible(false);
+				if(popup_optionsPopup != null) popup_optionsPopup.setVisible(false);
 				//popupIsShown = false;
 			}
 		});
@@ -1049,14 +1060,18 @@ public class ApplicationFrame extends JFrame {
 		cust_refreshTableBtn = new JButton();		
 		cust_refreshTableBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				
 				String query = "SELECT * FROM `customers` ";
+				
 				if(cust_customerNoChckbx.isSelected() || cust_customerNameChckbx.isSelected()) {
+					
 					query += "WHERE ";
 					
 					//Concat the query depending on if the search by employee number check box is ticked.
 					if(cust_customerNoChckbx.isSelected()) { 
 						query += "`customer_number` LIKE '"+cust_searchTextField.getText()+"%' ";
 					}
+					
 					//Concat the query depending on if the search by customer name check box is ticked.
 					if(cust_customerNameChckbx.isSelected()) {
 						
@@ -1078,9 +1093,7 @@ public class ApplicationFrame extends JFrame {
 					//If both of the checkboxes are unticked, then simply show them a row with the "Please tick atleast one of the checkboxes" notice.
 					String[] temp = new String[]{""};
 					DefaultTableModel model = new DefaultTableModel(null, temp) {
-						/**
-						 * 
-						 */
+
 						private static final long serialVersionUID = 1L;
 
 						@Override
@@ -1126,8 +1139,10 @@ public class ApplicationFrame extends JFrame {
 			if(currentPanel != null) {
 				//System.out.println("Attempting to show the loading screen 03");
 				Component[] comps = currentPanel.getComponents();
-				for(Component c : comps) {
-					//c.setVisible(false);
+				if(currentPanel != cust_contentPanel/*May need to add the other table content panels here*/) { //A hacky way of dealing with an issue that allows certain GUI elements to be visible when the loading screen is on. Temporary fix.
+					for(Component c : comps) {
+						c.setVisible(false);
+					}
 				}
 			}
 			
@@ -1146,8 +1161,10 @@ public class ApplicationFrame extends JFrame {
 			if(currentPanel != null) {
 				//System.out.println("Attempting to hide the loading screen 3");
 				Component[] comps = currentPanel.getComponents();
-				for(Component c : comps) {
-					//c.setVisible(true);
+				if(currentPanel != cust_contentPanel) { //A hacky way of dealing with an issue that allows certain GUI elements to be visible when the loading screen is on. Temporary fix.
+					for(Component c : comps) {
+						c.setVisible(true);
+					}
 				}
 			}
 			
@@ -1219,7 +1236,9 @@ public class ApplicationFrame extends JFrame {
 				//loginPanel.setVisible(false);
 				//homePanel.setVisible(false);				
 				//setContentPane(mainMenuPanel);
-				appManager.setLoggedInUser(null);
+				appManager.clearUsers(); //Clear all the User objects currently loaded.
+				appManager.setLoggedInUser(null); //Reset the 'Currently logged in user'.
+				
 				panelToDisplay = mm_contentPanel;
 				break;
 			}
@@ -1402,7 +1421,7 @@ public class ApplicationFrame extends JFrame {
 	*/
 	/**
 	 * Refresh the data within the appropriate table with the information taken from the list of objects (Customers, Employees, Users).
-	 * @param tableName
+	 * @param tableName - The name of the table to refresh. "CUSTOMERS", "EMPLOYEES", "USERS".
 	 */
 	public void refreshTable(String tableName) {
 		String[] columnNames = null;
@@ -1416,6 +1435,14 @@ public class ApplicationFrame extends JFrame {
 				table = cust_customersTable;
 				
 				rowData = appManager.getRowData("CUSTOMER", customerList);
+				
+				//If there is no results, then create a notice to the user that nothing was returned so that they are notified.
+				if(rowData == null || rowData.length < 1) {
+					rowData = new Object[1][];
+					rowData[0] = new Object[]{"No results matched the search criteria"};
+					
+					columnNames = new String[]{""};
+				}
 				
 				break;
 			} 
@@ -1536,7 +1563,7 @@ public class ApplicationFrame extends JFrame {
 				//if it is selected, save the details.	
 				properties.setProperty("dbUrl", config_urlTextField.getText());
 				properties.setProperty("dbUser", config_userTextField.getText());
-				properties.setProperty("dbPassword", config_passwordTextField.getText());
+				properties.setProperty("dbPassword", new String(config_passwordTextField.getPassword()));
 			} else {
 				//if it's not selected, do not save the details.
 				properties.setProperty("dbUrl", "");
