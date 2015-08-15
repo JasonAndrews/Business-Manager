@@ -112,11 +112,9 @@ public class ApplicationFrame extends JFrame {
 	private JPasswordField config_passwordTextField;
 	private JCheckBox config_saveDetailsChckbx;
 	private JCheckBox login_saveDetailsChckbx;
-	
-	//private JLabel mainMenuConnectionLb;
-	//private JLabel mainMenuConnectionLbStatus;
+		
 	private JLabel config_statusResultLbl;
-	//private JLabel mm_errorLbl;
+	
 	private JLabel login_errorLbl;
 	
 	private String[] cust_tableColumnNames;
@@ -134,15 +132,13 @@ public class ApplicationFrame extends JFrame {
 	
 	private ArrayList<Entity> customerList; //A list of customer objects represented in the current customer table.
 	
-	private JButton cust_refreshTableBtn;
+	//private JButton cust_refreshTableBtn; //The 'Refresh table' button.
 	
-	//private JButton cust_viewCustomerBtn;
-	//private JButton cust_editCustomerBtn;
-	//private JButton cust_deleteCustomerBtn;
+	private JLabel loadingScreenImage;
 	
-	JLabel cust_viewTableLbl;
-	JLabel cust_editTableLbl;
-	JLabel cust_deleteTableLbl;
+	private JLabel cust_viewTableLbl;
+	private JLabel cust_editTableLbl;
+	private JLabel cust_deleteTableLbl;
 	
 	/**
 	 * @wbp.nonvisual location=82,359
@@ -170,7 +166,7 @@ public class ApplicationFrame extends JFrame {
 	            }
 		};
 		addWindowListener(exitListener);
-		setBounds(100, 100, 750, 500);
+		setBounds(100, 100, 820, 500);
 		setResizable(false);		
 		getContentPane().setLayout(new CardLayout(0, 0));
 		
@@ -640,8 +636,6 @@ public class ApplicationFrame extends JFrame {
 		login_contentPanel.add(login_backBtn);
 		
 		
-		
-		
 		//Home Panel
 		home_contentPanel = new JPanel();
 		home_contentPanel.setBackground(Color.WHITE);
@@ -649,14 +643,13 @@ public class ApplicationFrame extends JFrame {
 		home_contentPanel.setLayout(null);
 		
 		menu_menuBar = new JMenuBar();
-		menu_menuBar.setBounds(0, 0, 681, 21);
+		menu_menuBar.setBounds(0, 0, this.getWidth(), 20);
 		home_contentPanel.add(menu_menuBar);
 		
 		JMenu applicationMenu = new JMenu("Application");
 		menu_menuBar.add(applicationMenu);
 		
-		
-		
+				
 		JMenuItem menu_homeMnItem = new JMenuItem("Home");
 		menu_homeMnItem.addActionListener(new ActionListener() {
 			
@@ -703,6 +696,13 @@ public class ApplicationFrame extends JFrame {
 		customersMenu.add(menu_viewCustomersMnItem);
 		
 		JMenuItem menu_newCustomersMnItem = new JMenuItem("New");
+		menu_newCustomersMnItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				popupFrame.fillInForm("CUSTOMERS",  new Customer());
+				popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4)))); //Set the position of the PopupFrame.
+				popupFrame.setVisible(true);	
+			}
+		});
 		customersMenu.add(menu_newCustomersMnItem);
 		
 		JMenu menu_employeesMenu = new JMenu("Employees");
@@ -774,63 +774,14 @@ public class ApplicationFrame extends JFrame {
 		cust_newCustomerBtn.setBounds(20, 425, 120, 30);
 		cust_contentPanel.add(cust_newCustomerBtn);
 		cust_newCustomerBtn.setVisible(false); //Hide this button for now.
-		
-		
-		cust_viewCustomerBtn = new JButton("View");
-		cust_viewCustomerBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				//View information about the customer.
-				int selectedRow = cust_customersTable.getSelectedRow();
 				
-				if(selectedRow >= 0) { //Make sure the selected row is valid.
-					popupFrame.fillInForm("CUSTOMERS",  customerList.get(selectedRow));
-					popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
-					popupFrame.setVisible(true);
-					popup_optionsPopup.setVisible(false);
-				}	
-			}
-		});
-		cust_viewCustomerBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
-		cust_viewCustomerBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
-		cust_viewCustomerBtn.setBounds(150, 425, 120, 30);
-		cust_viewCustomerBtn.setVisible(false);
-		cust_contentPanel.add(cust_viewCustomerBtn);
-		
-		cust_editCustomerBtn = new JButton("Edit");
-		cust_editCustomerBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				//Edit information about the customer (can also be done when viewing the customer, but this is direct.)
-				
-				int selectedRow = cust_customersTable.getSelectedRow();
-				
-				if(selectedRow >= 0) { //Make sure the selected row is valid.
-					popupFrame.fillInForm("CUSTOMERS",  customerList.get(selectedRow));
-					popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
-					popupFrame.setVisible(true);
-					popupFrame.setEditingForm("CUSTOMERS", true);
-					popupFrame.setFormEditable("CUSTOMERS", true);
-					popup_optionsPopup.setVisible(false);
-				}	
-			}
-		});
-		cust_editCustomerBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
-		cust_editCustomerBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
-		cust_editCustomerBtn.setBounds(300, 425, 120, 30);
-		cust_editCustomerBtn.setVisible(false);
-		cust_contentPanel.add(cust_editCustomerBtn);
-		
-		cust_deleteCustomerBtn = new JButton("Delete");
-		cust_deleteCustomerBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				//Delete the customer from the database.
-			}
-		});
-		cust_deleteCustomerBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
-		cust_deleteCustomerBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
-		cust_deleteCustomerBtn.setBounds(450, 425, 120, 30);
-		cust_deleteCustomerBtn.setVisible(false);
-		cust_contentPanel.add(cust_deleteCustomerBtn);
 		*/
+		
+		//The title label for the customer panel.
+		JLabel cust_titleLbl = new JLabel("Customer Management");
+		cust_titleLbl.setBounds(300, 25, 250, 20);
+		cust_titleLbl.setFont(new Font("Arial", Font.PLAIN, 15));
+		cust_contentPanel.add(cust_titleLbl);
 		
 		//The search text field the user can use to filter the customers shown.
 		cust_searchTextField = new JTextField();
@@ -844,12 +795,13 @@ public class ApplicationFrame extends JFrame {
 
 			@Override
 			public void keyTyped(KeyEvent arg0) {
+				//Whenever the user types a key in the search textfield, refresh the table.
 				refreshTable("CUSTOMERS");
 			}
 			
 		});
 		
-		//Add a focus adapter so we can set the textfields text according to what method is called.
+		//Add a focus adapter so we can set the textfield's text according to what method is called.
 		cust_searchTextField.addFocusListener(new FocusAdapter() {
 			
 			@Override
@@ -864,25 +816,26 @@ public class ApplicationFrame extends JFrame {
 			}
 		});
 		cust_searchTextField.setText("Search...");
-		cust_searchTextField.setBounds(80, 30, 165, 20);		
-		cust_contentPanel.add(cust_searchTextField);
+		cust_searchTextField.setBounds(80, 50, 165, 20);
 		cust_searchTextField.setColumns(10);
+		cust_contentPanel.add(cust_searchTextField);
 		
 		
 		
+		//The checkboxes on the customer panel.
 		cust_customerNoChckbx = new JCheckBox("Customer No.");
 		cust_customerNoChckbx.setBackground(Color.WHITE);
 		cust_customerNoChckbx.setSelected(true);
-		cust_customerNoChckbx.setBounds(306, 28, 102, 23);
+		cust_customerNoChckbx.setBounds(250, 48, 105, 23);
 		cust_contentPanel.add(cust_customerNoChckbx);
 		
 		cust_customerNameChckbx = new JCheckBox("Name");
 		cust_customerNameChckbx.setBackground(Color.WHITE);
 		cust_customerNameChckbx.setSelected(true);
-		cust_customerNameChckbx.setBounds(416, 28, 102, 23);
+		cust_customerNameChckbx.setBounds(360, 48, 100, 23);
 		cust_contentPanel.add(cust_customerNameChckbx);
 		
-		
+		//The side icons (View, Edit and Delete) that appear to the left of the table when a user clicks on a valid row in the table.
 		cust_viewTableLbl = new JLabel("");
 		cust_viewTableLbl.setBounds(55, 100, 25, 20);
 		cust_viewTableLbl.setBackground(Color.WHITE);
@@ -985,8 +938,7 @@ public class ApplicationFrame extends JFrame {
 			public void mouseReleased(MouseEvent arg0) { }
 			
 		});
-		cust_contentPanel.add(cust_deleteTableLbl);
-		
+		cust_contentPanel.add(cust_deleteTableLbl);		
 		
 		//Customer Table
 		final JScrollPane cust_scrollPane = new JScrollPane();
@@ -1017,7 +969,7 @@ public class ApplicationFrame extends JFrame {
 			public void mouseReleased(MouseEvent arg0) { }
 			
 		});
-		cust_scrollPane.setBounds(80, 60, 661, 348);
+		cust_scrollPane.setBounds(80, 80, 660, 348);
 		cust_contentPanel.add(cust_scrollPane);
 
 		cust_customersTable = new JTable();
@@ -1076,12 +1028,11 @@ public class ApplicationFrame extends JFrame {
 			public void mouseReleased(MouseEvent arg0) { }
 		});
 		
-		
+		/*
 		cust_refreshTableBtn = new JButton();		
 		cust_refreshTableBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				refreshTable("CUSTOMERS");
-				
+				refreshTable("CUSTOMERS");				
 			}
 		});
 		cust_refreshTableBtn.setBorderPainted(false);
@@ -1091,6 +1042,7 @@ public class ApplicationFrame extends JFrame {
 		ImageIcon cust_refreshImageIcon = new ImageIcon("lib/images/table_search_button.png");
 		cust_refreshTableBtn.setIcon(cust_refreshImageIcon);
 		cust_contentPanel.add(cust_refreshTableBtn);	
+		*/
 		
 		//Popup Menu (When a user left clicks a row, a menu will pop up with a list of different options). 
 		final JMenuItem popup_closeMnItem = new JMenuItem("Close");
@@ -1413,7 +1365,7 @@ public class ApplicationFrame extends JFrame {
 	
 	/**
 	 * Return the currently loaded ArrayList of customers.
-	 * @return The ArrayList of Customer objects. 
+	 * @return Returns the ArrayList of Customer objects. 
 	 */
 	public ArrayList<Entity> getCustomerList() {
 		return customerList;
@@ -1421,7 +1373,7 @@ public class ApplicationFrame extends JFrame {
 	
 	/**
 	 * Get the text the user has entered into the 'Search' part of the customers area.
-	 * @return The text within the table's appropriate search field. 
+	 * @return Returns the text within the table's appropriate search field. 
 	 */
 	public String getCustomerTableSearchQuery() {
 		return (cust_searchTextField.getText());
@@ -1454,7 +1406,7 @@ public class ApplicationFrame extends JFrame {
 		});
 	}
 	
-	private JLabel loadingScreenImage;
+	
 	
 	/**
 	 * This will internally handle the showing/hiding of different panels. It will also move the JMenuBar around so it fits on all panels where appropiate.
@@ -1494,7 +1446,7 @@ public class ApplicationFrame extends JFrame {
 	
 	/**
 	 * Resets the elements of a JPanel. Some elements are meant to be hidden by default, this method does just that. 
-	 * @param String panelName - The name of the panel to reset the GUI elements of.
+	 * @param panelName - The name of the panel to reset the GUI elements of.
 	 */
 	/*
 	private void resetPanelElements(String panelName) {
@@ -1510,8 +1462,8 @@ public class ApplicationFrame extends JFrame {
 	
 	/**
 	 * Get a prepared MySQL query for the appropriate table, specified by the parameter tableName.
-	 * @param String tableName - The name of the table the query is for. For example - "CUSTOMERS" for the customers table. 
-	 * @return String - Returns the finished query for the appropriate table.
+	 * @param tableName - The name of the table the query is for. For example - "CUSTOMERS" for the customers table. 
+	 * @return Returns the finished query as a String for the appropriate table.
 	 */
 	public String prepareTableQuery(String tableName) {
 		String query = null;
@@ -1558,17 +1510,23 @@ public class ApplicationFrame extends JFrame {
 		return query; 
 	}
 	
+	private String[] columnNames = null;
+	private Object[][] rowData = null;
+	private JTable table = null;
+	private String query = null;
+	
 	/**
 	 * Refresh the appropriate table. The table to be refreshed is decided by the parameter tableName.
 	 * Get the list of Customer, Employee or User objects, depending on the query (prepared in the prepareTableQuery method) sent.
 	 * From the list of objects, prepare the tables rows and then populate the table with the data.
 	 * @param tableName - The name of the table to refresh. "CUSTOMERS", "EMPLOYEES", "USERS".
 	 */
-	public void refreshTable(String tableName) {
-		String[] columnNames = null;
-		Object[][] rowData = null;
-		JTable table = null;
-		String query = null;
+	public void refreshTable(final String tableName) {
+		
+		this.columnNames = null;
+		this.rowData = null;
+		this.table = null;
+		this.query = null;
 		
 		//Set the 'View', 'Edit' & 'Delete' icons to be invisible.
 		if(null != cust_viewTableLbl) cust_viewTableLbl.setVisible(false);
@@ -1576,63 +1534,75 @@ public class ApplicationFrame extends JFrame {
 		if(null != cust_deleteTableLbl) cust_deleteTableLbl.setVisible(false);
 		
 		
-		switch(tableName) {
-		
-			case "CUSTOMERS": {
+		SwingWorker<Integer, Integer> sw = new SwingWorker<Integer, Integer>() {
+
+			@Override
+			protected Integer doInBackground() throws Exception {
 				
-				table = cust_customersTable;
-				
-				query = this.prepareTableQuery(tableName);
-				
-				//If query is not null at this point, then atleast one of the checkboxes are ticked so get the data.
-				if(null != query) {
+				switch(tableName) {		
+					case "CUSTOMERS": {
 					
-					//Get the list of Customer objects generated from the query. Then get an array containing all the data from the objects so it can be displayed in the table.
-					customerList = appManager.getTableRowData("CUSTOMERS", query);  
-					
-					columnNames = cust_tableColumnNames;
-					
-					rowData = appManager.getRowData("CUSTOMER", customerList);
-				} 
-				
-				//If there is no results, then create a notice to the user that nothing was returned so that they are notified.	
+						table = cust_customersTable;
+						
+						query = prepareTableQuery(tableName);
+						
+						//If query is not null at this point, then atleast one of the checkboxes are ticked so get the data.
+						if(null != query) {
+							
+							//Get the list of Customer objects generated from the query. Then get an array containing all the data from the objects so it can be displayed in the table.
+							customerList = appManager.getTableRowData("CUSTOMERS", query);  
+							
+							columnNames = cust_tableColumnNames;
+							
+							rowData = appManager.getRowData("CUSTOMERS", customerList);
+							
+						}			
+						
+						break;
+					} 
+					case "EMPLOYEES": {
+						break;
+					}
+					case "USERS": {
+						break;
+					}
+				}
+				return 1;
+			}
+			
+			@Override
+			public void done() {
+				//If there are no results, then create a notice to the user that nothing was returned so that they are notified.	
 				if(rowData == null || rowData.length < 1) {
 					rowData = new Object[1][];
-					rowData[0] = new Object[]{"No results matched the search criteria"};
+					rowData[0] = new Object[]{"No results matched the search criteria!"};
 					
 					columnNames = new String[]{""};
 				}
 				
-				break;
-			} 
-			case "EMPLOYEES": {
-				break;
+				//Display the new data.
+				if(table != null) {
+					//Create a new table model for the table.
+					DefaultTableModel tableModel = new DefaultTableModel(rowData, columnNames) {
+						//Overriding the method so no cell is editable.
+						@Override
+					    public boolean isCellEditable(int row, int column) {
+					       //set all cells false
+					       return false;
+					    }
+					};
+					table.setModel(tableModel); //Set the tables model.
+				}		
+				table = null;
 			}
-			case "USERS": {
-				break;
-			}
-		}		 
+		};
+		sw.execute();
 		
-		//Display the new data.
-		if(table != null) {
-			//Create a new table model for the table.
-			DefaultTableModel tableModel = new DefaultTableModel(rowData, columnNames) {
-				//Overriding the method so no cell is editable.
-				@Override
-			    public boolean isCellEditable(int row, int column) {
-			       //set all cells false
-			       return false;
-			    }
-			};
-			table.setModel(tableModel); //Set the tables model.
-		}
-		
-		table = null;
 	}
 	
 	/**
 	 * Get the instanced Properties object.
-	 * @return Properties - Returns the instanced Properties object.
+	 * @return Returns the instanced Properties object.
 	 */
 	public Properties getProperties() {		
 		return this.properties;

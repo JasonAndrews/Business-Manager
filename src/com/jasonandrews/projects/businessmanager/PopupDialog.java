@@ -52,6 +52,13 @@ public class PopupDialog extends JDialog {
 	private JTextField c_addressCityTextField;
 	private JTextField c_addressCountryTextField;
 
+	private JLabel c_firstNameLbl;
+	private JLabel c_lastNameLbl;
+	private JLabel c_addressOneLbl;
+	private JLabel c_addressTwoLbl;
+	private JLabel c_addressCityLbl;
+	private JLabel c_addressCountryLbl;	
+	
 	private JLabel c_customerNoLbl;
 	
 	private JButton c_confirmBtn;
@@ -107,12 +114,12 @@ public class PopupDialog extends JDialog {
 		getContentPane().add(customersFormPanel, "name_26635925853738");
 		customersFormPanel.setLayout(null);
 		
-		JLabel firstNameLbl = new JLabel("First Name:");
-		firstNameLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		firstNameLbl.setBounds(61, 56, 99, 14);
-		customersFormPanel.add(firstNameLbl);
+		c_firstNameLbl = new JLabel("First Name:");
+		c_firstNameLbl.setHorizontalAlignment(SwingConstants.RIGHT);
+		c_firstNameLbl.setBounds(61, 56, 99, 14);
+		customersFormPanel.add(c_firstNameLbl);
 		
-		JLabel c_lastNameLbl = new JLabel("Last Name:");
+		c_lastNameLbl = new JLabel("Last Name:");
 		c_lastNameLbl.setHorizontalAlignment(SwingConstants.RIGHT);
 		c_lastNameLbl.setBounds(61, 78, 99, 14);
 		customersFormPanel.add(c_lastNameLbl);
@@ -147,12 +154,12 @@ public class PopupDialog extends JDialog {
 		c_customerNoTextField.setBounds(170, 25, 136, 20);
 		customersFormPanel.add(c_customerNoTextField);
 		
-		JLabel c_addressTwoLbl = new JLabel("Address Two:");
+		c_addressTwoLbl = new JLabel("Address Two:");
 		c_addressTwoLbl.setHorizontalAlignment(SwingConstants.RIGHT);
 		c_addressTwoLbl.setBounds(61, 127, 99, 14);
 		customersFormPanel.add(c_addressTwoLbl);
 		
-		JLabel c_addressOneLbl = new JLabel("Address One:");
+		c_addressOneLbl = new JLabel("Address One:");
 		c_addressOneLbl.setHorizontalAlignment(SwingConstants.RIGHT);
 		c_addressOneLbl.setBounds(61, 105, 99, 14);
 		customersFormPanel.add(c_addressOneLbl);
@@ -173,12 +180,12 @@ public class PopupDialog extends JDialog {
 		c_addressTwoTextField.setBounds(170, 124, 136, 20);
 		customersFormPanel.add(c_addressTwoTextField);
 		
-		JLabel c_addressCountryLbl = new JLabel("Country:");
+		c_addressCountryLbl = new JLabel("Country:");
 		c_addressCountryLbl.setHorizontalAlignment(SwingConstants.RIGHT);
 		c_addressCountryLbl.setBounds(61, 173, 99, 14);
 		customersFormPanel.add(c_addressCountryLbl);
 		
-		JLabel c_addressCityLbl = new JLabel("City:");
+		c_addressCityLbl = new JLabel("City:");
 		c_addressCityLbl.setHorizontalAlignment(SwingConstants.RIGHT);
 		c_addressCityLbl.setBounds(61, 151, 99, 14);
 		customersFormPanel.add(c_addressCityLbl);
@@ -203,41 +210,57 @@ public class PopupDialog extends JDialog {
 		c_confirmBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
-				if(c_isCreatingNewCustomer) { //If the user clicked the button when it said "Create".
-					Customer customer = (Customer) loadedObject; //Cast the loaded object to a customer object so we can call Customer methods.
-					customer.update(c_firstNameTextField.getText(), c_lastNameTextField.getText(), c_addressOneTextField.getText(), c_addressTwoTextField.getText(), c_addressCityTextField.getText(), c_addressCountryTextField.getText());
-					appManager.updateDatabase("CUSTOMERS", customer);
+				//Check if the user is currently creating a new customer.
+				if(c_isCreatingNewCustomer) { 
 					
-					setVisible(false); //Hide the frame.
+					//Check if the user has entered in enough information for the form.
+					if(checkRequiredFields("CUSTOMERS")) {
+						Customer customer = (Customer) loadedObject; //Cast the loaded object to a customer object so we can call Customer methods.
+						customer.update(c_firstNameTextField.getText(), c_lastNameTextField.getText(), c_addressOneTextField.getText(), c_addressTwoTextField.getText(), c_addressCityTextField.getText(), c_addressCountryTextField.getText());
+						appManager.updateDatabase("CUSTOMERS", customer);
+						
+						
+						
+						c_customerNoTextField.setVisible(true); 
+						c_customerNoLbl.setVisible(true);
+						
+						c_isCreatingNewCustomer = false;
+						
+						resetForm("CUSTOMERS"); //reset the form.
+						
+						setVisible(false); //Hide the dialog.
+					}
 					
-					c_customerNoTextField.setVisible(true); 
-					c_customerNoLbl.setVisible(true);
+					return;
+				}
+				
+				//Check if the user is currently editing a customer's information.
+				if(c_isEditingCustomer) {
 					
-				} else if(!c_isEditingCustomer) { //If they click the button when it says "Edit", then set all the appropriate fields to be editable.
-					c_firstNameTextField.setEditable(true);
-					c_lastNameTextField.setEditable(true);
-					c_addressOneTextField.setEditable(true);
-					c_addressTwoTextField.setEditable(true);
-					c_addressCityTextField.setEditable(true);
-					c_addressCountryTextField.setEditable(true);
+					
+					//Check if the user has entered in enough information for the form.
+					if(checkRequiredFields("CUSTOMERS")) {
+						//The user is editing a customer's information so save the updated information and set the user to NOT BE editing the information.
+						
+						Customer customer = (Customer) loadedObject; //Cast the loaded object to a customer object so we can call Customer methods.
+						
+						//Update the customer object with the updated information.
+						customer.update(c_firstNameTextField.getText(), c_lastNameTextField.getText(), c_addressOneTextField.getText(), c_addressTwoTextField.getText(), c_addressCityTextField.getText(), c_addressCountryTextField.getText());
+						appManager.updateDatabase("CUSTOMERS", customer);
+						
+						c_isEditingCustomer = false;
+						c_confirmBtn.setText("Edit"); //Change the text on the button to "Edit".
+						setFormEditable("CUSTOMERS", false); //Do allow users to edit the information on the form.
+					} 					
+					
+				} else {
+					//The user is not currently editing a customer's information, so set them to BE editing the information.
+					setFormEditable("CUSTOMERS", true);
 					
 					c_isEditingCustomer = true;
 					c_confirmBtn.setText("Save");
 					c_firstNameTextField.requestFocus();
-				} else {
-					//If they have edited the user and clicked the button when it says "Save".
-					Customer customer = (Customer) loadedObject; //Cast the loaded object to a customer object so we can call Customer methods.
-					//Update the customer object with the updated information.
-					customer.update(c_firstNameTextField.getText(), c_lastNameTextField.getText(), c_addressOneTextField.getText(), c_addressTwoTextField.getText(), c_addressCityTextField.getText(), c_addressCountryTextField.getText());
-					appManager.updateDatabase("CUSTOMERS", customer);
-					
-					c_isEditingCustomer = true;
-					c_confirmBtn.setText("Edit"); //Change the text on the button to "Edit".
-					setFormEditable("CUSTOMERS", false); //Do allow users to edit the information on the form.
-					appFrame.refreshTable("CUSTOMERS");
-					//setVisible(false); //Hide the frame.
-					//resetForm(PopupFrame.FORM_TYPE_CUSTOMER);
-				}				
+				}			
 			}
 		});
 		c_confirmBtn.setBounds(102, 237, 89, 23);
@@ -255,9 +278,7 @@ public class PopupDialog extends JDialog {
 		});
 		c_closeBtn.setBounds(201, 237, 89, 23);
 		customersFormPanel.add(c_closeBtn);
-		
-		
-		
+				
 		//Employee Panel.
 		JPanel employeePanel = new JPanel();
 		getContentPane().add(employeePanel, "name_26990095477004");
@@ -268,8 +289,8 @@ public class PopupDialog extends JDialog {
 	/**
 	 * Sets the editing state of the current form.
 	 * Example - Setting the customer form to be editable, so that the user may edit the customer's information.
-	 * @param String formType - The type of form to update, for example, "CUSTOMERS".
-	 * @param boolean editingForm - Whether to enable (true) or disable (false) the ability to edit the form.
+	 * @param formType - The type of form to update, for example, "CUSTOMERS".
+	 * @param editingForm - Whether to enable (true) or disable (false) the ability to edit the form.
 	 */
 	public void setEditingForm(String formType, boolean editingForm) {
 		switch(formType) {
@@ -364,20 +385,41 @@ public class PopupDialog extends JDialog {
 				c_addressOneTextField.setEditable(toggle);
 				c_addressTwoTextField.setEditable(toggle);
 				c_addressCityTextField.setEditable(toggle);
-				c_addressCountryTextField.setEditable(toggle);				
+				c_addressCountryTextField.setEditable(toggle);	
+				
+				if(toggle) {
+					c_firstNameLbl.setText("First Name* :");
+					c_lastNameLbl.setText("Last Name* :");
+					c_addressOneLbl.setText("Address One* :");
+					c_addressTwoLbl.setText("Address Two  :");
+					c_addressCityLbl.setText("City* :");
+					c_addressCountryLbl.setText("Country* :");
+					
+				} else {
+					c_firstNameLbl.setText("First Name:");
+					c_lastNameLbl.setText("Last Name:");
+					c_addressOneLbl.setText("Address One:");
+					c_addressTwoLbl.setText("Address Two:");
+					c_addressCityLbl.setText("City:");
+					c_addressCountryLbl.setText("Country:");
+				}
+				
 			}
 			case "EMPLOYEES": { }
 			case "USERS": { }
 		}		
 	}
 	
-	/*
-	 * Reset the information shown on a form (such as the Customer form when a user views a specific customer's information.)	
+	/**
+	 * Reset the information shown on a form (such as the Customer form when a user views a specific customer's information.)
+	 * @param formType - The String representative of the form type.	
 	 */
 	private void resetForm(String formType) {		
 		switch(formType) {
 			case "CUSTOMERS": {
 				
+				setEditingForm(formType, false); 
+								
 				c_firstNameTextField.setEditable(false);
 				c_firstNameTextField.setText("");
 				c_lastNameTextField.setEditable(false);
@@ -391,14 +433,71 @@ public class PopupDialog extends JDialog {
 				c_addressCountryTextField.setEditable(false);
 				c_addressCountryTextField.setText("");
 				
+				c_firstNameLbl.setText("First Name:");
+				c_lastNameLbl.setText("Last Name:");
+				c_addressOneLbl.setText("Address One:");
+				c_addressTwoLbl.setText("Address Two:");
+				c_addressCityLbl.setText("City:");
+				c_addressCountryLbl.setText("Country:");
+				
+				c_firstNameLbl.setForeground(Color.BLACK);
+				c_lastNameLbl.setForeground(Color.BLACK);
+				c_addressOneLbl.setForeground(Color.BLACK);
+				c_addressCityLbl.setForeground(Color.BLACK);
+				c_addressCountryLbl.setForeground(Color.BLACK);
+				
 				c_isEditingCustomer = false;
+				c_isCreatingNewCustomer = false;
 				c_confirmBtn.setText("Edit");
 				break;				
 			}
 			case "EMPLOYEES": { }
 			case "USERS": { }
+		}		
+	}
+	
+	private boolean checkRequiredFields(String formName) {
+		
+		boolean isValid = true;
+		
+		switch(formName) {
+			case "CUSTOMERS": {
+				if(c_firstNameTextField.getText().length() < 1) {
+					c_firstNameLbl.setForeground(Color.RED);
+					isValid = false;
+				} else c_firstNameLbl.setForeground(Color.BLACK);
+				
+				if(c_lastNameTextField.getText().length() < 1) {
+					c_lastNameLbl.setForeground(Color.RED);
+					isValid = false;
+				} else c_lastNameLbl.setForeground(Color.BLACK);
+				
+				if(c_addressOneTextField.getText().length() < 1) {
+					c_addressOneLbl.setForeground(Color.RED);
+					isValid = false;
+				} else c_addressOneLbl.setForeground(Color.BLACK);
+				
+				if(c_addressCityTextField.getText().length() < 1) {
+					c_addressCityLbl.setForeground(Color.RED);
+					isValid = false;
+				} else c_addressCityLbl.setForeground(Color.BLACK);
+				
+				if(c_addressCountryTextField.getText().length() < 1) {
+					c_addressCountryLbl.setForeground(Color.RED);
+					isValid = false;
+				} else c_addressCountryLbl.setForeground(Color.BLACK);
+					
+				break;
+			}
+			case "EMPLOYEES": {
+				break;
+			}
+			case "USERS": {
+				break;
+			}
 		}
 		
+		return isValid;
 	}
 }
 

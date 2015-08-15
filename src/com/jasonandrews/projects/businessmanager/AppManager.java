@@ -6,6 +6,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import javax.swing.SwingWorker;
+
 /**
  * This class is the core of the application's back end work. It will handle most non-related GUI actions, such as getting information from the MySQL database. 
  * @author Jason Andrews
@@ -16,7 +18,7 @@ public class AppManager {
 
 	private DatabaseConnector dbConnector;
 	private ApplicationFrame appFrame;
-
+	
 	private String[] customerTableColumns;
 	private String[] customerTableRowData;
 	
@@ -74,11 +76,14 @@ public class AppManager {
 		
 		try {
 			
-			connection = dbConnector.getConnection();
+			connection = dbConnector.getConnection();			
+			System.out.println(connection);
 			
-			statement = connection.createStatement();
+			statement = connection.createStatement();			
+			System.out.println(statement);
 			
-			resultSet = statement.executeQuery(query);			
+			resultSet = statement.executeQuery(query);
+			System.out.println(resultSet);
 			
 			objectList = new ArrayList<Entity>();
 			//System.out.println("Counted rows: " + count);
@@ -107,7 +112,13 @@ public class AppManager {
 				}				
 			}
 			
-		} catch (Exception ex) {
+		} catch (com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException ntce) {			
+			appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "The application has lost connection to the database!\nYou could try testing your connection to the database\nby from the Configuration screen.");
+			ntce.printStackTrace();
+		} catch (com.mysql.jdbc.exceptions.jdbc4.CommunicationsException ce) {
+			appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "The application could not connect to the database!");
+			ce.printStackTrace();
+		} catch(Exception ex) {
 			ex.printStackTrace();
 		} finally {
 			//Close all of the objects connections.
@@ -275,7 +286,7 @@ public class AppManager {
 	 * Clears the ArrayList of User objects.
 	 */
 	public void clearUsers() {
-		if(userList != null) {
+		if(null != userList) {
 			userList.clear();
 		}
 	}
@@ -413,77 +424,123 @@ public class AppManager {
 		return columns;
 	}
 	
+	/**
+	 * Converts an ArrayList of objects (Customer, Employee or User) into a 2-Dimensional array of Object objects so that it can be displayed in a JTable.
+	 * @param tableName
+	 * @param objectList
+	 * @return Returns the 2-Dimensional Object array.
+	 */
 	public Object[][] getRowData(String tableName, ArrayList<Entity> objectList) {
-		Object[][] rowData = Customer.convertObjectsToRowData(this, objectList);
+		
+		Object[][] rowData = null;
+		
+		switch(tableName) {
+			case "CUSTOMERS": {
+				rowData = Customer.convertObjectsToRowData(this, objectList);
+				break;
+			}
+			case "EMPLOYEES": {
+				//rowData = Employee.convertObjectsToRowData(this, objectList);
+				break;
+			}
+			case "USERS": {
+				//rowData = User.convertObjectsToRowData(this, objectList);
+				break;
+			}
+		}	
 		
 		return rowData;
 	}
 	
-	//Send a query to the database. Could be an INSERT query or an UPDATE query.
-	public void updateDatabase(String tableName, Object objectToUpdate) {
-		
-		Connection connection = null;
-		Statement statement = null;
-		
-		String query = null;
-		
-		try {
+	/**
+	 * Send a query to the database. 
+	 * Could be an INSERT, UPDATE or DELETE query.
+	 * @param tableName - The name of the table to update (not the MySQL table name.)
+	 * @param entityToUpdate
+	 */
+	public void updateDatabase(final String tableName, final Entity entityToUpdate) {
 			
-			connection = dbConnector.getConnection();
-			
-			switch(tableName) {
-			
-				case "CUSTOMERS": {
-					Customer customer = (Customer) objectToUpdate;
+		SwingWorker<Integer,Integer> sw = new SwingWorker<Integer, Integer>() {
+
+			@Override
+			protected Integer doInBackground() throws Exception {
+				
+				Connection connection = null;
+				Statement statement = null;
+				
+				String query = null;
+				
+				try {					
 					
-					if(customer.getCustomerNumber() > 0) { //If the customer already exists and needs to be updated.
-						
-						query = "UPDATE `customers` SET `first_name` = '"+customer.getFirstName()+"', `last_name` = '"+customer.getLastName()+"', `address_one` = '"+customer.getAddressOne()+"', `address_two` = '"+customer.getAddressTwo()+"', `address_city` = '"+customer.getAddressCity()+
-								"', `address_country` = '"+customer.getAddressCountry()+"' WHERE `customer_number` = '"+customer.getCustomerNumber()+"'";
-						System.out.println("UPDATE QUERY: " + query);
-					} else { //If the customer is being created.
-						
-						query = "INSERT INTO `customers` (`first_name`, `last_name`, `address_one`, `address_two`, `address_city`, `address_country`) VALUES ('"+customer.getFirstName()+"', '"+customer.getLastName()+"', '"+customer.getAddressOne()+"','"+customer.getAddressTwo()+"',"
-								+ "'"+customer.getAddressCity()+"', '"+customer.getAddressCountry()+"')";
-						System.out.println("INSERT QUERY: " + query);
+					connection = dbConnector.getConnection();
+					
+					switch(tableName) {
+					
+						case "CUSTOMERS": {
+							Customer customer = (Customer) entityToUpdate;
+							
+							//Check if the customer already exists and needs to be updated.
+							if(customer.getCustomerNumber() > 0) {
+								
+								query = "UPDATE `customers` SET `first_name` = '"+customer.getFirstName()+"', `last_name` = '"+customer.getLastName()+"', `address_one` = '"+customer.getAddressOne()+"', `address_two` = '"+customer.getAddressTwo()+"', `address_city` = '"+customer.getAddressCity()+
+										"', `address_country` = '"+customer.getAddressCountry()+"' WHERE `customer_number` = '"+customer.getCustomerNumber()+"'";
+								//System.out.println("UPDATE QUERY: " + query); //Debugging.
+							} else { 
+								//If this code runs, it means that the user is creating a new customer.
+								
+								
+								
+								query = "INSERT INTO `customers` (`first_name`, `last_name`, `address_one`, `address_two`, `address_city`, `address_country`) VALUES ('"+customer.getFirstName()+"', '"+customer.getLastName()+"', '"+customer.getAddressOne()+"','"+customer.getAddressTwo()+"',"
+										+ "'"+customer.getAddressCity()+"', '"+customer.getAddressCountry()+"')";
+								//System.out.println("INSERT QUERY: " + query); //Debugging.
+							}
+							
+							statement = connection.createStatement();
+							
+							statement.executeUpdate(query);
+							
+							break;
+						}
+						case "EMPLOYEES": {
+					
+							break;
+						}
+						case "USERS": {
+				
+							break;
+						}
+				
 					}
 					
-					statement = connection.createStatement();
-					
-					statement.executeUpdate(query);
-					
-					break;
-				}
-				case "EMPLOYEES": {
-			
-					break;
-				}
-				case "USERS": {
-		
-					break;
-				}
-		
-			}
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		} finally {
-			if(connection != null) {
-				try {
-					connection.close();
-				} catch (Exception ex) {
+				} catch (com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException ntce) {			
+					appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "Could not complete the request!\n\nThe application has lost connection to the database!\nYou could try testing your connection to the database\nby from the Configuration screen.");
+					ntce.printStackTrace();
+				} catch (com.mysql.jdbc.exceptions.jdbc4.CommunicationsException ce) {
+					appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "Could not complete the request!\n\nThe application could not connect to the database!");
+					ce.printStackTrace();
+				} catch(Exception ex) {
 					ex.printStackTrace();
+				} finally {
+					if(connection != null) {
+						try {
+							connection.close();
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					}
+					if(statement != null) { 
+						try {
+							statement.close();
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					}
 				}
+				
+				return 1;
 			}
-			if(statement != null) { 
-				try {
-					statement.close();
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-		}
-		
+		};
+		sw.execute();
 	}
 		
 }
