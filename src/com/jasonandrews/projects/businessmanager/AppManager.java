@@ -29,6 +29,7 @@ public class AppManager {
 	private User loggedInUser;
 	
 	
+	
 	public AppManager() {		
 		this.customerTableColumns = new String[]{"Customer No.", "First Name", "Last Name"};		
 	}
@@ -39,20 +40,15 @@ public class AppManager {
 	 * @param tableName
 	 * @return Return the column names for a table, depending on the String passed as a parameter.
 	 */
-	String[] getTableColumnNames(String tableName) {
+	String[] getTableColumnNames(Entity.EntityTypes entityType) {
 		String[] columnNames = null;
 		
-		try {
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		switch(tableName) {
-			case "Customers": { 
+		switch(entityType) {
+			case CUSTOMER: { 
 				columnNames = customerTableColumns;
 				break;
 			}
-			case "Employees": {
+			case EMPLOYEE: {
 				columnNames = employeeTableColumns;
 				break;
 			}
@@ -62,11 +58,11 @@ public class AppManager {
 	
 	/**
 	 * Get row data depending on the query passed.
-	 * @param tableName
+	 * @param entityType
 	 * @param query
 	 * @return Returns an ArrayList of child Entity objects, depending on the string tableName. Passing "CUSTOMERS" will result in an ArrayList of Customer objects being returned.
 	 */
-	ArrayList<Entity> getTableRowData(String tableName, String query) {
+	ArrayList<Entity> getTableRowData(Entity.EntityTypes entityType, String query) {
 		
 		Connection connection = null;
 		Statement statement = null;
@@ -95,18 +91,18 @@ public class AppManager {
 			while(resultSet.next()) { //While there is another row of data.		
 				
 				//Switch to the appropriate case so the data is loaded correctly.
-				switch(tableName) {
-					case "CUSTOMERS": {
+				switch(entityType) {
+					case CUSTOMER: {
 						
 						//Add a new Customer object with the given information to the ArrayList.
 						objectList.add(new Customer(resultSet.getInt("customer_number"), resultSet.getString("first_name"), resultSet.getString("last_name"), resultSet.getString("address_one"), resultSet.getString("address_two"), resultSet.getString("address_city"), resultSet.getString("address_country")));						
 						
 						break;
 					}
-					case "EMPLOYEES": {
+					case EMPLOYEE: {
 						break;
 					}
-					case "USERS": {
+					case USER: {
 						break;
 					}
 				}				
@@ -402,20 +398,20 @@ public class AppManager {
 		this.loggedInUser = user;
 	}
 	
-	public int getTableColumnCount(String tableName) {
+	public int getTableColumnCount(Entity.EntityTypes entityType) {
 		int columns = 0;
 		
-		switch(tableName) {
+		switch(entityType) {
 		
-			case "CUSTOMERS": {
+			case CUSTOMER: {
 				columns = 7;
 				break;
 			}
-			case "EMPLOYEES": {
+			case EMPLOYEE: {
 				columns = 3;		
 				break;
 			}
-			case "USERS": {
+			case USER: {
 				columns = 4;
 				break;
 			}
@@ -426,24 +422,24 @@ public class AppManager {
 	
 	/**
 	 * Converts an ArrayList of objects (Customer, Employee or User) into a 2-Dimensional array of Object objects so that it can be displayed in a JTable.
-	 * @param tableName
+	 * @param entityType
 	 * @param objectList
 	 * @return Returns the 2-Dimensional Object array.
 	 */
-	public Object[][] getRowData(String tableName, ArrayList<Entity> objectList) {
+	public Object[][] getRowData(Entity.EntityTypes entityType, ArrayList<Entity> objectList) {
 		
 		Object[][] rowData = null;
 		
-		switch(tableName) {
-			case "CUSTOMERS": {
+		switch(entityType) {
+			case CUSTOMER: {
 				rowData = Customer.convertObjectsToRowData(this, objectList);
 				break;
 			}
-			case "EMPLOYEES": {
+			case EMPLOYEE: {
 				//rowData = Employee.convertObjectsToRowData(this, objectList);
 				break;
 			}
-			case "USERS": {
+			case USER: {
 				//rowData = User.convertObjectsToRowData(this, objectList);
 				break;
 			}
@@ -455,10 +451,10 @@ public class AppManager {
 	/**
 	 * Send a query to the database. 
 	 * Could be an INSERT, UPDATE or DELETE query.
-	 * @param tableName - The name of the table to update (not the MySQL table name.)
+	 * @param entityType - The name of the table to update (not the MySQL table name.)
 	 * @param entityToUpdate
 	 */
-	public void updateDatabase(final String tableName, final Entity entityToUpdate) {
+	public void updateDatabase(final Entity.EntityTypes entityType, final Entity entityToUpdate) {
 			
 		SwingWorker<Integer,Integer> sw = new SwingWorker<Integer, Integer>() {
 
@@ -474,9 +470,9 @@ public class AppManager {
 					
 					connection = dbConnector.getConnection();
 					
-					switch(tableName) {
+					switch(entityType) {
 					
-						case "CUSTOMERS": {
+						case CUSTOMER: {
 							Customer customer = (Customer) entityToUpdate;
 							
 							//Check if the customer already exists and needs to be updated.
@@ -501,11 +497,11 @@ public class AppManager {
 							
 							break;
 						}
-						case "EMPLOYEES": {
+						case EMPLOYEE: {
 					
 							break;
 						}
-						case "USERS": {
+						case USER: {
 				
 							break;
 						}

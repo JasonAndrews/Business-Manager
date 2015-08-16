@@ -3,6 +3,7 @@ package com.jasonandrews.projects.businessmanager;
 
 import java.awt.EventQueue;
 
+import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
@@ -25,12 +26,20 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import javax.swing.JCheckBox;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+
+import javax.swing.JSeparator;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.EmptyBorder;
 
 public class PopupDialog extends JDialog {
 	
@@ -83,7 +92,7 @@ public class PopupDialog extends JDialog {
 				System.out.println("HIDDEN");
 				c_isEditingCustomer = false;
 				c_isCreatingNewCustomer = false;
-				resetForm("CUSTOMERS");
+				resetForm(Entity.EntityTypes.CUSTOMER);
 				//Make a void resetCustomerForm method to reset it.
 				//WORKSSS
 			}
@@ -91,7 +100,7 @@ public class PopupDialog extends JDialog {
 		
 		this.appManager = appManager;
 		this.appFrame = appFrame;
-		setBounds(100, 100, 400, 350);
+		setBounds(100, 100, 206, 456);
 		getContentPane().setLayout(new CardLayout(0, 0));
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		
@@ -105,6 +114,7 @@ public class PopupDialog extends JDialog {
 		
 		//Customer Panel.
 		customersFormPanel = new JPanel();
+		customersFormPanel.setBackground(Color.WHITE);
 		customersFormPanel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -114,99 +124,106 @@ public class PopupDialog extends JDialog {
 		getContentPane().add(customersFormPanel, "name_26635925853738");
 		customersFormPanel.setLayout(null);
 		
-		c_firstNameLbl = new JLabel("First Name:");
-		c_firstNameLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		c_firstNameLbl.setBounds(61, 56, 99, 14);
+		c_firstNameLbl = new JLabel("First Name");
+		c_firstNameLbl.setForeground(Color.DARK_GRAY);
+		c_firstNameLbl.setHorizontalAlignment(SwingConstants.LEFT);
+		c_firstNameLbl.setBounds(28, 83, 99, 14);
 		customersFormPanel.add(c_firstNameLbl);
 		
-		c_lastNameLbl = new JLabel("Last Name:");
-		c_lastNameLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		c_lastNameLbl.setBounds(61, 78, 99, 14);
+		c_lastNameLbl = new JLabel("Last Name");
+		c_lastNameLbl.setForeground(Color.DARK_GRAY);
+		c_lastNameLbl.setHorizontalAlignment(SwingConstants.LEFT);
+		c_lastNameLbl.setBounds(28, 129, 99, 14);
 		customersFormPanel.add(c_lastNameLbl);
 		
 		c_firstNameTextField = new JTextField();
-		c_firstNameTextField.setBorder(new LineBorder(Color.BLACK));
+		c_firstNameTextField.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		c_firstNameTextField.setEditable(false);
 		c_firstNameTextField.setBackground(Color.WHITE);
-		c_firstNameTextField.setBounds(170, 53, 136, 20);
+		c_firstNameTextField.setBounds(28, 98, 136, 20);
 		customersFormPanel.add(c_firstNameTextField);
 		c_firstNameTextField.setColumns(10);
 		
 		c_lastNameTextField = new JTextField();
-		c_lastNameTextField.setBorder(new LineBorder(Color.BLACK));
+		c_lastNameTextField.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		c_lastNameTextField.setEditable(false);
 		c_lastNameTextField.setColumns(10);
 		c_lastNameTextField.setBackground(Color.WHITE);
-		c_lastNameTextField.setBounds(170, 75, 136, 20);
+		c_lastNameTextField.setBounds(28, 145, 136, 20);
 		customersFormPanel.add(c_lastNameTextField);
 		
-		c_customerNoLbl = new JLabel("Customer Number:");
-		c_customerNoLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		c_customerNoLbl.setBounds(42, 28, 118, 14);
+		c_customerNoLbl = new JLabel("Customer Number");
+		c_customerNoLbl.setForeground(Color.DARK_GRAY);
+		c_customerNoLbl.setHorizontalAlignment(SwingConstants.LEFT);
+		c_customerNoLbl.setBounds(28, 22, 135, 14);
 		customersFormPanel.add(c_customerNoLbl);
 		
 		c_customerNoTextField = new JTextField();	
 		c_customerNoTextField.setEditable(false);
 		
-		c_customerNoTextField.setBorder(new LineBorder(Color.BLACK));
+		c_customerNoTextField.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		c_customerNoTextField.setBackground(Color.WHITE);
 		c_customerNoTextField.setColumns(10);
-		c_customerNoTextField.setBounds(170, 25, 136, 20);
+		c_customerNoTextField.setBounds(27, 36, 136, 20);
 		customersFormPanel.add(c_customerNoTextField);
 		
 		c_addressTwoLbl = new JLabel("Address Two:");
-		c_addressTwoLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		c_addressTwoLbl.setBounds(61, 127, 99, 14);
+		c_addressTwoLbl.setForeground(Color.DARK_GRAY);
+		c_addressTwoLbl.setHorizontalAlignment(SwingConstants.LEFT);
+		c_addressTwoLbl.setBounds(28, 242, 99, 14);
 		customersFormPanel.add(c_addressTwoLbl);
 		
-		c_addressOneLbl = new JLabel("Address One:");
-		c_addressOneLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		c_addressOneLbl.setBounds(61, 105, 99, 14);
+		c_addressOneLbl = new JLabel("Address One");
+		c_addressOneLbl.setForeground(Color.DARK_GRAY);
+		c_addressOneLbl.setHorizontalAlignment(SwingConstants.LEFT);
+		c_addressOneLbl.setBounds(28, 196, 99, 14);
 		customersFormPanel.add(c_addressOneLbl);
 		
 		c_addressOneTextField = new JTextField();
-		c_addressOneTextField.setBorder(new LineBorder(Color.BLACK));
+		c_addressOneTextField.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		c_addressOneTextField.setEditable(false);
 		c_addressOneTextField.setBackground(Color.WHITE);
 		c_addressOneTextField.setColumns(10);
-		c_addressOneTextField.setBounds(170, 102, 136, 20);
+		c_addressOneTextField.setBounds(28, 211, 136, 20);
 		customersFormPanel.add(c_addressOneTextField);
 		
 		c_addressTwoTextField = new JTextField();
-		c_addressTwoTextField.setBorder(new LineBorder(Color.BLACK));
+		c_addressTwoTextField.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		c_addressTwoTextField.setEditable(false);
 		c_addressTwoTextField.setBackground(Color.WHITE);
 		c_addressTwoTextField.setColumns(10);
-		c_addressTwoTextField.setBounds(170, 124, 136, 20);
+		c_addressTwoTextField.setBounds(28, 256, 136, 20);
 		customersFormPanel.add(c_addressTwoTextField);
 		
-		c_addressCountryLbl = new JLabel("Country:");
-		c_addressCountryLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		c_addressCountryLbl.setBounds(61, 173, 99, 14);
+		c_addressCountryLbl = new JLabel("Country");
+		c_addressCountryLbl.setForeground(Color.DARK_GRAY);
+		c_addressCountryLbl.setHorizontalAlignment(SwingConstants.LEFT);
+		c_addressCountryLbl.setBounds(28, 332, 99, 14);
 		customersFormPanel.add(c_addressCountryLbl);
 		
-		c_addressCityLbl = new JLabel("City:");
-		c_addressCityLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		c_addressCityLbl.setBounds(61, 151, 99, 14);
+		c_addressCityLbl = new JLabel("City");
+		c_addressCityLbl.setForeground(Color.DARK_GRAY);
+		c_addressCityLbl.setHorizontalAlignment(SwingConstants.LEFT);
+		c_addressCityLbl.setBounds(28, 287, 99, 14);
 		customersFormPanel.add(c_addressCityLbl);
 		
 		c_addressCityTextField = new JTextField();
-		c_addressCityTextField.setBorder(new LineBorder(Color.BLACK));
+		c_addressCityTextField.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		c_addressCityTextField.setEditable(false);
 		c_addressCityTextField.setBackground(Color.WHITE);
 		c_addressCityTextField.setColumns(10);
-		c_addressCityTextField.setBounds(170, 148, 136, 20);
+		c_addressCityTextField.setBounds(28, 301, 136, 20);
 		customersFormPanel.add(c_addressCityTextField);
 		
 		c_addressCountryTextField = new JTextField();
-		c_addressCountryTextField.setBorder(new LineBorder(Color.BLACK));
+		c_addressCountryTextField.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		c_addressCountryTextField.setEditable(false);
 		c_addressCountryTextField.setBackground(Color.WHITE);
 		c_addressCountryTextField.setColumns(10);
-		c_addressCountryTextField.setBounds(170, 170, 136, 20);
+		c_addressCountryTextField.setBounds(28, 346, 136, 20);
 		customersFormPanel.add(c_addressCountryTextField);
 		
-		c_confirmBtn = new JButton("Edit");
+		c_confirmBtn = new JButton("");
 		c_confirmBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
@@ -214,10 +231,10 @@ public class PopupDialog extends JDialog {
 				if(c_isCreatingNewCustomer) { 
 					
 					//Check if the user has entered in enough information for the form.
-					if(checkRequiredFields("CUSTOMERS")) {
+					if(checkRequiredFields(Entity.EntityTypes.CUSTOMER)) {
 						Customer customer = (Customer) loadedObject; //Cast the loaded object to a customer object so we can call Customer methods.
 						customer.update(c_firstNameTextField.getText(), c_lastNameTextField.getText(), c_addressOneTextField.getText(), c_addressTwoTextField.getText(), c_addressCityTextField.getText(), c_addressCountryTextField.getText());
-						appManager.updateDatabase("CUSTOMERS", customer);
+						appManager.updateDatabase(Entity.EntityTypes.CUSTOMER, customer);
 						
 						
 						
@@ -226,7 +243,7 @@ public class PopupDialog extends JDialog {
 						
 						c_isCreatingNewCustomer = false;
 						
-						resetForm("CUSTOMERS"); //reset the form.
+						resetForm(Entity.EntityTypes.CUSTOMER); //reset the form.
 						
 						setVisible(false); //Hide the dialog.
 					}
@@ -239,23 +256,23 @@ public class PopupDialog extends JDialog {
 					
 					
 					//Check if the user has entered in enough information for the form.
-					if(checkRequiredFields("CUSTOMERS")) {
+					if(checkRequiredFields(Entity.EntityTypes.CUSTOMER)) {
 						//The user is editing a customer's information so save the updated information and set the user to NOT BE editing the information.
 						
 						Customer customer = (Customer) loadedObject; //Cast the loaded object to a customer object so we can call Customer methods.
 						
 						//Update the customer object with the updated information.
 						customer.update(c_firstNameTextField.getText(), c_lastNameTextField.getText(), c_addressOneTextField.getText(), c_addressTwoTextField.getText(), c_addressCityTextField.getText(), c_addressCountryTextField.getText());
-						appManager.updateDatabase("CUSTOMERS", customer);
+						appManager.updateDatabase(Entity.EntityTypes.CUSTOMER, customer);
 						
 						c_isEditingCustomer = false;
 						c_confirmBtn.setText("Edit"); //Change the text on the button to "Edit".
-						setFormEditable("CUSTOMERS", false); //Do allow users to edit the information on the form.
+						setFormEditable(Entity.EntityTypes.CUSTOMER, false); //Do allow users to edit the information on the form.
 					} 					
 					
 				} else {
 					//The user is not currently editing a customer's information, so set them to BE editing the information.
-					setFormEditable("CUSTOMERS", true);
+					setFormEditable(Entity.EntityTypes.CUSTOMER, true);
 					
 					c_isEditingCustomer = true;
 					c_confirmBtn.setText("Save");
@@ -263,7 +280,8 @@ public class PopupDialog extends JDialog {
 				}			
 			}
 		});
-		c_confirmBtn.setBounds(102, 237, 89, 23);
+		c_confirmBtn.setBackground(Color.WHITE);
+		c_confirmBtn.setBounds(40, 377, 30, 30);
 		customersFormPanel.add(c_confirmBtn);
 		
 		c_closeBtn = new JButton("Close");
@@ -273,11 +291,21 @@ public class PopupDialog extends JDialog {
 				
 				c_isEditingCustomer = false;
 				c_isCreatingNewCustomer = false;
-				resetForm("CUSTOMERS");
+				resetForm(Entity.EntityTypes.CUSTOMER);
 			}
 		});
-		c_closeBtn.setBounds(201, 237, 89, 23);
+		c_closeBtn.setBounds(109, 377, 89, 23);
 		customersFormPanel.add(c_closeBtn);
+		
+		JSeparator cust_separatorOne = new JSeparator();
+		cust_separatorOne.setForeground(Color.BLACK);
+		cust_separatorOne.setBounds(19, 67, 151, 5);
+		customersFormPanel.add(cust_separatorOne);
+		
+		JSeparator cust_separatorTwo = new JSeparator();
+		cust_separatorTwo.setForeground(Color.BLACK);
+		cust_separatorTwo.setBounds(21, 177, 151, 9);
+		customersFormPanel.add(cust_separatorTwo);
 				
 		//Employee Panel.
 		JPanel employeePanel = new JPanel();
@@ -289,21 +317,21 @@ public class PopupDialog extends JDialog {
 	/**
 	 * Sets the editing state of the current form.
 	 * Example - Setting the customer form to be editable, so that the user may edit the customer's information.
-	 * @param formType - The type of form to update, for example, "CUSTOMERS".
+	 * @param entityType - The type of form to update, for example, "CUSTOMERS".
 	 * @param editingForm - Whether to enable (true) or disable (false) the ability to edit the form.
 	 */
-	public void setEditingForm(String formType, boolean editingForm) {
-		switch(formType) {
-			case "CUSTOMERS": {				
+	public void setEditingForm(Entity.EntityTypes entityType, boolean editingForm) {
+		switch(entityType) {
+			case CUSTOMER: {				
 				c_isEditingCustomer = editingForm;
 				c_confirmBtn.setText("Save");
 				
 				break;
 			}
-			case "EMPLOYEES": {
+			case EMPLOYEE: {
 				break;
 			}
-			case "USERS": {
+			case USER: {
 				break;
 			}
 		}
@@ -311,16 +339,16 @@ public class PopupDialog extends JDialog {
 	
 	/**
 	 * Populate the form with the given information, depending on the given panel type.
-	 * @param formType
+	 * @param entityType
 	 * @param entity
 	 */
-	public void fillInForm(String formType, Entity entity) {
+	public void fillInForm(Entity.EntityTypes entityType, Entity entity) {
 		this.loadedObject = entity;
 		c_isCreatingNewCustomer = false;
 		c_isEditingCustomer = false;
-		switch(formType) {
+		switch(entityType) {
 		
-			case "CUSTOMERS": {
+			case CUSTOMER: {
 				Object[] info = ((Customer) entity).getInformation();
 				customersFormPanel.setVisible(true);
 				
@@ -354,19 +382,20 @@ public class PopupDialog extends JDialog {
 					c_addressCityTextField.setText("");
 					c_addressCountryTextField.setText("");
 					
-					c_confirmBtn.setText("Create");
+					//c_confirmBtn.setText("Create");
+					c_confirmBtn.setIcon(new ImageIcon("lib/images/create_icon.png"));
 					
-					setFormEditable("CUSTOMERS", true);
+					setFormEditable(Entity.EntityTypes.CUSTOMER, true);
 				}
 				break;
 			}
-			case "EMPLOYEES": {
+			case EMPLOYEE: {
 				//customerPanel.setVisible(false);
 				//employeePanel.setVisible(true);
 				//userPanel.setVisible(false);
 				break;
 			}
-			case "USERS": {
+			case USER: {
 				//customerPanel.setVisible(false);
 				//employeePanel.setVisible(false);
 				//userPanel.setVisible(true);
@@ -377,9 +406,9 @@ public class PopupDialog extends JDialog {
 	}
 	
 	//Set the ability for some components to be edited (mainly JTextFields). 
-	public void setFormEditable(String formType, boolean toggle) {		
-		switch(formType) {
-			case "CUSTOMERS": {			
+	public void setFormEditable(Entity.EntityTypes entityType, boolean toggle) {		
+		switch(entityType) {
+			case CUSTOMER: {			
 				c_firstNameTextField.setEditable(toggle);
 				c_lastNameTextField.setEditable(toggle);
 				c_addressOneTextField.setEditable(toggle);
@@ -405,20 +434,20 @@ public class PopupDialog extends JDialog {
 				}
 				
 			}
-			case "EMPLOYEES": { }
-			case "USERS": { }
+			case EMPLOYEE: { }
+			case USER: { }
 		}		
 	}
 	
 	/**
 	 * Reset the information shown on a form (such as the Customer form when a user views a specific customer's information.)
-	 * @param formType - The String representative of the form type.	
+	 * @param entityType - The String representative of the form type.	
 	 */
-	private void resetForm(String formType) {		
-		switch(formType) {
-			case "CUSTOMERS": {
+	private void resetForm(Entity.EntityTypes entityType) {		
+		switch(entityType) {
+			case CUSTOMER: {
 				
-				setEditingForm(formType, false); 
+				setEditingForm(entityType, false); 
 								
 				c_firstNameTextField.setEditable(false);
 				c_firstNameTextField.setText("");
@@ -451,17 +480,17 @@ public class PopupDialog extends JDialog {
 				c_confirmBtn.setText("Edit");
 				break;				
 			}
-			case "EMPLOYEES": { }
-			case "USERS": { }
+			case EMPLOYEE: { }
+			case USER: { }
 		}		
 	}
 	
-	private boolean checkRequiredFields(String formName) {
+	private boolean checkRequiredFields(Entity.EntityTypes entityType) {
 		
 		boolean isValid = true;
 		
-		switch(formName) {
-			case "CUSTOMERS": {
+		switch(entityType) {
+			case CUSTOMER: {
 				if(c_firstNameTextField.getText().length() < 1) {
 					c_firstNameLbl.setForeground(Color.RED);
 					isValid = false;
@@ -489,10 +518,10 @@ public class PopupDialog extends JDialog {
 					
 				break;
 			}
-			case "EMPLOYEES": {
+			case EMPLOYEE: {
 				break;
 			}
-			case "USERS": {
+			case USER: {
 				break;
 			}
 		}

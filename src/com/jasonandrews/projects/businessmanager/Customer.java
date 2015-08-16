@@ -47,7 +47,7 @@ public class Customer extends Entity {
 	 * Convert the customer objects to arrays so that they can be displayed on a table. 
 	 */
 	public static Object[][] convertObjectsToRowData(AppManager appManager, ArrayList<Entity> objectList) {
-		Object[][] rowData = new Object[objectList.size()][appManager.getTableColumnCount("CUSTOMER")];		
+		Object[][] rowData = new Object[objectList.size()][appManager.getTableColumnCount(Entity.EntityTypes.CUSTOMER)];		
 		
 		int index = 0;
 		for(Object customer : objectList) {

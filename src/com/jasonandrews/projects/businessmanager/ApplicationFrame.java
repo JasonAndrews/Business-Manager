@@ -1,6 +1,6 @@
 /*
  * TO DO:
- *	1) Change the whole "CUSTOMERS", "EMPLOYEES", "USERS" switch statements to take an ENUM so like Enum EntityTypes = {"CUSTOMERS", "EMPLOYEES", "USERS"}.
+ *	1) Change the whole Entity.EntityTypes.CUSTOMER, "EMPLOYEES", "USERS" switch statements to take an ENUM so like Enum EntityTypes = {Entity.EntityTypes.CUSTOMER, "EMPLOYEES", "USERS"}.
  * 	2) A proper implementation of the loading screen bugging out when hovering over certain GUI elements (mouse hovering over them shows them).
  */
 
@@ -698,7 +698,7 @@ public class ApplicationFrame extends JFrame {
 		JMenuItem menu_newCustomersMnItem = new JMenuItem("New");
 		menu_newCustomersMnItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				popupFrame.fillInForm("CUSTOMERS",  new Customer());
+				popupFrame.fillInForm(Entity.EntityTypes.CUSTOMER,  new Customer());
 				popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4)))); //Set the position of the PopupFrame.
 				popupFrame.setVisible(true);	
 			}
@@ -764,7 +764,7 @@ public class ApplicationFrame extends JFrame {
 		JButton cust_newCustomerBtn = new JButton("New customer");
 		cust_newCustomerBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				popupFrame.fillInForm("CUSTOMERS",  new Customer());
+				popupFrame.fillInForm(Entity.EntityTypes.CUSTOMER,  new Customer());
 				popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4)))); //Set the position of the PopupFrame.
 				popupFrame.setVisible(true);	
 			}
@@ -796,7 +796,7 @@ public class ApplicationFrame extends JFrame {
 			@Override
 			public void keyTyped(KeyEvent arg0) {
 				//Whenever the user types a key in the search textfield, refresh the table.
-				refreshTable("CUSTOMERS");
+				refreshTable(Entity.EntityTypes.CUSTOMER);
 			}
 			
 		});
@@ -849,7 +849,7 @@ public class ApplicationFrame extends JFrame {
 				int selectedRow = cust_customersTable.getSelectedRow();
 				
 				if(selectedRow >= 0) { //Make sure the selected row is valid.
-					popupFrame.fillInForm("CUSTOMERS",  customerList.get(selectedRow));
+					popupFrame.fillInForm(Entity.EntityTypes.CUSTOMER,  customerList.get(selectedRow));
 					popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
 					popupFrame.setVisible(true);
 					popup_optionsPopup.setVisible(false);
@@ -886,11 +886,11 @@ public class ApplicationFrame extends JFrame {
 				int selectedRow = cust_customersTable.getSelectedRow();
 				
 				if(selectedRow >= 0) { //Make sure the selected row is valid.
-					popupFrame.fillInForm("CUSTOMERS",  customerList.get(selectedRow));
+					popupFrame.fillInForm(Entity.EntityTypes.CUSTOMER,  customerList.get(selectedRow));
 					popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
 					popupFrame.setVisible(true);
-					popupFrame.setEditingForm("CUSTOMERS", true);
-					popupFrame.setFormEditable("CUSTOMERS", true);
+					popupFrame.setEditingForm(Entity.EntityTypes.CUSTOMER, true);
+					popupFrame.setFormEditable(Entity.EntityTypes.CUSTOMER, true);
 					popup_optionsPopup.setVisible(false);
 				}	
 				
@@ -1032,7 +1032,7 @@ public class ApplicationFrame extends JFrame {
 		cust_refreshTableBtn = new JButton();		
 		cust_refreshTableBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				refreshTable("CUSTOMERS");				
+				refreshTable(Entity.EntityTypes.CUSTOMER);				
 			}
 		});
 		cust_refreshTableBtn.setBorderPainted(false);
@@ -1093,7 +1093,7 @@ public class ApplicationFrame extends JFrame {
 				int selectedRow = cust_customersTable.getSelectedRow();
 				
 				if(selectedRow >= 0) { //Make sure the selected row is valid.
-					popupFrame.fillInForm("CUSTOMERS",  customerList.get(selectedRow));
+					popupFrame.fillInForm(Entity.EntityTypes.CUSTOMER,  customerList.get(selectedRow));
 					popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
 					popupFrame.setVisible(true);
 					popup_optionsPopup.setVisible(false);
@@ -1451,7 +1451,7 @@ public class ApplicationFrame extends JFrame {
 	/*
 	private void resetPanelElements(String panelName) {
 		switch(panelName) {
-			case "CUSTOMERS": {
+			case CUSTOMER: {
 				cust_viewCustomerBtn.setVisible(false);
 				cust_deleteCustomerBtn.setVisible(false);
 				cust_editCustomerBtn.setVisible(false);
@@ -1461,15 +1461,15 @@ public class ApplicationFrame extends JFrame {
 	*/
 	
 	/**
-	 * Get a prepared MySQL query for the appropriate table, specified by the parameter tableName.
-	 * @param tableName - The name of the table the query is for. For example - "CUSTOMERS" for the customers table. 
+	 * Get a prepared MySQL query for the appropriate table, specified by the parameter entityType.
+	 * @param entityType - The Entity.EntityTypes of the table the query is for. For example - Entity.EntityTypes.CUSTOMER for the customers table. 
 	 * @return Returns the finished query as a String for the appropriate table.
 	 */
-	public String prepareTableQuery(String tableName) {
+	public String prepareTableQuery(Entity.EntityTypes entityType) {
 		String query = null;
 		
-		switch(tableName) {
-			case "CUSTOMERS": {
+		switch(entityType) {
+			case CUSTOMER: {
 				
 				if(cust_customerNoChckbx.isSelected() || cust_customerNameChckbx.isSelected()) {
 					
@@ -1493,16 +1493,14 @@ public class ApplicationFrame extends JFrame {
 					//If the search field is just left as "Search..." or there's nothing in it, then select everything from the table.
 					if(cust_searchTextField.getText().equals("Search...") || cust_searchTextField.getText().length() == 0) query = "SELECT * FROM `customers`";
 					
-				} else {
-					query = null;
-				}
+				} 
 				
 				break;
 			}
-			case "EMPLOYEES": {
+			case EMPLOYEE: {
 				break;
 			}
-			case "USERS": {
+			case USER: {
 				break;
 			}
 		}
@@ -1516,12 +1514,12 @@ public class ApplicationFrame extends JFrame {
 	private String query = null;
 	
 	/**
-	 * Refresh the appropriate table. The table to be refreshed is decided by the parameter tableName.
+	 * Refresh the appropriate table. The table to be refreshed is decided by the parameter entityType.
 	 * Get the list of Customer, Employee or User objects, depending on the query (prepared in the prepareTableQuery method) sent.
 	 * From the list of objects, prepare the tables rows and then populate the table with the data.
-	 * @param tableName - The name of the table to refresh. "CUSTOMERS", "EMPLOYEES", "USERS".
+	 * @param entityType - The name of the table to refresh. Entity.EntityTypes.CUSTOMER, "EMPLOYEES", "USERS".
 	 */
-	public void refreshTable(final String tableName) {
+	public void refreshTable(final Entity.EntityTypes entityType) {
 		
 		this.columnNames = null;
 		this.rowData = null;
@@ -1539,31 +1537,31 @@ public class ApplicationFrame extends JFrame {
 			@Override
 			protected Integer doInBackground() throws Exception {
 				
-				switch(tableName) {		
-					case "CUSTOMERS": {
+				switch(entityType) {		
+					case CUSTOMER: {
 					
 						table = cust_customersTable;
 						
-						query = prepareTableQuery(tableName);
+						query = prepareTableQuery(entityType);
 						
 						//If query is not null at this point, then atleast one of the checkboxes are ticked so get the data.
 						if(null != query) {
 							
 							//Get the list of Customer objects generated from the query. Then get an array containing all the data from the objects so it can be displayed in the table.
-							customerList = appManager.getTableRowData("CUSTOMERS", query);  
+							customerList = appManager.getTableRowData(Entity.EntityTypes.CUSTOMER, query);  
 							
 							columnNames = cust_tableColumnNames;
 							
-							rowData = appManager.getRowData("CUSTOMERS", customerList);
+							rowData = appManager.getRowData(Entity.EntityTypes.CUSTOMER, customerList);
 							
 						}			
 						
 						break;
 					} 
-					case "EMPLOYEES": {
+					case EMPLOYEE: {
 						break;
 					}
-					case "USERS": {
+					case USER: {
 						break;
 					}
 				}
