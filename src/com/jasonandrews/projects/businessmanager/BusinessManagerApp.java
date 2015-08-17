@@ -24,6 +24,8 @@ public class BusinessManagerApp {
 					
 					appFrame.loadProperties();
 					
+					//Request focus, this stops the 'Login' button on the main menu being 'focused' when the app starts.
+					appFrame.requestFocusInWindow();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

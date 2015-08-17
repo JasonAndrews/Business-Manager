@@ -57,6 +57,7 @@ import javax.swing.JCheckBox;
 
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -98,11 +99,17 @@ public class ApplicationFrame extends JFrame {
 	
 	private PopupDialog popupFrame;	
 	private JPanel currentPanel;
-		
+	
+	//The different content panels.
 	private JPanel mm_contentPanel;
 	private JPanel config_contentPanel;
 	private JPanel login_contentPanel;
 	private JPanel home_contentPanel;
+	
+	//The main menus buttons.
+	private JButton mm_loginBtn;
+	private JButton mm_configurationBtn;
+	private JButton mm_exitBtn;
 	
 	private JPanel cust_contentPanel;
 	
@@ -119,8 +126,8 @@ public class ApplicationFrame extends JFrame {
 	
 	private String[] cust_tableColumnNames;
 	
-	private static final Color BUTTON_BACKGROUND_COLOR = Color.BLACK;
-	private static final Color BUTTON_FOREGROUND_COLOR = Color.WHITE;
+	private static final Color BUTTON_BACKGROUND_COLOR = Color.WHITE;
+	private static final Color BUTTON_FOREGROUND_COLOR = Color.BLACK;
 	private JTextField login_usernameTextField;
 	private JPasswordField login_passwordField;
 	private JTextField cust_searchTextField;
@@ -136,9 +143,10 @@ public class ApplicationFrame extends JFrame {
 	
 	private JLabel loadingScreenImage;
 	
-	private JLabel cust_viewTableLbl;
-	private JLabel cust_editTableLbl;
-	private JLabel cust_deleteTableLbl;
+	private JButton cust_viewTableLbl;
+	private JButton cust_editTableLbl;
+	private JButton cust_deleteTableLbl;
+
 	
 	/**
 	 * @wbp.nonvisual location=82,359
@@ -230,13 +238,6 @@ public class ApplicationFrame extends JFrame {
 		mm_contentPanel.setBackground(Color.WHITE);
 		mm_contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		mm_contentPanel.setLayout(null);		
-		mm_contentPanel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				System.out.println("CLICKED MAIN MENU PANEL");
-			}
-		});
-		
 		mm_contentPanel.add(loadingScreenImage);
 		loadingScreenImage.setVisible(false);
 		
@@ -254,32 +255,137 @@ public class ApplicationFrame extends JFrame {
 		mainMenuPanel.add(mainMenuConnectionLbStatus);
 		*/
 		
-		JButton mm_configurationBtn = new JButton("Configuration");		
-		mm_configurationBtn.setToolTipText("Configure the database settings.");
+		//The login button on the main menu.
+		mm_loginBtn = new JButton("Login");
+		mm_loginBtn.setToolTipText("Log into the application.");	
+		mm_loginBtn.setBackground(BUTTON_BACKGROUND_COLOR);
+		mm_loginBtn.setForeground(BUTTON_FOREGROUND_COLOR);
+		mm_loginBtn.setBounds(268, 128, 122, 33);		
+		mm_loginBtn.setBorder(null);
+		mm_loginBtn.setFocusPainted(false);
+		mm_loginBtn.setContentAreaFilled(false);
+		mm_loginBtn.addActionListener(new ActionListener() {			
+			public void actionPerformed(ActionEvent arg0) {					
+				display("LOGIN");
+			}				
+		});
+		mm_loginBtn.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				mm_loginBtn.setForeground(Color.GRAY);
+				mm_configurationBtn.setForeground(Color.BLACK);
+				mm_exitBtn.setForeground(Color.BLACK);
+			}
+
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				mm_loginBtn.setForeground(Color.BLACK);				
+			}
+			
+		});
+		mm_loginBtn.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent arg0) { }
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) { 
+				//When the mouse hovers over the button, set the text to gray.
+				mm_loginBtn.setForeground(Color.GRAY);
+				mm_configurationBtn.setForeground(Color.BLACK);
+				mm_exitBtn.setForeground(Color.BLACK);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				//When the mouse stops hovering over the button, set the text back to black.
+				mm_loginBtn.setForeground(Color.BLACK);
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		mm_contentPanel.add(mm_loginBtn);
+		
+		//The configuration button on the main menu.
+		mm_configurationBtn = new JButton("Configuration");		
+		mm_configurationBtn.setToolTipText("Configure the database settings.");		
+		mm_configurationBtn.setBorder(null);
+		mm_configurationBtn.setFocusPainted(false);
+		mm_configurationBtn.setBackground(BUTTON_BACKGROUND_COLOR);
+		mm_configurationBtn.setForeground(BUTTON_FOREGROUND_COLOR);
+		mm_configurationBtn.setBounds(268, 169, 122, 33);
+		mm_configurationBtn.setContentAreaFilled(false);
 		mm_configurationBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				display("CONFIGURATION");
 				//When the Configure button is clicked/pressed.
 			}
 		});
-		mm_configurationBtn.setBackground(BUTTON_BACKGROUND_COLOR);
-		mm_configurationBtn.setForeground(BUTTON_FOREGROUND_COLOR);
-		mm_configurationBtn.setBounds(268, 169, 122, 33);
+		mm_configurationBtn.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				mm_loginBtn.setForeground(Color.BLACK);
+				mm_configurationBtn.setForeground(Color.GRAY);
+				mm_exitBtn.setForeground(Color.BLACK);
+				
+			}
+
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				mm_configurationBtn.setForeground(Color.BLACK);				
+			}
+			
+		});
+		mm_configurationBtn.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent arg0) { }
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) { 
+				//When the mouse hovers over the button, set the text to gray.
+				mm_loginBtn.setForeground(Color.BLACK);
+				mm_configurationBtn.setForeground(Color.GRAY);
+				mm_exitBtn.setForeground(Color.BLACK);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				//When the mouse stops hovering over the button, set the text back to black.
+				mm_configurationBtn.setForeground(Color.BLACK);
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
 		mm_contentPanel.add(mm_configurationBtn);
 		
-		JButton mm_loginBtn = new JButton("Login");
-		mm_loginBtn.addActionListener(new ActionListener() {			
-			public void actionPerformed(ActionEvent arg0) {	
-				
-				display("LOGIN");
-			}				
-		});
-		mm_loginBtn.setBackground(BUTTON_BACKGROUND_COLOR);
-		mm_loginBtn.setForeground(BUTTON_FOREGROUND_COLOR);
-		mm_loginBtn.setBounds(268, 128, 122, 33);		
-		mm_contentPanel.add(mm_loginBtn);
-		
-		JButton mm_exitBtn = new JButton("Exit");
+		//The exit button on the main menu.
+		mm_exitBtn = new JButton("Exit");
+		mm_exitBtn.setToolTipText("Exit the application");
 		mm_exitBtn.addActionListener(new ActionListener() {
 
 			@Override
@@ -288,9 +394,59 @@ public class ApplicationFrame extends JFrame {
 			}
 			
 		});
+		mm_exitBtn.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				mm_loginBtn.setForeground(Color.BLACK);
+				mm_configurationBtn.setForeground(Color.BLACK);
+				mm_exitBtn.setForeground(Color.GRAY);
+			}
+
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				mm_exitBtn.setForeground(Color.BLACK);				
+			}
+			
+		});
+		mm_exitBtn.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent arg0) { }
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) { 
+				//When the mouse hovers over the button, set the text to gray.
+				mm_loginBtn.setForeground(Color.BLACK);
+				mm_configurationBtn.setForeground(Color.BLACK);
+				mm_exitBtn.setForeground(Color.GRAY);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				//When the mouse stops hovering over the button, set the text back to black.
+				mm_exitBtn.setForeground(Color.BLACK);
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
 		mm_exitBtn.setBackground(BUTTON_BACKGROUND_COLOR);
 		mm_exitBtn.setForeground(BUTTON_FOREGROUND_COLOR);
+		mm_exitBtn.setFocusPainted(false);
+		mm_exitBtn.setBorder(null);
 		mm_exitBtn.setBounds(268, 213, 122, 33);
+		mm_exitBtn.setContentAreaFilled(false);
 		mm_contentPanel.add(mm_exitBtn);
 		
 		/*
@@ -836,16 +992,20 @@ public class ApplicationFrame extends JFrame {
 		cust_contentPanel.add(cust_customerNameChckbx);
 		
 		//The side icons (View, Edit and Delete) that appear to the left of the table when a user clicks on a valid row in the table.
-		cust_viewTableLbl = new JLabel("");
+		//The 'View' side icon.
+		cust_viewTableLbl = new JButton("");
 		cust_viewTableLbl.setBounds(55, 100, 25, 20);
 		cust_viewTableLbl.setBackground(Color.WHITE);
 		cust_viewTableLbl.setBorder(null);
-		cust_viewTableLbl.setIcon(new ImageIcon("lib/images/view_entity_image.png"));
+		cust_viewTableLbl.setIcon(new ImageIcon("lib/images/view_icon_black_20x20.png"));
+		cust_viewTableLbl.setRolloverIcon(new ImageIcon("lib/images/view_icon_grey_20x20.png"));
 		cust_viewTableLbl.setVisible(false);
-		cust_viewTableLbl.addMouseListener(new MouseListener() {
+		cust_viewTableLbl.addActionListener(new ActionListener() {
 
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void actionPerformed(ActionEvent arg0) {
+				//View information about the customer.
+				
 				int selectedRow = cust_customersTable.getSelectedRow();
 				
 				if(selectedRow >= 0) { //Make sure the selected row is valid.
@@ -854,33 +1014,24 @@ public class ApplicationFrame extends JFrame {
 					popupFrame.setVisible(true);
 					popup_optionsPopup.setVisible(false);
 				}
+				
 			}
-
-			@Override
-			public void mouseEntered(MouseEvent arg0) { }
-
-			@Override
-			public void mouseExited(MouseEvent arg0) { }
-
-			@Override
-			public void mousePressed(MouseEvent arg0) { }
-
-			@Override
-			public void mouseReleased(MouseEvent arg0) { }
 			
 		});
 		cust_contentPanel.add(cust_viewTableLbl);
 				
-		cust_editTableLbl = new JLabel("");
+		//The 'Edit' side icon.
+		cust_editTableLbl = new JButton("");
 		cust_editTableLbl.setBounds(30, 100, 20, 20);
 		cust_editTableLbl.setBackground(Color.WHITE);
 		cust_editTableLbl.setBorder(null);
-		cust_editTableLbl.setIcon(new ImageIcon("lib/images/edit_entity_image.png"));
+		cust_editTableLbl.setIcon(new ImageIcon("lib/images/edit_icon_black_20x20.png"));
+		cust_editTableLbl.setRolloverIcon(new ImageIcon("lib/images/edit_icon_grey_20x20.png"));
 		cust_editTableLbl.setVisible(false);
-		cust_editTableLbl.addMouseListener(new MouseListener() {
+		cust_editTableLbl.addActionListener(new ActionListener() {
 
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void actionPerformed(ActionEvent arg0) {
 				//Edit information about the customer (can also be done when viewing the customer, but this is direct.)
 				
 				int selectedRow = cust_customersTable.getSelectedRow();
@@ -895,47 +1046,26 @@ public class ApplicationFrame extends JFrame {
 				}	
 				
 			}
-
-			@Override
-			public void mouseEntered(MouseEvent arg0) { }
-
-			@Override
-			public void mouseExited(MouseEvent arg0) { }
-
-			@Override
-			public void mousePressed(MouseEvent arg0) { }
-
-			@Override
-			public void mouseReleased(MouseEvent arg0) { }
 			
 		});
 		cust_contentPanel.add(cust_editTableLbl);
 		
-		cust_deleteTableLbl = new JLabel("");
+		//The 'Delete' side icon.
+		cust_deleteTableLbl = new JButton("");
 		cust_deleteTableLbl.setBounds(5, 98, 20, 25);
 		cust_deleteTableLbl.setBackground(Color.WHITE);
 		cust_deleteTableLbl.setBorder(null);
-		cust_deleteTableLbl.setIcon(new ImageIcon("lib/images/delete_entity_image.png"));
+		cust_deleteTableLbl.setIcon(new ImageIcon("lib/images/delete_icon_black_20x20.png"));
+		cust_deleteTableLbl.setRolloverIcon(new ImageIcon("lib/images/delete_icon_grey_20x20.png"));
 		cust_deleteTableLbl.setVisible(false);
-		cust_deleteTableLbl.addMouseListener(new MouseListener() {
+		cust_deleteTableLbl.addActionListener(new ActionListener() {
 
 			@Override
-			public void mouseClicked(MouseEvent arg0) { 
+			public void actionPerformed(ActionEvent arg0) {
 				//Delete the customer from the database.
 				//Make a popup for a confirmation.
+				
 			}
-
-			@Override
-			public void mouseEntered(MouseEvent arg0) { }
-
-			@Override
-			public void mouseExited(MouseEvent arg0) { }
-
-			@Override
-			public void mousePressed(MouseEvent arg0) { }
-
-			@Override
-			public void mouseReleased(MouseEvent arg0) { }
 			
 		});
 		cust_contentPanel.add(cust_deleteTableLbl);		

@@ -40,8 +40,19 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class PopupDialog extends JDialog {
+	
+	private static final ImageIcon EDIT_ICON_BLACK = new ImageIcon("lib/images/edit_icon_black_40x40.png");
+	private static final ImageIcon EDIT_ICON_GREY = new ImageIcon("lib/images/edit_icon_grey_40x40.png");
+	
+	private static final ImageIcon SAVE_ICON_BLACK = new ImageIcon("lib/images/save_icon_black_40x40.png");
+	private static final ImageIcon SAVE_ICON_GREY = new ImageIcon("lib/images/save_icon_grey_40x40.png");
+	
+	private static final ImageIcon CLOSE_ICON_BLACK = new ImageIcon("lib/images/close_icon_black_40x40.png");
+	private static final ImageIcon CLOSE_ICON_GREY = new ImageIcon("lib/images/close_icon_grey_40x40.png");
 	
 	private AppManager appManager;
 	private ApplicationFrame appFrame; //Object reference to the main frame of the application.
@@ -100,7 +111,8 @@ public class PopupDialog extends JDialog {
 		
 		this.appManager = appManager;
 		this.appFrame = appFrame;
-		setBounds(100, 100, 206, 456);
+		setResizable(false);
+		setBounds(100, 100, 206, 482);
 		getContentPane().setLayout(new CardLayout(0, 0));
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		
@@ -124,13 +136,41 @@ public class PopupDialog extends JDialog {
 		getContentPane().add(customersFormPanel, "name_26635925853738");
 		customersFormPanel.setLayout(null);
 		
+		
+		c_customerNoLbl = new JLabel("Customer Number");
+		c_customerNoLbl.setFocusable(false);
+		c_customerNoLbl.setForeground(Color.DARK_GRAY);
+		c_customerNoLbl.setHorizontalAlignment(SwingConstants.LEFT);
+		c_customerNoLbl.setBounds(28, 22, 135, 14);
+		customersFormPanel.add(c_customerNoLbl);
+		
+		c_customerNoTextField = new JTextField();		
+		c_customerNoTextField.setEditable(false);		
+		c_customerNoTextField.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		c_customerNoTextField.setBackground(Color.WHITE);
+		c_customerNoTextField.setColumns(10);			
+		c_customerNoTextField.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				c_customerNoTextField.setBorder(new LineBorder(Color.BLACK));
+			}
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				c_customerNoTextField.setBorder(new LineBorder(Color.GRAY));
+			}
+		});
+		customersFormPanel.add(c_customerNoTextField);
+		
 		c_firstNameLbl = new JLabel("First Name");
+		c_firstNameLbl.setFocusable(false);
 		c_firstNameLbl.setForeground(Color.DARK_GRAY);
 		c_firstNameLbl.setHorizontalAlignment(SwingConstants.LEFT);
 		c_firstNameLbl.setBounds(28, 83, 99, 14);
 		customersFormPanel.add(c_firstNameLbl);
 		
 		c_lastNameLbl = new JLabel("Last Name");
+		c_lastNameLbl.setFocusable(false);
 		c_lastNameLbl.setForeground(Color.DARK_GRAY);
 		c_lastNameLbl.setHorizontalAlignment(SwingConstants.LEFT);
 		c_lastNameLbl.setBounds(28, 129, 99, 14);
@@ -141,8 +181,20 @@ public class PopupDialog extends JDialog {
 		c_firstNameTextField.setEditable(false);
 		c_firstNameTextField.setBackground(Color.WHITE);
 		c_firstNameTextField.setBounds(28, 98, 136, 20);
-		customersFormPanel.add(c_firstNameTextField);
 		c_firstNameTextField.setColumns(10);
+		c_firstNameTextField.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				c_firstNameTextField.setBorder(new LineBorder(Color.BLACK));
+			}
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				c_firstNameTextField.setBorder(new LineBorder(Color.GRAY));
+			}
+		});
+		customersFormPanel.add(c_firstNameTextField);
+		
 		
 		c_lastNameTextField = new JTextField();
 		c_lastNameTextField.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
@@ -150,30 +202,28 @@ public class PopupDialog extends JDialog {
 		c_lastNameTextField.setColumns(10);
 		c_lastNameTextField.setBackground(Color.WHITE);
 		c_lastNameTextField.setBounds(28, 145, 136, 20);
+		c_lastNameTextField.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				c_lastNameTextField.setBorder(new LineBorder(Color.BLACK));
+			}
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				c_lastNameTextField.setBorder(new LineBorder(Color.GRAY));
+			}
+		});
 		customersFormPanel.add(c_lastNameTextField);
 		
-		c_customerNoLbl = new JLabel("Customer Number");
-		c_customerNoLbl.setForeground(Color.DARK_GRAY);
-		c_customerNoLbl.setHorizontalAlignment(SwingConstants.LEFT);
-		c_customerNoLbl.setBounds(28, 22, 135, 14);
-		customersFormPanel.add(c_customerNoLbl);
-		
-		c_customerNoTextField = new JTextField();	
-		c_customerNoTextField.setEditable(false);
-		
-		c_customerNoTextField.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		c_customerNoTextField.setBackground(Color.WHITE);
-		c_customerNoTextField.setColumns(10);
-		c_customerNoTextField.setBounds(27, 36, 136, 20);
-		customersFormPanel.add(c_customerNoTextField);
-		
 		c_addressTwoLbl = new JLabel("Address Two:");
+		c_addressTwoLbl.setFocusable(false);
 		c_addressTwoLbl.setForeground(Color.DARK_GRAY);
 		c_addressTwoLbl.setHorizontalAlignment(SwingConstants.LEFT);
 		c_addressTwoLbl.setBounds(28, 242, 99, 14);
 		customersFormPanel.add(c_addressTwoLbl);
 		
 		c_addressOneLbl = new JLabel("Address One");
+		c_addressOneLbl.setFocusable(false);
 		c_addressOneLbl.setForeground(Color.DARK_GRAY);
 		c_addressOneLbl.setHorizontalAlignment(SwingConstants.LEFT);
 		c_addressOneLbl.setBounds(28, 196, 99, 14);
@@ -185,6 +235,17 @@ public class PopupDialog extends JDialog {
 		c_addressOneTextField.setBackground(Color.WHITE);
 		c_addressOneTextField.setColumns(10);
 		c_addressOneTextField.setBounds(28, 211, 136, 20);
+		c_addressOneTextField.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				c_addressOneTextField.setBorder(new LineBorder(Color.BLACK));
+			}
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				c_addressOneTextField.setBorder(new LineBorder(Color.GRAY));
+			}
+		});
 		customersFormPanel.add(c_addressOneTextField);
 		
 		c_addressTwoTextField = new JTextField();
@@ -193,15 +254,28 @@ public class PopupDialog extends JDialog {
 		c_addressTwoTextField.setBackground(Color.WHITE);
 		c_addressTwoTextField.setColumns(10);
 		c_addressTwoTextField.setBounds(28, 256, 136, 20);
+		c_addressTwoTextField.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				c_addressTwoTextField.setBorder(new LineBorder(Color.BLACK));
+			}
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				c_addressTwoTextField.setBorder(new LineBorder(Color.GRAY));
+			}
+		});
 		customersFormPanel.add(c_addressTwoTextField);
 		
 		c_addressCountryLbl = new JLabel("Country");
+		c_addressCountryLbl.setFocusable(false);
 		c_addressCountryLbl.setForeground(Color.DARK_GRAY);
 		c_addressCountryLbl.setHorizontalAlignment(SwingConstants.LEFT);
 		c_addressCountryLbl.setBounds(28, 332, 99, 14);
 		customersFormPanel.add(c_addressCountryLbl);
 		
 		c_addressCityLbl = new JLabel("City");
+		c_addressCityLbl.setFocusable(false);
 		c_addressCityLbl.setForeground(Color.DARK_GRAY);
 		c_addressCityLbl.setHorizontalAlignment(SwingConstants.LEFT);
 		c_addressCityLbl.setBounds(28, 287, 99, 14);
@@ -213,6 +287,17 @@ public class PopupDialog extends JDialog {
 		c_addressCityTextField.setBackground(Color.WHITE);
 		c_addressCityTextField.setColumns(10);
 		c_addressCityTextField.setBounds(28, 301, 136, 20);
+		c_addressCityTextField.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				c_addressCityTextField.setBorder(new LineBorder(Color.BLACK));
+			}
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				c_addressCityTextField.setBorder(new LineBorder(Color.GRAY));
+			}
+		});
 		customersFormPanel.add(c_addressCityTextField);
 		
 		c_addressCountryTextField = new JTextField();
@@ -221,10 +306,43 @@ public class PopupDialog extends JDialog {
 		c_addressCountryTextField.setBackground(Color.WHITE);
 		c_addressCountryTextField.setColumns(10);
 		c_addressCountryTextField.setBounds(28, 346, 136, 20);
+		c_addressCountryTextField.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				c_addressCountryTextField.setBorder(new LineBorder(Color.BLACK));
+			}
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				c_addressCountryTextField.setBorder(new LineBorder(Color.GRAY));
+			}
+		});
 		customersFormPanel.add(c_addressCountryTextField);
 		
 		c_confirmBtn = new JButton("");
+		c_confirmBtn.addFocusListener(new FocusAdapter() {
+			
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				if(c_confirmBtn.getIcon() == EDIT_ICON_BLACK) {
+					c_confirmBtn.setIcon(EDIT_ICON_GREY);
+				} else if(c_confirmBtn.getIcon() == SAVE_ICON_BLACK) {
+					c_confirmBtn.setIcon(SAVE_ICON_GREY);
+				}
+			}
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				if(c_confirmBtn.getIcon() == EDIT_ICON_GREY) {
+					c_confirmBtn.setIcon(EDIT_ICON_BLACK);
+				} else if(c_confirmBtn.getIcon() == SAVE_ICON_GREY) {
+					c_confirmBtn.setIcon(SAVE_ICON_BLACK);
+				}
+			}
+		});
 		c_confirmBtn.addActionListener(new ActionListener() {
+			
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				
 				//Check if the user is currently creating a new customer.
@@ -266,7 +384,9 @@ public class PopupDialog extends JDialog {
 						appManager.updateDatabase(Entity.EntityTypes.CUSTOMER, customer);
 						
 						c_isEditingCustomer = false;
-						c_confirmBtn.setText("Edit"); //Change the text on the button to "Edit".
+						//c_confirmBtn.setText("Edit"); //Change the text on the button to "Edit".
+						c_confirmBtn.setIcon(EDIT_ICON_BLACK);
+						c_confirmBtn.setRolloverIcon(EDIT_ICON_GREY);
 						setFormEditable(Entity.EntityTypes.CUSTOMER, false); //Do allow users to edit the information on the form.
 					} 					
 					
@@ -275,17 +395,26 @@ public class PopupDialog extends JDialog {
 					setFormEditable(Entity.EntityTypes.CUSTOMER, true);
 					
 					c_isEditingCustomer = true;
-					c_confirmBtn.setText("Save");
+					//c_confirmBtn.setText("Save");
+					c_confirmBtn.setIcon(SAVE_ICON_BLACK);
+					c_confirmBtn.setRolloverIcon(SAVE_ICON_GREY);
 					c_firstNameTextField.requestFocus();
 				}			
 			}
-		});
+		});	
 		c_confirmBtn.setBackground(Color.WHITE);
-		c_confirmBtn.setBounds(40, 377, 30, 30);
+		c_confirmBtn.setBounds(50, 385, 40, 40);
+		c_confirmBtn.setIcon(EDIT_ICON_BLACK);
+		c_confirmBtn.setRolloverIcon(EDIT_ICON_GREY);
+		c_confirmBtn.setBorder(null);
 		customersFormPanel.add(c_confirmBtn);
 		
-		c_closeBtn = new JButton("Close");
+		c_closeBtn = new JButton("");
+		c_closeBtn.setBackground(Color.WHITE);
+		c_closeBtn.setBorder(null);
 		c_closeBtn.addActionListener(new ActionListener() {
+			
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				setVisible(false);
 				
@@ -294,7 +423,21 @@ public class PopupDialog extends JDialog {
 				resetForm(Entity.EntityTypes.CUSTOMER);
 			}
 		});
-		c_closeBtn.setBounds(109, 377, 89, 23);
+		c_closeBtn.addFocusListener(new FocusAdapter() {
+			
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				c_closeBtn.setIcon(CLOSE_ICON_GREY);
+			}
+			
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				c_closeBtn.setIcon(CLOSE_ICON_BLACK);				
+			}
+		});
+		c_closeBtn.setIcon(CLOSE_ICON_BLACK);
+		c_closeBtn.setRolloverIcon(CLOSE_ICON_GREY);
+		c_closeBtn.setBounds(100, 385, 40, 40);
 		customersFormPanel.add(c_closeBtn);
 		
 		JSeparator cust_separatorOne = new JSeparator();
@@ -324,7 +467,9 @@ public class PopupDialog extends JDialog {
 		switch(entityType) {
 			case CUSTOMER: {				
 				c_isEditingCustomer = editingForm;
-				c_confirmBtn.setText("Save");
+				c_confirmBtn.setIcon(SAVE_ICON_BLACK);
+				c_confirmBtn.setRolloverIcon(SAVE_ICON_GREY);
+				//c_confirmBtn.setText("Save");
 				
 				break;
 			}
@@ -353,12 +498,12 @@ public class PopupDialog extends JDialog {
 				customersFormPanel.setVisible(true);
 				
 				Integer customerNumber = ((Integer) info[0]).intValue();
-				System.out.println("Customer Number: " + customerNumber);
+				//System.out.println("Customer Number: " + customerNumber);
 				
 				//employeePanel.setVisible(false);
 				//userPanel.setVisible(false);
 				if(customerNumber > 0) { //If they're viewing an existing customer.
-					c_confirmBtn.setText("Edit");
+					//c_confirmBtn.setText("Edit");
 					
 					c_customerNoTextField.setText(info[0].toString());
 					c_firstNameTextField.setText(info[1].toString());
@@ -370,7 +515,7 @@ public class PopupDialog extends JDialog {
 				} else { //If they're going to be creating a new user.
 					c_isCreatingNewCustomer = true;
 					
-					//Hide the Customer Number components.
+					//Hide the Customer Number components.					
 					c_customerNoTextField.setVisible(false); 
 					c_customerNoLbl.setVisible(false);
 					
@@ -383,7 +528,8 @@ public class PopupDialog extends JDialog {
 					c_addressCountryTextField.setText("");
 					
 					//c_confirmBtn.setText("Create");
-					c_confirmBtn.setIcon(new ImageIcon("lib/images/create_icon.png"));
+					c_confirmBtn.setIcon(SAVE_ICON_BLACK);
+					c_confirmBtn.setRolloverIcon(SAVE_ICON_GREY);
 					
 					setFormEditable(Entity.EntityTypes.CUSTOMER, true);
 				}
@@ -417,20 +563,20 @@ public class PopupDialog extends JDialog {
 				c_addressCountryTextField.setEditable(toggle);	
 				
 				if(toggle) {
-					c_firstNameLbl.setText("First Name* :");
-					c_lastNameLbl.setText("Last Name* :");
-					c_addressOneLbl.setText("Address One* :");
-					c_addressTwoLbl.setText("Address Two  :");
-					c_addressCityLbl.setText("City* :");
-					c_addressCountryLbl.setText("Country* :");
+					c_firstNameLbl.setText("First Name *");
+					c_lastNameLbl.setText("Last Name *");
+					c_addressOneLbl.setText("Address One *");
+					c_addressTwoLbl.setText("Address Two *");
+					c_addressCityLbl.setText("City *");
+					c_addressCountryLbl.setText("Country *");
 					
 				} else {
-					c_firstNameLbl.setText("First Name:");
-					c_lastNameLbl.setText("Last Name:");
-					c_addressOneLbl.setText("Address One:");
-					c_addressTwoLbl.setText("Address Two:");
-					c_addressCityLbl.setText("City:");
-					c_addressCountryLbl.setText("Country:");
+					c_firstNameLbl.setText("First Name");
+					c_lastNameLbl.setText("Last Name");
+					c_addressOneLbl.setText("Address One");
+					c_addressTwoLbl.setText("Address Two");
+					c_addressCityLbl.setText("City");
+					c_addressCountryLbl.setText("Country");
 				}
 				
 			}
@@ -462,12 +608,12 @@ public class PopupDialog extends JDialog {
 				c_addressCountryTextField.setEditable(false);
 				c_addressCountryTextField.setText("");
 				
-				c_firstNameLbl.setText("First Name:");
-				c_lastNameLbl.setText("Last Name:");
-				c_addressOneLbl.setText("Address One:");
-				c_addressTwoLbl.setText("Address Two:");
-				c_addressCityLbl.setText("City:");
-				c_addressCountryLbl.setText("Country:");
+				c_firstNameLbl.setText("First Name");
+				c_lastNameLbl.setText("Last Name");
+				c_addressOneLbl.setText("Address One");
+				c_addressTwoLbl.setText("Address Two");
+				c_addressCityLbl.setText("City");
+				c_addressCountryLbl.setText("Country");
 				
 				c_firstNameLbl.setForeground(Color.BLACK);
 				c_lastNameLbl.setForeground(Color.BLACK);
@@ -477,7 +623,11 @@ public class PopupDialog extends JDialog {
 				
 				c_isEditingCustomer = false;
 				c_isCreatingNewCustomer = false;
-				c_confirmBtn.setText("Edit");
+				
+				c_confirmBtn.setIcon(EDIT_ICON_BLACK);
+				c_confirmBtn.setRolloverIcon(EDIT_ICON_GREY);
+				
+				//c_confirmBtn.setText("Edit");
 				break;				
 			}
 			case EMPLOYEE: { }
