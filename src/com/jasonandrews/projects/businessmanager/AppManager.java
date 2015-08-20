@@ -72,20 +72,14 @@ public class AppManager {
 		
 		try {
 			
-			connection = dbConnector.getConnection();			
-			System.out.println(connection);
+			objectList = new ArrayList<Entity>();
 			
-			statement = connection.createStatement();			
-			System.out.println(statement);
+			connection = dbConnector.getConnection();
+			
+			statement = connection.createStatement();
 			
 			resultSet = statement.executeQuery(query);
-			System.out.println(resultSet);
-			
-			objectList = new ArrayList<Entity>();
-			//System.out.println("Counted rows: " + count);
-			
-			
-			
+						
 			
 			//NEED A THREAD HERE!!
 			while(resultSet.next()) { //While there is another row of data.		
@@ -109,7 +103,7 @@ public class AppManager {
 			}
 			
 		} catch (com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException ntce) {			
-			appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "The application has lost connection to the database!\nYou could try testing your connection to the database\nby from the Configuration screen.");
+			appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "The application has lost connection to the database!\n\nYou could try testing your connection to the database\nfrom the Configuration screen.");
 			ntce.printStackTrace();
 		} catch (com.mysql.jdbc.exceptions.jdbc4.CommunicationsException ce) {
 			appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "The application could not connect to the database!");
@@ -509,7 +503,7 @@ public class AppManager {
 					}
 					
 				} catch (com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException ntce) {			
-					appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "Could not complete the request!\n\nThe application has lost connection to the database!\nYou could try testing your connection to the database\nby from the Configuration screen.");
+					appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "Could not complete the request!\n\nThe application has lost connection to the database!\n\nYou could try testing your connection to the database\nfrom the Configuration screen.");
 					ntce.printStackTrace();
 				} catch (com.mysql.jdbc.exceptions.jdbc4.CommunicationsException ce) {
 					appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "Could not complete the request!\n\nThe application could not connect to the database!");
@@ -537,6 +531,83 @@ public class AppManager {
 			}
 		};
 		sw.execute();
+	}
+	
+	
+	/**
+	 * Delete an entity from the database (Customer, Employee or User.)
+	 * @param entityType - The type of Entity that will be deleted (Customer, Employee, User.) 
+	 * @param entityToDelete - The Entity child object containing the information regarding the entity that will be deleted.
+	 */
+	public void deleteEntity(final Entity.EntityTypes entityType, final Entity entityToDelete) {
+		if(null == entityToDelete) return;
+		
+		SwingWorker<Integer, Integer> sw = new SwingWorker<Integer, Integer> () {
+
+			@Override
+			protected Integer doInBackground() throws Exception {
+				
+				Connection connection = null;
+				Statement statement = null;
+				
+				try {
+										
+					connection = dbConnector.getConnection();
+					
+					statement = connection.createStatement();
+					
+					switch(entityType) {
+					
+						case CUSTOMER: {
+							
+							Customer customer = (Customer) entityToDelete;
+														
+							int customerNumber = customer.getCustomerNumber();
+							
+							if(customerNumber > 0) {
+								String query = "DELETE FROM `customers` WHERE `customer_number` = '" + customer.getCustomerNumber() + "'";
+								statement.executeUpdate(query);								
+								appFrame.refreshTable(entityType);
+							}			
+							
+							break;
+						}
+						case EMPLOYEE: {
+							break;
+						}
+						case USER: {
+							break;
+						}
+					}
+				} catch (com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException ntce) {			
+					appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "Could not complete the request!\n\nThe application has lost connection to the database!\n\nYou could try testing your connection to the database\nfrom the Configuration screen.");
+					ntce.printStackTrace();
+				} catch (com.mysql.jdbc.exceptions.jdbc4.CommunicationsException ce) {
+					appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "Could not complete the request!\n\nThe application could not connect to the database!");
+					ce.printStackTrace();
+				} catch(Exception ex) {
+					ex.printStackTrace();
+				} finally {
+					if(connection != null) {
+						try {
+							connection.close();
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					}
+					if(statement != null) { 
+						try {
+							statement.close();
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					}
+				}				
+				return 1;
+			}			
+		};
+		sw.execute();
+		
 	}
 		
 }

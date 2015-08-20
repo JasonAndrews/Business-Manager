@@ -60,6 +60,10 @@ public class Customer extends Entity {
 	public int getCustomerNumber() {
 		return this.customerNumber;
 	}
+	
+	public String getFullName() {
+		return (this.firstName + " " + this.lastName);
+	}
 	public String getFirstName() {
 		return this.firstName;
 	}

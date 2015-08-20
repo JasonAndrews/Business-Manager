@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -99,6 +100,7 @@ public class ApplicationFrame extends JFrame {
 	
 	private PopupDialog popupFrame;	
 	private JPanel currentPanel;
+	private JTable currentlyDisplayedTable;
 	
 	//The different content panels.
 	private JPanel mm_contentPanel;
@@ -110,6 +112,10 @@ public class ApplicationFrame extends JFrame {
 	private JButton mm_loginBtn;
 	private JButton mm_configurationBtn;
 	private JButton mm_exitBtn;
+	
+	private JButton login_loginBtn;
+	private JButton login_clearBtn;
+	private JButton login_backBtn;
 	
 	private JPanel cust_contentPanel;
 	
@@ -135,17 +141,21 @@ public class ApplicationFrame extends JFrame {
 	private JCheckBox cust_customerNoChckbx;
 	private JCheckBox cust_customerNameChckbx;
 	
-	private JMenuBar menu_menuBar;	
+	private JMenuBar menu_menuBar;
+	private JMenu menu_usersMenu;
 	
+
 	private ArrayList<Entity> customerList; //A list of customer objects represented in the current customer table.
 	
 	//private JButton cust_refreshTableBtn; //The 'Refresh table' button.
 	
 	private JLabel loadingScreenImage;
 	
-	private JButton cust_viewTableLbl;
-	private JButton cust_editTableLbl;
-	private JButton cust_deleteTableLbl;
+	private JLabel home_welcomeUserLbl;
+	
+	private JButton cust_viewTableBtn;
+	private JButton cust_editTableBtn;
+	private JButton cust_deleteTableBtn;
 
 	
 	/**
@@ -233,27 +243,13 @@ public class ApplicationFrame extends JFrame {
 		loadingScreenImage.setHorizontalAlignment(SwingConstants.CENTER);
 		loadingScreenImage.setIcon(loadingScreenImageIcon);
 		
-		//Main Menu Panel.
+		//The main menu content panel.
 		mm_contentPanel = new JPanel();
 		mm_contentPanel.setBackground(Color.WHITE);
 		mm_contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		mm_contentPanel.setLayout(null);		
 		mm_contentPanel.add(loadingScreenImage);
 		loadingScreenImage.setVisible(false);
-		
-		/*
-		//A label to show whether or not the application is connected to the database (not useful any more.)
-		mainMenuConnectionLb = new JLabel("Connected: ");
-		mainMenuConnectionLb.setHorizontalAlignment(SwingConstants.RIGHT);
-		mainMenuConnectionLb.setBounds(500, 15, 70, 10);
-		mainMenuPanel.add(mainMenuConnectionLb);		
-		
-		mainMenuConnectionLbStatus = new JLabel(X_MARK_CHARACTER);
-		mainMenuConnectionLbStatus.setForeground(COLOR_RED);
-		mainMenuConnectionLbStatus.setHorizontalAlignment(SwingConstants.RIGHT);
-		mainMenuConnectionLbStatus.setBounds(515, 15, 70, 10);
-		mainMenuPanel.add(mainMenuConnectionLbStatus);
-		*/
 		
 		//The login button on the main menu.
 		mm_loginBtn = new JButton("Login");
@@ -304,16 +300,10 @@ public class ApplicationFrame extends JFrame {
 			}
 
 			@Override
-			public void mousePressed(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mousePressed(MouseEvent arg0) { }
 
 			@Override
-			public void mouseReleased(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void mouseReleased(MouseEvent arg0) { }
 			
 		});
 		mm_contentPanel.add(mm_loginBtn);
@@ -449,53 +439,9 @@ public class ApplicationFrame extends JFrame {
 		mm_exitBtn.setContentAreaFilled(false);
 		mm_contentPanel.add(mm_exitBtn);
 		
-		/*
-		JButton mm_testConnectionBtn = new JButton("Test Connection");
-		mm_testConnectionBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				String url = urlTextField.getText();
-				String user = userTextField.getText();
-				String password = passwordTextField.getText();
-				
-				if(!appManager.testConnectionToDatabase(url, user, password)) { //If the connection failed, then give them the error on the main menu.
-					errorLbl.setText("Could not connect, please enter the correct credentials on the Configuration form.");		
-					statusResultLbl.setText("Could not connect.");
-					statusResultLbl.setForeground(COLOR_RED);			
-					
-					mainMenuConnectionLbStatus.setText(X_MARK_CHARACTER);
-					mainMenuConnectionLbStatus.setForeground(COLOR_RED);
-					
-				} else { 
-					errorLbl.setText("");
-					mainMenuConnectionLbStatus.setText(CHECK_MARK_CHARACTER);
-					mainMenuConnectionLbStatus.setForeground(COLOR_GREEN);
-					statusResultLbl.setForeground(COLOR_GREEN);
-					statusResultLbl.setText("Connected.");
-				}
-			}
-		});
-		mm_testConnectionBtn.setBackground(BUTTON_BACKGROUND_COLOR);
-		mm_testConnectionBtn.setForeground(BUTTON_FOREGROUND_COLOR);		
-		mm_testConnectionBtn.setBounds(268, 257, 122, 33);
-		mainMenuPanel.add(mm_testConnectionBtn);
 		
-		
-		mm_errorLbl = new JLabel("");
-		mm_errorLbl.setForeground(COLOR_RED);
-		mm_errorLbl.setBounds(100, 301, 540, 14);
-		mainMenuPanel.add(mm_errorLbl);
-		*/		
-		//Configure Panel
-		
-		
-		//Creating the elements of the Configuration content pane.
+		//The configuration content panel.
 		config_contentPanel = new JPanel();
-		config_contentPanel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				System.out.println("CLICKED CONFIGURE PANEL");
-			}
-		});
 		config_contentPanel.setBackground(Color.WHITE);		
 		config_contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		config_contentPanel.setLayout(null);
@@ -531,6 +477,7 @@ public class ApplicationFrame extends JFrame {
 		config_userTextField.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyTyped(KeyEvent arg0) {
+				//When the user types in the database username JTextField, update the properties object with the newest username.
 				properties.setProperty("dbUser", config_userTextField.getText());
 			}
 		});
@@ -552,6 +499,7 @@ public class ApplicationFrame extends JFrame {
 		config_passwordTextField.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyTyped(KeyEvent arg0) {
+				//When the user types in the database password JPasswordField, update the properties object with the newest password.
 				properties.setProperty("dbPassword", new String(config_passwordTextField.getPassword()));
 			}
 		});
@@ -568,6 +516,7 @@ public class ApplicationFrame extends JFrame {
 		config_testConnectionBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
+				//Show the loading screen to the player so they know something is going on behind the scenes.
 				showLoadingScreen();
 				
 				SwingWorker<Integer, Integer> sw = null;
@@ -584,17 +533,12 @@ public class ApplicationFrame extends JFrame {
 						if(appManager.testConnectionToDatabase(url, user, password)) {
 							//The connection succeeded.
 							config_statusResultLbl.setForeground(COLOR_GREEN);
-							config_statusResultLbl.setText("Connected.");
-							//mainMenuConnectionLbStatus.setText(CHECK_MARK_CHARACTER);
-							//mainMenuConnectionLbStatus.setForeground(COLOR_GREEN);
-							
+							config_statusResultLbl.setText("Connected.");							
 							hideLoadingScreen();
 						} else {
 							//The connection failed.
 							config_statusResultLbl.setText("Connection failed.");
 							config_statusResultLbl.setForeground(COLOR_RED);	
-							//mainMenuConnectionLbStatus.setText(X_MARK_CHARACTER);
-							//mainMenuConnectionLbStatus.setForeground(COLOR_RED);
 							hideLoadingScreen();
 						}
 						
@@ -603,14 +547,7 @@ public class ApplicationFrame extends JFrame {
 					
 				};
 				sw.execute();
-				
-				//try connect to the database specified.				
-				
-				//String url = "jdbc:mysql://localhost:3306/business_manager";
-				//String user = "root";
-				//String pw = "";
-				
-				
+											
 			}
 		});
 		config_testConnectionBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
@@ -621,6 +558,7 @@ public class ApplicationFrame extends JFrame {
 		JButton config_resetFormBtn = new JButton("Reset");
 		config_resetFormBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				//Reset the configuration form.
 				config_urlTextField.setText("");
 				config_userTextField.setText("");
 				config_passwordTextField.setText("");
@@ -653,19 +591,12 @@ public class ApplicationFrame extends JFrame {
 		config_contentPanel.add(config_lowerSeparator);
 		
 		
-		//Setting up the Login content pane.
+		//The login content panel.
 		login_contentPanel = new JPanel();
-		login_contentPanel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				System.out.println("CLICKED LOGIN PANEL");
-			}
-		});
 		login_contentPanel.setBackground(Color.WHITE);
 		login_contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		login_contentPanel.setLayout(null);
-		login_contentPanel.setBounds(0,0,0,0);
-		
+		login_contentPanel.setBounds(0,0,0,0);	
 		
 		
 		login_errorLbl = new JLabel("");
@@ -676,13 +607,26 @@ public class ApplicationFrame extends JFrame {
 		
 		JLabel login_usernameLbl = new JLabel("Username:");
 		login_usernameLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-		login_usernameLbl.setBounds(169, 160, 81, 22);
+		login_usernameLbl.setBounds(169, 160, 81, 22);		
 		login_contentPanel.add(login_usernameLbl);
 		
 		login_usernameTextField = new JTextField();
 		login_usernameTextField.setBounds(260, 161, 207, 20);
-		login_contentPanel.add(login_usernameTextField);
 		login_usernameTextField.setColumns(10);
+		login_usernameTextField.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				login_usernameTextField.setBorder(new LineBorder(Color.BLACK));
+			}
+
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				login_usernameTextField.setBorder(new LineBorder(Color.GRAY));				
+			}
+			
+		});
+		login_contentPanel.add(login_usernameTextField);		
 		
 		JLabel login_passwordLbl = new JLabel("Password:");
 		login_passwordLbl.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -691,9 +635,47 @@ public class ApplicationFrame extends JFrame {
 		
 		login_passwordField = new JPasswordField();
 		login_passwordField.setBounds(260, 194, 207, 21);
+		login_passwordField.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				login_passwordField.setBorder(new LineBorder(Color.BLACK));				
+			}
+
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				login_passwordField.setBorder(new LineBorder(Color.GRAY));				
+			}
+			
+		});
 		login_contentPanel.add(login_passwordField);
 		
-		JButton login_loginBtn = new JButton("Login");
+		login_loginBtn = new CustomButton("Login");
+		login_loginBtn.setBorder(null);
+		login_loginBtn.setFocusPainted(false);
+		login_loginBtn.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent arg0) { }
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+				login_loginBtn.setForeground(Color.GRAY);
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				login_loginBtn.setForeground(Color.BLACK);				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) { }
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) { }
+			
+		});
 		login_loginBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {						
 				showLoadingScreen();
@@ -736,9 +718,7 @@ public class ApplicationFrame extends JFrame {
 							//The connection failed.
 							hideLoadingScreen();
 							appFrame.triggerError(ApplicationFrame.ERROR_CONNECTION_FAILED, "The connection to the database failed!\n\nPlease ensure your configuration credentials are correct!");
-							
-						}
-												
+						}												
 						return 1;
 					}
 					
@@ -751,7 +731,7 @@ public class ApplicationFrame extends JFrame {
 		login_loginBtn.setBounds(270, 240, 89, 23);		
 		login_contentPanel.add(login_loginBtn);
 		
-		JButton login_clearBtn = new JButton("Clear");
+		login_clearBtn = new JButton("Clear");
 		login_clearBtn.addActionListener(new ActionListener() {
 
 			@Override
@@ -777,7 +757,7 @@ public class ApplicationFrame extends JFrame {
 		login_separator.setBounds(260, 275, 207, 2);
 		login_contentPanel.add(login_separator);
 		
-		JButton login_backBtn = new JButton("Back");
+		login_backBtn = new JButton("Back");
 		login_backBtn.addActionListener(new ActionListener() {
 			
 			@Override
@@ -792,7 +772,7 @@ public class ApplicationFrame extends JFrame {
 		login_contentPanel.add(login_backBtn);
 		
 		
-		//Home Panel
+		//The home content panel.
 		home_contentPanel = new JPanel();
 		home_contentPanel.setBackground(Color.WHITE);
 		home_contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -813,6 +793,7 @@ public class ApplicationFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				display("HOME");
 			}
+			
 		});
 		applicationMenu.add(menu_homeMnItem);
 		
@@ -836,7 +817,35 @@ public class ApplicationFrame extends JFrame {
 			}
 			
 		});
-		applicationMenu.add(menu_exitMnItem);
+		applicationMenu.add(menu_exitMnItem);		
+		
+		final JMenu menu_settingsMenu = new JMenu("Settings");
+		
+		menu_settingsMenu.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				menu_settingsMenu.setSelected(false);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) { 
+				menu_settingsMenu.setForeground(Color.GRAY);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) { 
+				menu_settingsMenu.setForeground(Color.BLACK);
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) { }
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) { }
+			
+		});
+		menu_menuBar.add(menu_settingsMenu);
 		
 		JMenu customersMenu = new JMenu("Customers");
 		menu_menuBar.add(customersMenu);
@@ -846,7 +855,7 @@ public class ApplicationFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				//currentPanel.setVisible(false);
 				//setContentPane(cust_contentPanel);
-				display("CUSTOMER");
+				display("CUSTOMERS");
 			}
 		});
 		customersMenu.add(menu_viewCustomersMnItem);
@@ -870,33 +879,34 @@ public class ApplicationFrame extends JFrame {
 		JMenuItem menu_newEmployeesMnItem = new JMenuItem("New");
 		menu_employeesMenu.add(menu_newEmployeesMnItem);
 		
-		JMenu menu_settingsMenu = new JMenu("Settings");
-		menu_menuBar.add(menu_settingsMenu);
 		
-		JMenu menu_accountMenu = new JMenu("Account");
-		menu_menuBar.add(menu_accountMenu);
+				
+		menu_usersMenu = new JMenu("Users");
+		menu_usersMenu.setVisible(false);
+		menu_menuBar.add(menu_usersMenu);
 		
-		JMenuItem menu_changePasswordMnItem = new JMenuItem("Change password");
-		menu_accountMenu.add(menu_changePasswordMnItem);
-		
-		JMenu menu_adminMenu = new JMenu("Admin");
-		menu_menuBar.add(menu_adminMenu);
-		
-		JMenuItem menu_newUserMnItem = new JMenuItem("New User");
-		menu_newUserMnItem.addActionListener(new ActionListener() {
+		JMenuItem menu_viewUsersMnItem = new JMenuItem("View");
+		menu_viewUsersMnItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("Yooo");
+				//System.out.println("Yooo");
 			}
 		});
-		menu_adminMenu.add(menu_newUserMnItem);
-		//homePanel.setLayout(null);		
+		menu_usersMenu.add(menu_viewUsersMnItem);
 		
-		JLabel home_appTitleLbl = new JLabel("Business Manager Application");
-		home_appTitleLbl.setBounds(5, 5, 671, 86);
-		home_appTitleLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
-		home_appTitleLbl.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		home_appTitleLbl.setHorizontalAlignment(SwingConstants.CENTER);
-		home_contentPanel.add(home_appTitleLbl);
+		JMenuItem menu_newUsersMnItem = new JMenuItem("New");
+		menu_newUsersMnItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//System.out.println("Yooo");
+			}
+		});
+		menu_usersMenu.add(menu_newUsersMnItem);
+		
+		home_welcomeUserLbl = new JLabel("");
+		home_welcomeUserLbl.setBounds(5, 5, 671, 86);
+		home_welcomeUserLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+		home_welcomeUserLbl.setFont(new Font("Tahoma", Font.PLAIN, 17));
+		home_welcomeUserLbl.setHorizontalAlignment(SwingConstants.CENTER);
+		home_contentPanel.add(home_welcomeUserLbl);
 		
 		JLabel home_informationLbl = new JLabel("Information");
 		home_informationLbl.setBounds(5, 102, 671, 75);
@@ -904,35 +914,18 @@ public class ApplicationFrame extends JFrame {
 		home_contentPanel.add(home_informationLbl);
 		
 		JTextPane home_newsTextPane = new JTextPane();
+		home_newsTextPane.setText("\u2022 This application is currently in the BETA stage of development.\n\u2022 Please provide feedback to the developer by emailing jasonandrews271192@gmail.com, thanks!");		
 		home_newsTextPane.setBounds(5, 167, 666, 285);
-		home_newsTextPane.setEditable(false);
-		home_newsTextPane.setText("\u2022 This application is currently in the BETA stage of development.\n\u2022 Please provide feedback to the developer by emailing jasonandrews271192@gmail.com, thanks!");
+		home_newsTextPane.setEditable(false);		
 		home_contentPanel.add(home_newsTextPane);
 		
 		
-		//Customers Panel		
+		//The customers (after selecting 'View' from the dropdown menu for Customers.)		
 		cust_contentPanel = new JPanel();
 		cust_contentPanel.setBackground(Color.WHITE);
 		cust_contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		cust_contentPanel.setLayout(null);
-		
-		/*
-		JButton cust_newCustomerBtn = new JButton("New customer");
-		cust_newCustomerBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				popupFrame.fillInForm(Entity.EntityTypes.CUSTOMER,  new Customer());
-				popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4)))); //Set the position of the PopupFrame.
-				popupFrame.setVisible(true);	
-			}
-		});
-		cust_newCustomerBtn.setBackground(ApplicationFrame.BUTTON_BACKGROUND_COLOR);
-		cust_newCustomerBtn.setForeground(ApplicationFrame.BUTTON_FOREGROUND_COLOR);
-		cust_newCustomerBtn.setBounds(20, 425, 120, 30);
-		cust_contentPanel.add(cust_newCustomerBtn);
-		cust_newCustomerBtn.setVisible(false); //Hide this button for now.
-				
-		*/
-		
+						
 		//The title label for the customer panel.
 		JLabel cust_titleLbl = new JLabel("Customer Management");
 		cust_titleLbl.setBounds(300, 25, 250, 20);
@@ -941,6 +934,9 @@ public class ApplicationFrame extends JFrame {
 		
 		//The search text field the user can use to filter the customers shown.
 		cust_searchTextField = new JTextField();
+		cust_searchTextField.setText("Search...");
+		cust_searchTextField.setBounds(80, 50, 165, 20);
+		cust_searchTextField.setColumns(10);
 		cust_searchTextField.addKeyListener(new KeyListener() {
 
 			@Override
@@ -955,8 +951,7 @@ public class ApplicationFrame extends JFrame {
 				refreshTable(Entity.EntityTypes.CUSTOMER);
 			}
 			
-		});
-		
+		});		
 		//Add a focus adapter so we can set the textfield's text according to what method is called.
 		cust_searchTextField.addFocusListener(new FocusAdapter() {
 			
@@ -971,17 +966,14 @@ public class ApplicationFrame extends JFrame {
 				}
 			}
 		});
-		cust_searchTextField.setText("Search...");
-		cust_searchTextField.setBounds(80, 50, 165, 20);
-		cust_searchTextField.setColumns(10);
 		cust_contentPanel.add(cust_searchTextField);
 		
-		
-		
+				
 		//The checkboxes on the customer panel.
 		cust_customerNoChckbx = new JCheckBox("Customer No.");
 		cust_customerNoChckbx.setBackground(Color.WHITE);
 		cust_customerNoChckbx.setSelected(true);
+		cust_customerNoChckbx.setBorderPaintedFlat(true);
 		cust_customerNoChckbx.setBounds(250, 48, 105, 23);
 		cust_contentPanel.add(cust_customerNoChckbx);
 		
@@ -993,14 +985,16 @@ public class ApplicationFrame extends JFrame {
 		
 		//The side icons (View, Edit and Delete) that appear to the left of the table when a user clicks on a valid row in the table.
 		//The 'View' side icon.
-		cust_viewTableLbl = new JButton("");
-		cust_viewTableLbl.setBounds(55, 100, 25, 20);
-		cust_viewTableLbl.setBackground(Color.WHITE);
-		cust_viewTableLbl.setBorder(null);
-		cust_viewTableLbl.setIcon(new ImageIcon("lib/images/view_icon_black_20x20.png"));
-		cust_viewTableLbl.setRolloverIcon(new ImageIcon("lib/images/view_icon_grey_20x20.png"));
-		cust_viewTableLbl.setVisible(false);
-		cust_viewTableLbl.addActionListener(new ActionListener() {
+		cust_viewTableBtn = new JButton("");
+		cust_viewTableBtn.setBounds(55, 100, 25, 20);
+		cust_viewTableBtn.setBackground(Color.WHITE);
+		cust_viewTableBtn.setFocusPainted(false);
+		cust_viewTableBtn.setBorder(null);
+		cust_viewTableBtn.setIcon(new ImageIcon("lib/images/view_icon_black_20x20.png"));
+		cust_viewTableBtn.setRolloverIcon(new ImageIcon("lib/images/view_icon_grey_20x20.png"));
+		cust_viewTableBtn.setContentAreaFilled(false);
+		cust_viewTableBtn.setVisible(false);
+		cust_viewTableBtn.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -1018,17 +1012,18 @@ public class ApplicationFrame extends JFrame {
 			}
 			
 		});
-		cust_contentPanel.add(cust_viewTableLbl);
+		cust_contentPanel.add(cust_viewTableBtn);
 				
 		//The 'Edit' side icon.
-		cust_editTableLbl = new JButton("");
-		cust_editTableLbl.setBounds(30, 100, 20, 20);
-		cust_editTableLbl.setBackground(Color.WHITE);
-		cust_editTableLbl.setBorder(null);
-		cust_editTableLbl.setIcon(new ImageIcon("lib/images/edit_icon_black_20x20.png"));
-		cust_editTableLbl.setRolloverIcon(new ImageIcon("lib/images/edit_icon_grey_20x20.png"));
-		cust_editTableLbl.setVisible(false);
-		cust_editTableLbl.addActionListener(new ActionListener() {
+		cust_editTableBtn = new JButton("");
+		cust_editTableBtn.setBounds(30, 100, 20, 20);
+		cust_editTableBtn.setBackground(Color.WHITE);
+		cust_editTableBtn.setBorder(null);
+		cust_editTableBtn.setIcon(new ImageIcon("lib/images/edit_icon_black_20x20.png"));
+		cust_editTableBtn.setRolloverIcon(new ImageIcon("lib/images/edit_icon_grey_20x20.png"));
+		cust_editTableBtn.setContentAreaFilled(false);
+		cust_editTableBtn.setVisible(false);
+		cust_editTableBtn.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -1048,27 +1043,50 @@ public class ApplicationFrame extends JFrame {
 			}
 			
 		});
-		cust_contentPanel.add(cust_editTableLbl);
+		cust_contentPanel.add(cust_editTableBtn);
 		
 		//The 'Delete' side icon.
-		cust_deleteTableLbl = new JButton("");
-		cust_deleteTableLbl.setBounds(5, 98, 20, 25);
-		cust_deleteTableLbl.setBackground(Color.WHITE);
-		cust_deleteTableLbl.setBorder(null);
-		cust_deleteTableLbl.setIcon(new ImageIcon("lib/images/delete_icon_black_20x20.png"));
-		cust_deleteTableLbl.setRolloverIcon(new ImageIcon("lib/images/delete_icon_grey_20x20.png"));
-		cust_deleteTableLbl.setVisible(false);
-		cust_deleteTableLbl.addActionListener(new ActionListener() {
+		cust_deleteTableBtn = new JButton("");
+		cust_deleteTableBtn.setBounds(5, 98, 20, 25);
+		cust_deleteTableBtn.setBackground(Color.WHITE);
+		cust_deleteTableBtn.setBorder(null);
+		cust_deleteTableBtn.setIcon(new ImageIcon("lib/images/delete_icon_black_20x20.png"));
+		cust_deleteTableBtn.setRolloverIcon(new ImageIcon("lib/images/delete_icon_grey_20x20.png"));
+		cust_deleteTableBtn.setContentAreaFilled(false);
+		cust_deleteTableBtn.setVisible(false);
+		cust_deleteTableBtn.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				//Delete the customer from the database.
 				//Make a popup for a confirmation.
 				
+				int selectedRow = cust_customersTable.getSelectedRow();
+				
+				if(selectedRow >= 0) {
+					
+					Customer customer = (Customer) customerList.get(selectedRow);
+					
+					if(null != customer) {
+												
+						String fullName = (customer.getFirstName() + " " + customer.getLastName());
+						int selectedOption = 
+								JOptionPane.showConfirmDialog(null, 
+										"You are about to delete the following customer from the system.\n\nCustomer Number: " + customer.getCustomerNumber() + ".\nName: " + fullName + ".\n\nAre you sure you wish to continue?", 
+										"Delete customer - " + fullName + "?", 
+										JOptionPane.YES_NO_OPTION);
+						
+						//If they clicked the 'Yes' button.
+						if(selectedOption == JOptionPane.OK_OPTION) {
+							appManager.deleteEntity(Entity.EntityTypes.CUSTOMER, customer);
+						}						
+					}
+					
+				}				
 			}
 			
 		});
-		cust_contentPanel.add(cust_deleteTableLbl);		
+		cust_contentPanel.add(cust_deleteTableBtn);		
 		
 		//Customer Table
 		final JScrollPane cust_scrollPane = new JScrollPane();
@@ -1078,9 +1096,9 @@ public class ApplicationFrame extends JFrame {
 			public void mouseClicked(MouseEvent arg0) {
 				//If they left clicked.
 				if(arg0.getButton() == MouseEvent.BUTTON1) {
-					cust_viewTableLbl.setVisible(false);
-					cust_editTableLbl.setVisible(false);
-					cust_deleteTableLbl.setVisible(false);
+					cust_viewTableBtn.setVisible(false);
+					cust_editTableBtn.setVisible(false);
+					cust_deleteTableBtn.setVisible(false);
 					
 					cust_customersTable.clearSelection();
 				}
@@ -1132,14 +1150,14 @@ public class ApplicationFrame extends JFrame {
 						int mouseY = arg0.getPoint().y;
 
 						//Reposition the 'View', 'Edit' & 'Delete' icons (the icons that appear to the left of the tables).
-						cust_viewTableLbl.setLocation(cust_viewTableLbl.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 10));
-						cust_editTableLbl.setLocation(cust_editTableLbl.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 10));
-						cust_deleteTableLbl.setLocation(cust_deleteTableLbl.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 6));
+						cust_viewTableBtn.setLocation(cust_viewTableBtn.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 10));
+						cust_editTableBtn.setLocation(cust_editTableBtn.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 10));
+						cust_deleteTableBtn.setLocation(cust_deleteTableBtn.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 6));
 						
 						//Set the icons visible.
-						cust_viewTableLbl.setVisible(true);
-						cust_editTableLbl.setVisible(true);
-						cust_deleteTableLbl.setVisible(true);
+						cust_viewTableBtn.setVisible(true);
+						cust_editTableBtn.setVisible(true);
+						cust_deleteTableBtn.setVisible(true);
 						
 					}
 				}
@@ -1402,10 +1420,7 @@ public class ApplicationFrame extends JFrame {
 		JPanel panelToDisplay = null;
 		switch(panelName) {		
 			case "MAIN MENU": {
-				//configurePanel.setVisible(false);
-				//loginPanel.setVisible(false);
-				//homePanel.setVisible(false);				
-				//setContentPane(mainMenuPanel);
+
 				appManager.clearUsers(); //Clear all the User objects currently loaded.
 				appManager.setLoggedInUser(null); //Reset the 'Currently logged in user'.
 				
@@ -1413,37 +1428,55 @@ public class ApplicationFrame extends JFrame {
 				break;
 			}
 			case "CONFIGURATION": {
-				//mainMenuPanel.setVisible(false);
-				//loginPanel.setVisible(false);
-			//	homePanel.setVisible(false);
-				
-				//setContentPane(configurePanel);
-				//configurePanel.setVisible(true);
+
 				panelToDisplay = config_contentPanel;
-				break;
+				break; 
 			}
 			case "LOGIN": {
-				//mainMenuPanel.setVisible(false);
-				//configurePanel.setVisible(false);
-				//homePanel.setVisible(false);
-				
-				//setContentPane(loginPanel);
+
 				panelToDisplay = login_contentPanel;
 				break;
 			}	
 			case "HOME": {
-				//mainMenuPanel.setVisible(false);
-				//configurePanel.setVisible(false);
-				//loginPanel.setVisible(false);
+
+				String username = ""; 
+				User loggedInUser = appManager.getLoggedInUser();
 				
-				//setContentPane(homePanel);
-				//homePanel.setVisible(true);
+				if(null != loggedInUser) {
+					username = appManager.getLoggedInUser().getUsername();
+					
+					//If the user is an administrator, then show the 'Users' menu.
+					if(loggedInUser.isAdmin()) {
+						menu_usersMenu.setVisible(true);
+					} else {
+						//The user is not an administrator so hide the Users menu.
+						menu_usersMenu.setVisible(false);
+					}
+				}
+				
+				
+				if(username.length() > 0) {
+					home_welcomeUserLbl.setText("Welcome, " + username + "!");
+				} else {
+					home_welcomeUserLbl.setText("Welcome!");
+				}
+				
 				panelToDisplay = home_contentPanel;
 				break;
 			}
-			case "CUSTOMER": {
+			case "CUSTOMERS": {
+				currentlyDisplayedTable = cust_customersTable;		
 				panelToDisplay = cust_contentPanel;
 				break;
+			}
+			case "EMPLOYEES": {
+				//currentlyDisplayedTable = emp_employeesTable;
+				//panelToDisplay = emp_contentPanel;
+				break;
+			}
+			case "USERS": {
+				//currentlyDisplayedTable = user_usersTable;
+				//panelToDisplay = user_contentPanel;
 			}
 		}
 
@@ -1657,9 +1690,9 @@ public class ApplicationFrame extends JFrame {
 		this.query = null;
 		
 		//Set the 'View', 'Edit' & 'Delete' icons to be invisible.
-		if(null != cust_viewTableLbl) cust_viewTableLbl.setVisible(false);
-		if(null != cust_editTableLbl) cust_editTableLbl.setVisible(false);
-		if(null != cust_deleteTableLbl) cust_deleteTableLbl.setVisible(false);
+		if(null != cust_viewTableBtn) cust_viewTableBtn.setVisible(false);
+		if(null != cust_editTableBtn) cust_editTableBtn.setVisible(false);
+		if(null != cust_deleteTableBtn) cust_deleteTableBtn.setVisible(false);
 		
 		
 		SwingWorker<Integer, Integer> sw = new SwingWorker<Integer, Integer>() {

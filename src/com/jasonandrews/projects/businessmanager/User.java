@@ -1,7 +1,7 @@
 package com.jasonandrews.projects.businessmanager;
 
 public class User extends Entity {
-
+	
 	private int userNumber;
 	private String username;
 	private String password;

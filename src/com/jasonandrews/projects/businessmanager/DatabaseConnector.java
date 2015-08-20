@@ -1,3 +1,8 @@
+/**
+ * This application's purpose is to get a connection to a specific MySQL database.
+ * @author Jason Andrews
+ */
+
 package com.jasonandrews.projects.businessmanager;
 
 //String url = "jdbc:mysql://localhost:3306/TABLE_NAME";
