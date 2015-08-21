@@ -42,6 +42,8 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
 
 public class PopupDialog extends JDialog {
 
@@ -88,6 +90,16 @@ public class PopupDialog extends JDialog {
 	
 	private boolean c_isEditingCustomer;
 	private boolean c_isCreatingNewCustomer;
+	
+	private boolean user_isEditingUser;
+	private boolean user_isCreatingNewUser;
+	
+	private JLabel user_usernameLbl;
+	private JTextField user_usernameTextField;
+	private JTextField user_lastLogonTextField;
+	private JLabel user_userNumberLbl;
+	private JTextField user_userNumberTextField;
+	private JComboBox<String> user_adminComboBox;
 	//Employee related objects.
 	
 	//User related objects.
@@ -114,7 +126,7 @@ public class PopupDialog extends JDialog {
 		this.appManager = appManager;
 		this.appFrame = appFrame;
 		setResizable(false);
-		setBounds(100, 100, 206, 451);
+		setBounds(100, 100, 181, 254);
 		getContentPane().setLayout(new CardLayout(0, 0));
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		
@@ -129,12 +141,6 @@ public class PopupDialog extends JDialog {
 		//Customer Panel.
 		customersFormPanel = new JPanel();
 		customersFormPanel.setBackground(Color.WHITE);
-		customersFormPanel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				System.out.println("CLICKED CUSTOMER PANEL");
-			}
-		});
 		getContentPane().add(customersFormPanel, "name_26635925853738");
 		customersFormPanel.setLayout(null);
 		
@@ -459,6 +465,65 @@ public class PopupDialog extends JDialog {
 		JPanel employeePanel = new JPanel();
 		getContentPane().add(employeePanel, "name_26990095477004");
 		
+		
+		usersFormPanel = new JPanel();
+		usersFormPanel.setBackground(Color.WHITE);
+		getContentPane().add(usersFormPanel, "name_26990095477005");
+		usersFormPanel.setLayout(null);
+		
+		user_usernameLbl = new JLabel("Username");
+		user_usernameLbl.setForeground(Color.DARK_GRAY);
+		user_usernameLbl.setBounds(24, 56, 83, 14);
+		usersFormPanel.add(user_usernameLbl);
+		
+		user_usernameTextField = new JTextField();
+		user_usernameTextField.setBackground(Color.WHITE);
+		user_usernameTextField.setEditable(false);
+		user_usernameTextField.setBounds(24, 70, 122, 20);
+		usersFormPanel.add(user_usernameTextField);
+		user_usernameTextField.setColumns(10);
+		
+		JLabel user_adminLbl = new JLabel("Administrator");
+		user_adminLbl.setForeground(Color.DARK_GRAY);
+		user_adminLbl.setBounds(24, 95, 83, 14);
+		usersFormPanel.add(user_adminLbl);
+		
+		JLabel user_lastLogonLbl = new JLabel("Last Logon");
+		user_lastLogonLbl.setForeground(Color.DARK_GRAY);
+		user_lastLogonLbl.setBounds(25, 134, 83, 14);
+		usersFormPanel.add(user_lastLogonLbl);
+		
+		user_lastLogonTextField = new JTextField();
+		user_lastLogonTextField.setBackground(Color.WHITE);
+		user_lastLogonTextField.setEditable(false);
+		user_lastLogonTextField.setColumns(10);
+		user_lastLogonTextField.setBounds(25, 148, 122, 20);
+		usersFormPanel.add(user_lastLogonTextField);
+		
+		user_adminComboBox = new JComboBox<String>();
+		user_adminComboBox.setMaximumRowCount(2);
+		user_adminComboBox.setBackground(Color.WHITE);
+		user_adminComboBox.setForeground(Color.BLACK);
+		user_adminComboBox.setModel(new DefaultComboBoxModel(new String[] {"Yes", "No"}));
+		user_adminComboBox.setSelectedIndex(1);
+		user_adminComboBox.setBounds(24, 109, 122, 20);
+		user_adminComboBox.setEditable(false);
+		user_adminComboBox.setEnabled(false);
+		usersFormPanel.add(user_adminComboBox);
+		
+		user_userNumberLbl = new JLabel("User number");
+		user_userNumberLbl.setForeground(Color.DARK_GRAY);
+		user_userNumberLbl.setBounds(24, 19, 83, 14);
+		usersFormPanel.add(user_userNumberLbl);
+		
+		user_userNumberTextField = new JTextField();
+		user_userNumberTextField.setEditable(false);
+		user_userNumberTextField.setColumns(10);
+		user_userNumberTextField.setBackground(Color.WHITE);
+		user_userNumberTextField.setBounds(24, 33, 122, 20);
+		usersFormPanel.add(user_userNumberTextField);
+		
+		
 		//User Panel.
 	}
 	
@@ -473,8 +538,6 @@ public class PopupDialog extends JDialog {
 			case CUSTOMER: {				
 				c_isEditingCustomer = editingForm;
 				c_confirmBtn.setIcon(SAVE_ICON_BLACK);
-				c_confirmBtn.setRolloverIcon(SAVE_ICON_GREY);
-				//c_confirmBtn.setText("Save");
 				
 				break;
 			}
@@ -482,6 +545,8 @@ public class PopupDialog extends JDialog {
 				break;
 			}
 			case USER: {
+				user_isEditingUser = editingForm;
+				
 				break;
 			}
 		}
@@ -495,15 +560,20 @@ public class PopupDialog extends JDialog {
 	public void fillInForm(Entity.EntityTypes entityType, Entity entity) {
 		this.loadedObject = entity;
 		
+		
 		switch(entityType) {
 		
 			case CUSTOMER: {
+				customersFormPanel.setVisible(true);
+				this.setContentPane(customersFormPanel);
+				this.setSize(205,  450);
+				
+				
 				//Reset the editing and creation of a customer variables.
 				c_isCreatingNewCustomer = false;
 				c_isEditingCustomer = false;
 				
 				Object[] info = ((Customer) entity).getInformation();
-				customersFormPanel.setVisible(true);
 				
 				Integer customerNumber = ((Integer) info[0]).intValue();
 				//System.out.println("Customer Number: " + customerNumber);
@@ -553,6 +623,42 @@ public class PopupDialog extends JDialog {
 				break;
 			}
 			case USER: {
+				usersFormPanel.setVisible(true);
+				this.setContentPane(usersFormPanel);
+				//System.out.println(getWidth() + " " + getHeight());
+				this.setSize(180,  250);
+				
+				User user = ((User) entity);
+				
+				//Object[] info = ((User) entity).getInformation();
+				
+				Integer userNumber = user.getUserNumber();//((Integer) info[0]).intValue();
+				
+				if(userNumber > 0) {
+					//Viewing an existing user.
+					
+					user_userNumberTextField.setText(""+userNumber);
+					user_usernameTextField.setText(user.getUsername());
+					if(user.isAdmin()) {
+						user_adminComboBox.setSelectedIndex(0);
+					} else {
+						user_adminComboBox.setSelectedIndex(1);
+					}
+					user_lastLogonTextField.setText(user.getLastLogonDate().toString());
+					
+				} else {
+					//Creating a new user.
+					
+					user_userNumberTextField.setText("");
+					user_userNumberTextField.setVisible(false);
+					
+					user_usernameTextField.setText("");
+					user_adminComboBox.setEnabled(true);
+					user_adminComboBox.setSelectedIndex(1);					
+					user_lastLogonTextField.setText(user.getLastLogonDate().toString());
+					
+					setFormEditable(Entity.EntityTypes.USER, true);
+				}
 				//customerPanel.setVisible(false);
 				//employeePanel.setVisible(false);
 				//userPanel.setVisible(true);
@@ -600,6 +706,19 @@ public class PopupDialog extends JDialog {
 				break;
 			}
 			case USER: { 
+				
+				user_usernameTextField.setEditable(toggle);
+				user_adminComboBox.setEditable(toggle);
+				
+				if(toggle) {
+					user_usernameLbl.setText("Username *");
+					user_adminComboBox.setEnabled(true);
+				} else {
+					user_usernameLbl.setText("Username");
+					user_adminComboBox.setEnabled(false);
+				}
+				
+				
 				break;
 			}
 		}		
@@ -651,8 +770,12 @@ public class PopupDialog extends JDialog {
 				//c_confirmBtn.setText("Edit");
 				break;				
 			}
-			case EMPLOYEE: { }
-			case USER: { }
+			case EMPLOYEE: { 
+				break;
+			}
+			case USER: { 
+				break;
+			}
 		}		
 	}
 	
@@ -665,27 +788,27 @@ public class PopupDialog extends JDialog {
 				if(c_firstNameTextField.getText().length() < 1) {
 					c_firstNameLbl.setForeground(Color.RED);
 					isValid = false;
-				} else c_firstNameLbl.setForeground(Color.BLACK);
+				} else c_firstNameLbl.setForeground(Color.GRAY);
 				
 				if(c_lastNameTextField.getText().length() < 1) {
 					c_lastNameLbl.setForeground(Color.RED);
 					isValid = false;
-				} else c_lastNameLbl.setForeground(Color.BLACK);
+				} else c_lastNameLbl.setForeground(Color.GRAY);
 				
 				if(c_addressOneTextField.getText().length() < 1) {
 					c_addressOneLbl.setForeground(Color.RED);
 					isValid = false;
-				} else c_addressOneLbl.setForeground(Color.BLACK);
+				} else c_addressOneLbl.setForeground(Color.GRAY);
 				
 				if(c_addressCityTextField.getText().length() < 1) {
 					c_addressCityLbl.setForeground(Color.RED);
 					isValid = false;
-				} else c_addressCityLbl.setForeground(Color.BLACK);
+				} else c_addressCityLbl.setForeground(Color.GRAY);
 				
 				if(c_addressCountryTextField.getText().length() < 1) {
 					c_addressCountryLbl.setForeground(Color.RED);
 					isValid = false;
-				} else c_addressCountryLbl.setForeground(Color.BLACK);
+				} else c_addressCountryLbl.setForeground(Color.GRAY);
 					
 				break;
 			}
@@ -693,6 +816,12 @@ public class PopupDialog extends JDialog {
 				break;
 			}
 			case USER: {
+				
+				if(user_usernameTextField.getText().length() < 1) {
+					user_usernameLbl.setForeground(Color.RED);
+					isValid = false;
+				} else user_usernameLbl.setForeground(Color.GRAY);
+				
 				break;
 			}
 		}

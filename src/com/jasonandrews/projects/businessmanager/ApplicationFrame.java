@@ -1,7 +1,19 @@
-/*
- * TO DO:
- *	1) Change the whole Entity.EntityTypes.CUSTOMER, "EMPLOYEES", "USERS" switch statements to take an ENUM so like Enum EntityTypes = {Entity.EntityTypes.CUSTOMER, "EMPLOYEES", "USERS"}.
- * 	2) A proper implementation of the loading screen bugging out when hovering over certain GUI elements (mouse hovering over them shows them).
+/**
+ * This is the core class behind the application's GUI. It internally handles almost all of the GUI elements (exceptions being the popup dialogs that display information or errors.)
+ * Variables / Object Reference Variables have been prefixed so that it is more clear as to what panel they belong too.
+ * For example, a JButton on the Login Form will be prefixed with 'login_' so it may appear as follows: login_loginBtn. 
+ * Prefixes:
+ * - Main Menu = mm_
+ * - Configuration - config_
+ * - Login - login_
+ * - Home - home_
+ * - Customer - cust_
+ * - Employee - emp_
+ * - User - user_
+ * 
+ * @author Jason Andrews
+ * @version 0.30
+ * @dependencies AppManager.java, PopupDialog.java
  */
 
 package com.jasonandrews.projects.businessmanager;
@@ -29,7 +41,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -63,27 +74,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-/**
- * @author Jason Andrews
- * @version 0.30
- * @dependencies AppManager.java, PopupDialog.java
- * 
- * This is the core class behind the application's GUI. It internally handles almost all of the GUI elements (exceptions being the popup dialogs that display information or errors.)
- * Variables / Object Reference Variables have been prefixed so that it is more clear as to what panel they belong too.
- * For example, a JButton on the Login Form will be prefixed with 'login_' so it may appear as follows: login_loginBtn. 
- * Prefixes:
- * - Main Menu = mm_
- * - Configuration - config_
- * - Login - login_
- * - Home - home_
- * - Customer - cust_
- * - Employee - emp_
- * - User - user_
- */
 public class ApplicationFrame extends JFrame {
 
 	private static final String CHECK_MARK_CHARACTER = "\u2713";
@@ -98,71 +91,90 @@ public class ApplicationFrame extends JFrame {
 	private String fileDirectory;
 	private Properties properties;
 	
-	private PopupDialog popupFrame;	
+	private PopupDialog popupDialog;	
 	private JPanel currentPanel;
 	private JTable currentlyDisplayedTable;
 	
-	//The different content panels.
-	private JPanel mm_contentPanel;
-	private JPanel config_contentPanel;
-	private JPanel login_contentPanel;
-	private JPanel home_contentPanel;
+	//ORVs related to the main menu screen.
+		private JPanel mm_contentPanel;
 	
-	//The main menus buttons.
-	private JButton mm_loginBtn;
-	private JButton mm_configurationBtn;
-	private JButton mm_exitBtn;
+		//The main menus buttons.
+		private JButton mm_loginBtn;
+		private JButton mm_configurationBtn;
+		private JButton mm_exitBtn;
 	
-	private JButton login_loginBtn;
-	private JButton login_clearBtn;
-	private JButton login_backBtn;
 	
-	private JPanel cust_contentPanel;
+	//ORVs related to the configuration screen.
+		private JPanel config_contentPanel;
+		private JTextField config_urlTextField;
+		private JTextField config_userTextField;
+		private JPasswordField config_passwordTextField;
+		private JCheckBox config_saveDetailsChckbx;
+		private JLabel config_statusResultLbl;
 	
-	private JTable cust_customersTable;
-	private JTextField config_urlTextField;
-	private JTextField config_userTextField;
-	private JPasswordField config_passwordTextField;
-	private JCheckBox config_saveDetailsChckbx;
-	private JCheckBox login_saveDetailsChckbx;
+	//ORVs related to the login screen.
+		private JPanel login_contentPanel;
+	
+		//The login buttons.
+		private JButton login_loginBtn;
+		private JButton login_clearBtn;
+		private JButton login_backBtn;
+	
+		private JCheckBox login_saveDetailsChckbx;
+		private JLabel login_errorLbl;
+		private JTextField login_usernameTextField;
+		private JPasswordField login_passwordField;
+	
+	//ORVs related to the home screen.
+		private JPanel home_contentPanel;
+		private JLabel home_welcomeUserLbl;
 		
-	private JLabel config_statusResultLbl;
+		//The menu bar that appears on the home panel (and other panels linked with the bar.)
+		private JMenuBar menu_menuBar;
+		private JMenu menu_usersMenu;
+		
+		
+	//ORVs related to the customer screen.
+		private JPanel cust_contentPanel;
+		private JTable cust_customersTable;
 	
-	private JLabel login_errorLbl;
+		private String[] cust_tableColumnNames;
+		private JTextField cust_searchTextField;
+		
+		private JCheckBox cust_customerNoChckbx;
+		private JCheckBox cust_customerNameChckbx;
+		
 	
-	private String[] cust_tableColumnNames;
+	//ORVs related to the employee menu.
+		private JPanel emp_contentPanel;
+		private JTable emp_employeesTable;
+	
+	
+	//ORVs related to the user screen.
+		private JPanel user_contentPanel;
+		private JTable user_usersTable;
+	
+		private String[] user_tableColumnNames;
+		private JTextField user_searchTextField;
+	
+	
+	
 	
 	private static final Color BUTTON_BACKGROUND_COLOR = Color.WHITE;
 	private static final Color BUTTON_FOREGROUND_COLOR = Color.BLACK;
-	private JTextField login_usernameTextField;
-	private JPasswordField login_passwordField;
-	private JTextField cust_searchTextField;
 	
-	private JCheckBox cust_customerNoChckbx;
-	private JCheckBox cust_customerNameChckbx;
-	
-	private JMenuBar menu_menuBar;
-	private JMenu menu_usersMenu;
-	
-
-	private ArrayList<Entity> customerList; //A list of customer objects represented in the current customer table.
+	private ArrayList<Entity> customerList; //A list of Customer objects represented in the current customer table.
+	private ArrayList<Entity> userList; //A list of User objects represented in the current user table.
 	
 	//private JButton cust_refreshTableBtn; //The 'Refresh table' button.
 	
 	private JLabel loadingScreenImage;
 	
-	private JLabel home_welcomeUserLbl;
-	
-	private JButton cust_viewTableBtn;
-	private JButton cust_editTableBtn;
-	private JButton cust_deleteTableBtn;
+	private JButton viewTableRowBtn;
+	private JButton editTableRowBtn;
+	private JButton deleteTableRowBtn;
 
 	
-	/**
-	 * @wbp.nonvisual location=82,359
-	 */
-	private final JPopupMenu popup_optionsPopup = new JPopupMenu(); //The popup that appears when a user selects a row within a table. 
-
 	/**
 	 * 
 	 * @param appManager - The AppManager object.
@@ -188,40 +200,8 @@ public class ApplicationFrame extends JFrame {
 		setResizable(false);		
 		getContentPane().setLayout(new CardLayout(0, 0));
 		
-		popupFrame = new PopupDialog(this, appManager);
+		popupDialog = new PopupDialog(this, appManager);
 		
-		addMouseListener(new MouseListener() {
-
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				//System.out.println("FRAME - click.");
-				int mouseX = MouseInfo.getPointerInfo().getLocation().x; 
-				int mouseY = MouseInfo.getPointerInfo().getLocation().y;
-				//System.out.println("X: " + mouseX + " | Y: " + mouseY);
-				//customerOptionsPopup.setVisible(false);
-				
-				//Hide the 'View', 'Edit' and 'Delete' buttons when the user deselects a row.
-				if((cust_customersTable != null && cust_customersTable.getSelectedRow() < 0)/* || ((employeesTable != null && employeesTable.getSelectedRow() > -1)) || ((usersTable != null && usersTable.getSelectedRow() > -1))*/) {
-					cust_customersTable.clearSelection();
-					//cust_viewCustomerBtn.setVisible(false);
-					//cust_editCustomerBtn.setVisible(false);
-					//cust_deleteCustomerBtn.setVisible(false);
-				}				
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent arg0) { }
-
-			@Override
-			public void mouseExited(MouseEvent arg0) { }
-
-			@Override
-			public void mousePressed(MouseEvent arg0) { }
-
-			@Override
-			public void mouseReleased(MouseEvent arg0) { }
-			
-		});
 		
 		createContentPanels(); //Create the different panels.
 		//createInternalFrames();	
@@ -863,9 +843,9 @@ public class ApplicationFrame extends JFrame {
 		JMenuItem menu_newCustomersMnItem = new JMenuItem("New");
 		menu_newCustomersMnItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				popupFrame.fillInForm(Entity.EntityTypes.CUSTOMER,  new Customer());
-				popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4)))); //Set the position of the PopupFrame.
-				popupFrame.setVisible(true);	
+				popupDialog.fillInForm(Entity.EntityTypes.CUSTOMER,  new Customer());
+				popupDialog.setLocation((getLocation().x + (popupDialog.getWidth()/4)), ((getLocation().y + (popupDialog.getHeight()/4)))); //Set the position of the PopupFrame.
+				popupDialog.setVisible(true);	
 			}
 		});
 		customersMenu.add(menu_newCustomersMnItem);
@@ -888,7 +868,7 @@ public class ApplicationFrame extends JFrame {
 		JMenuItem menu_viewUsersMnItem = new JMenuItem("View");
 		menu_viewUsersMnItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				//System.out.println("Yooo");
+				display("USERS");
 			}
 		});
 		menu_usersMenu.add(menu_viewUsersMnItem);
@@ -920,7 +900,9 @@ public class ApplicationFrame extends JFrame {
 		home_contentPanel.add(home_newsTextPane);
 		
 		
-		//The customers (after selecting 'View' from the dropdown menu for Customers.)		
+		
+		
+		//The customers content panel (after selecting 'View' from the dropdown menu for Customers.)		
 		cust_contentPanel = new JPanel();
 		cust_contentPanel.setBackground(Color.WHITE);
 		cust_contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -983,110 +965,6 @@ public class ApplicationFrame extends JFrame {
 		cust_customerNameChckbx.setBounds(360, 48, 100, 23);
 		cust_contentPanel.add(cust_customerNameChckbx);
 		
-		//The side icons (View, Edit and Delete) that appear to the left of the table when a user clicks on a valid row in the table.
-		//The 'View' side icon.
-		cust_viewTableBtn = new JButton("");
-		cust_viewTableBtn.setBounds(55, 100, 25, 20);
-		cust_viewTableBtn.setBackground(Color.WHITE);
-		cust_viewTableBtn.setFocusPainted(false);
-		cust_viewTableBtn.setBorder(null);
-		cust_viewTableBtn.setIcon(new ImageIcon("lib/images/view_icon_black_20x20.png"));
-		cust_viewTableBtn.setRolloverIcon(new ImageIcon("lib/images/view_icon_grey_20x20.png"));
-		cust_viewTableBtn.setContentAreaFilled(false);
-		cust_viewTableBtn.setVisible(false);
-		cust_viewTableBtn.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				//View information about the customer.
-				
-				int selectedRow = cust_customersTable.getSelectedRow();
-				
-				if(selectedRow >= 0) { //Make sure the selected row is valid.
-					popupFrame.fillInForm(Entity.EntityTypes.CUSTOMER,  customerList.get(selectedRow));
-					popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
-					popupFrame.setVisible(true);
-					popup_optionsPopup.setVisible(false);
-				}
-				
-			}
-			
-		});
-		cust_contentPanel.add(cust_viewTableBtn);
-				
-		//The 'Edit' side icon.
-		cust_editTableBtn = new JButton("");
-		cust_editTableBtn.setBounds(30, 100, 20, 20);
-		cust_editTableBtn.setBackground(Color.WHITE);
-		cust_editTableBtn.setBorder(null);
-		cust_editTableBtn.setIcon(new ImageIcon("lib/images/edit_icon_black_20x20.png"));
-		cust_editTableBtn.setRolloverIcon(new ImageIcon("lib/images/edit_icon_grey_20x20.png"));
-		cust_editTableBtn.setContentAreaFilled(false);
-		cust_editTableBtn.setVisible(false);
-		cust_editTableBtn.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				//Edit information about the customer (can also be done when viewing the customer, but this is direct.)
-				
-				int selectedRow = cust_customersTable.getSelectedRow();
-				
-				if(selectedRow >= 0) { //Make sure the selected row is valid.
-					popupFrame.fillInForm(Entity.EntityTypes.CUSTOMER,  customerList.get(selectedRow));
-					popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
-					popupFrame.setVisible(true);
-					popupFrame.setEditingForm(Entity.EntityTypes.CUSTOMER, true);
-					popupFrame.setFormEditable(Entity.EntityTypes.CUSTOMER, true);
-					popup_optionsPopup.setVisible(false);
-				}	
-				
-			}
-			
-		});
-		cust_contentPanel.add(cust_editTableBtn);
-		
-		//The 'Delete' side icon.
-		cust_deleteTableBtn = new JButton("");
-		cust_deleteTableBtn.setBounds(5, 98, 20, 25);
-		cust_deleteTableBtn.setBackground(Color.WHITE);
-		cust_deleteTableBtn.setBorder(null);
-		cust_deleteTableBtn.setIcon(new ImageIcon("lib/images/delete_icon_black_20x20.png"));
-		cust_deleteTableBtn.setRolloverIcon(new ImageIcon("lib/images/delete_icon_grey_20x20.png"));
-		cust_deleteTableBtn.setContentAreaFilled(false);
-		cust_deleteTableBtn.setVisible(false);
-		cust_deleteTableBtn.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				//Delete the customer from the database.
-				//Make a popup for a confirmation.
-				
-				int selectedRow = cust_customersTable.getSelectedRow();
-				
-				if(selectedRow >= 0) {
-					
-					Customer customer = (Customer) customerList.get(selectedRow);
-					
-					if(null != customer) {
-												
-						String fullName = (customer.getFirstName() + " " + customer.getLastName());
-						int selectedOption = 
-								JOptionPane.showConfirmDialog(null, 
-										"You are about to delete the following customer from the system.\n\nCustomer Number: " + customer.getCustomerNumber() + ".\nName: " + fullName + ".\n\nAre you sure you wish to continue?", 
-										"Delete customer - " + fullName + "?", 
-										JOptionPane.YES_NO_OPTION);
-						
-						//If they clicked the 'Yes' button.
-						if(selectedOption == JOptionPane.OK_OPTION) {
-							appManager.deleteEntity(Entity.EntityTypes.CUSTOMER, customer);
-						}						
-					}
-					
-				}				
-			}
-			
-		});
-		cust_contentPanel.add(cust_deleteTableBtn);		
 		
 		//Customer Table
 		final JScrollPane cust_scrollPane = new JScrollPane();
@@ -1096,9 +974,9 @@ public class ApplicationFrame extends JFrame {
 			public void mouseClicked(MouseEvent arg0) {
 				//If they left clicked.
 				if(arg0.getButton() == MouseEvent.BUTTON1) {
-					cust_viewTableBtn.setVisible(false);
-					cust_editTableBtn.setVisible(false);
-					cust_deleteTableBtn.setVisible(false);
+					viewTableRowBtn.setVisible(false);
+					editTableRowBtn.setVisible(false);
+					deleteTableRowBtn.setVisible(false);
 					
 					cust_customersTable.clearSelection();
 				}
@@ -1135,12 +1013,10 @@ public class ApplicationFrame extends JFrame {
 		cust_customersTable.addMouseListener(new MouseListener() {			
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				//If they left clicked.
-								
-				if(arg0.getButton() == MouseEvent.BUTTON1) {
 				
-					
-					
+				//If they left clicked.
+				if(arg0.getButton() == MouseEvent.BUTTON1) {
+									
 					int selectedRow = cust_customersTable.getSelectedRow(); //Get the id of the row the user selected. The return int value will be the value used in the array to retrieve information on the customer.					
 					int columnCount = cust_customersTable.getColumnCount(); //Get the total amount of columns, if it's only 1, then that means that they have no check boxes ticked and the notice was shown.
 					
@@ -1150,14 +1026,14 @@ public class ApplicationFrame extends JFrame {
 						int mouseY = arg0.getPoint().y;
 
 						//Reposition the 'View', 'Edit' & 'Delete' icons (the icons that appear to the left of the tables).
-						cust_viewTableBtn.setLocation(cust_viewTableBtn.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 10));
-						cust_editTableBtn.setLocation(cust_editTableBtn.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 10));
-						cust_deleteTableBtn.setLocation(cust_deleteTableBtn.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 6));
+						viewTableRowBtn.setLocation(viewTableRowBtn.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 10));
+						editTableRowBtn.setLocation(editTableRowBtn.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 10));
+						deleteTableRowBtn.setLocation(deleteTableRowBtn.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 6));
 						
 						//Set the icons visible.
-						cust_viewTableBtn.setVisible(true);
-						cust_editTableBtn.setVisible(true);
-						cust_deleteTableBtn.setVisible(true);
+						viewTableRowBtn.setVisible(true);
+						editTableRowBtn.setVisible(true);
+						deleteTableRowBtn.setVisible(true);
 						
 					}
 				}
@@ -1192,119 +1068,269 @@ public class ApplicationFrame extends JFrame {
 		cust_contentPanel.add(cust_refreshTableBtn);	
 		*/
 		
-		//Popup Menu (When a user left clicks a row, a menu will pop up with a list of different options). 
-		final JMenuItem popup_closeMnItem = new JMenuItem("Close");
-		final JMenuItem popup_viewMnItem = new JMenuItem("View");
-		final JMenuItem popup_editMnItem = new JMenuItem("Edit");
-		final JMenuItem popup_deleteMnItem = new JMenuItem("Delete");
+		//The users (after selecting 'View' from the dropdown menu for Users.)		
+		user_contentPanel = new JPanel();
+		user_contentPanel.setBackground(Color.WHITE);
+		user_contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		user_contentPanel.setLayout(null);
+						
+		//The title label for the customer panel.
+		JLabel user_titleLbl = new JLabel("User Management");
+		user_titleLbl.setBounds(300, 25, 250, 20);
+		user_titleLbl.setFont(new Font("Arial", Font.PLAIN, 15));
+		user_contentPanel.add(user_titleLbl);
 		
-		popup_optionsPopup.setPopupSize(60, 60);
-		
-		//The Close menu item.
-		popup_closeMnItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				//System.out.println("CLOSING");
-				if(popup_optionsPopup != null) popup_optionsPopup.setVisible(false);
-				//popupIsShown = false;
-			}
-		});
-		popup_closeMnItem.addMouseMotionListener(new MouseMotionListener() {
-			@Override
-			public void mouseDragged(MouseEvent arg0) { }
+		//The search text field the user can use to filter the customers shown.
+		user_searchTextField = new JTextField();
+		user_searchTextField.setText("Search...");
+		user_searchTextField.setBounds(80, 50, 165, 20);
+		user_searchTextField.setColumns(10);
+		user_searchTextField.addKeyListener(new KeyListener() {
 
 			@Override
-			public void mouseMoved(MouseEvent arg0) {				
-				popup_closeMnItem.setForeground(COLOR_RED);
-				popup_viewMnItem.setForeground(Color.BLACK);
-				popup_editMnItem.setForeground(Color.BLACK);
-				popup_deleteMnItem.setForeground(Color.BLACK);
+			public void keyPressed(KeyEvent arg0) { }
+
+			@Override
+			public void keyReleased(KeyEvent arg0) { }
+
+			@Override
+			public void keyTyped(KeyEvent arg0) {
+				//Whenever the user types a key in the search textfield, refresh the table.
+				refreshTable(Entity.EntityTypes.USER);
 			}
 			
-		});
-		popup_optionsPopup.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusGained(FocusEvent arg0) { }
+		});		
+		//Add a focus adapter so we can set the textfield's text according to what method is called.
+		user_searchTextField.addFocusListener(new FocusAdapter() {
 			
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				if(user_searchTextField != null && user_searchTextField.getText().equals("Search...")) user_searchTextField.setText(""); //Set the textfield's text to an empty string.
+			}
 			@Override
 			public void focusLost(FocusEvent arg0) {
-				popup_optionsPopup.setVisible(false);
-				//System.out.println("Focus Lost: customerOptionsPopup");
+				if(user_searchTextField != null && user_searchTextField.getText().length() == 0) {
+					user_searchTextField.setText("Search..."); //If the user never typed anything into the textfield, set the text to the default message.
+				}
 			}
 		});
-		popup_closeMnItem.setBounds(0, 0, 20, 20);
-		popup_optionsPopup.add(popup_closeMnItem);
+		user_contentPanel.add(user_searchTextField);
 		
-		//The View menu item.
-		popup_viewMnItem.addActionListener(new ActionListener() {
+				
+		/*The checkboxes on the customer panel.
+		user_customerNoChckbx = new JCheckBox("Customer No.");
+		cust_customerNoChckbx.setBackground(Color.WHITE);
+		cust_customerNoChckbx.setSelected(true);
+		cust_customerNoChckbx.setBorderPaintedFlat(true);
+		cust_customerNoChckbx.setBounds(250, 48, 105, 23);
+		user_contentPanel.add(cust_customerNoChckbx);
+		
+		cust_customerNameChckbx = new JCheckBox("Name");
+		cust_customerNameChckbx.setBackground(Color.WHITE);
+		cust_customerNameChckbx.setSelected(true);
+		cust_customerNameChckbx.setBounds(360, 48, 100, 23);
+		user_contentPanel.add(cust_customerNameChckbx);
+		*/
+		
+		//Customer Table
+		final JScrollPane user_scrollPane = new JScrollPane();
+		user_scrollPane.setBackground(Color.WHITE);
+		user_scrollPane.addMouseListener(new MouseListener() {			
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				//If they left clicked.
+				if(arg0.getButton() == MouseEvent.BUTTON1) {
+					viewTableRowBtn.setVisible(false);
+					editTableRowBtn.setVisible(false);
+					deleteTableRowBtn.setVisible(false);
+					
+					user_usersTable.clearSelection();
+				}
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) { }
+
+			@Override
+			public void mouseExited(MouseEvent arg0) { }
+
+			@Override
+			public void mousePressed(MouseEvent arg0) { }
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) { }
+			
+		});
+		user_scrollPane.setBounds(80, 80, 660, 348);
+		user_contentPanel.add(user_scrollPane);
+
+		user_usersTable = new JTable();
+		user_scrollPane.setViewportView(user_usersTable);
+
+		user_usersTable.setAutoCreateRowSorter(true);
+		user_usersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		user_usersTable.setColumnSelectionAllowed(true);		
+		user_usersTable.setBorder(new LineBorder(new Color(0, 0, 0)));
+		user_usersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		user_usersTable.setColumnSelectionAllowed(false);
+		user_usersTable.setCellEditor(null);
+		user_tableColumnNames = new String[]{"User No.", "Username", "Administrator", "Last logon"};
+		user_usersTable.setModel(new DefaultTableModel(null, user_tableColumnNames));		
+		user_usersTable.addMouseListener(new MouseListener() {			
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				//If they left clicked.
+				if(arg0.getButton() == MouseEvent.BUTTON1) {
+									
+					int selectedRow = user_usersTable.getSelectedRow(); //Get the id of the row the user selected. The return int value will be the value used in the array to retrieve information on the customer.					
+					int columnCount = user_usersTable.getColumnCount(); //Get the total amount of columns, if it's only 1, then that means that they have no check boxes ticked and the notice was shown.
+					
+					if(selectedRow >= 0 && columnCount > 1) { //Only show the options if the person clicked on a valid row.
+
+						//Get the Y position of the mouse.
+						int mouseY = arg0.getPoint().y;
+
+						//Reposition the 'View', 'Edit' & 'Delete' icons (the icons that appear to the left of the tables).
+						viewTableRowBtn.setLocation(viewTableRowBtn.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 10));
+						editTableRowBtn.setLocation(editTableRowBtn.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 10));
+						deleteTableRowBtn.setLocation(deleteTableRowBtn.getLocation().x, (mouseY + cust_scrollPane.getLocation().y + 6));
+						
+						//Set the icons visible.
+						viewTableRowBtn.setVisible(true);
+						editTableRowBtn.setVisible(true);
+						deleteTableRowBtn.setVisible(true);
+						
+					}
+				}
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) { }
+
+			@Override
+			public void mouseExited(MouseEvent arg0) { }
+
+			@Override
+			public void mousePressed(MouseEvent arg0) { }
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) { }
+		});
+		
+		
+		//The side icons (View, Edit and Delete) that appear to the left of the table when a user clicks on a valid row in the table.
+		//The 'View' side icon.
+		viewTableRowBtn = new JButton("");
+		viewTableRowBtn.setBounds(55, 100, 25, 20);
+		viewTableRowBtn.setBackground(Color.WHITE);
+		viewTableRowBtn.setFocusPainted(false);
+		viewTableRowBtn.setBorder(null);
+		viewTableRowBtn.setIcon(new ImageIcon("lib/images/view_icon_black_20x20.png"));
+		viewTableRowBtn.setRolloverIcon(new ImageIcon("lib/images/view_icon_grey_20x20.png"));
+		viewTableRowBtn.setContentAreaFilled(false);
+		viewTableRowBtn.setVisible(false);
+		viewTableRowBtn.addActionListener(new ActionListener() {
+
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				//System.out.println("VIEWING");
+				//View information about the customer.
+				
+				if(null == currentlyDisplayedTable) return;
+								
+				int selectedRow = currentlyDisplayedTable.getSelectedRow();
+				
+				if(selectedRow >= 0) { //Make sure the selected row is valid.
+					
+					if(currentlyDisplayedTable == cust_customersTable) {
+						popupDialog.fillInForm(Entity.EntityTypes.CUSTOMER, customerList.get(selectedRow));
+					} else if(currentlyDisplayedTable == emp_employeesTable) {
+						
+					} else if(currentlyDisplayedTable == user_usersTable) {
+						popupDialog.fillInForm(Entity.EntityTypes.USER, userList.get(selectedRow));
+					}
+					
+					popupDialog.setLocation((getLocation().x + (popupDialog.getWidth()/4)), ((getLocation().y + (popupDialog.getHeight()/4))));
+					popupDialog.setVisible(true);
+				}
+				
+			}
+			
+		});
+		cust_contentPanel.add(viewTableRowBtn);
+				
+		//The 'Edit' side icon.
+		editTableRowBtn = new JButton("");
+		editTableRowBtn.setBounds(30, 100, 20, 20);
+		editTableRowBtn.setBackground(Color.WHITE);
+		editTableRowBtn.setBorder(null);
+		editTableRowBtn.setIcon(new ImageIcon("lib/images/edit_icon_black_20x20.png"));
+		editTableRowBtn.setRolloverIcon(new ImageIcon("lib/images/edit_icon_grey_20x20.png"));
+		editTableRowBtn.setContentAreaFilled(false);
+		editTableRowBtn.setVisible(false);
+		editTableRowBtn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				//Edit information about the customer (can also be done when viewing the customer, but this is direct.)
+				
 				int selectedRow = cust_customersTable.getSelectedRow();
 				
 				if(selectedRow >= 0) { //Make sure the selected row is valid.
-					popupFrame.fillInForm(Entity.EntityTypes.CUSTOMER,  customerList.get(selectedRow));
-					popupFrame.setLocation((getLocation().x + (popupFrame.getWidth()/4)), ((getLocation().y + (popupFrame.getHeight()/4))));
-					popupFrame.setVisible(true);
-					popup_optionsPopup.setVisible(false);
+					popupDialog.fillInForm(Entity.EntityTypes.CUSTOMER,  customerList.get(selectedRow));
+					popupDialog.setLocation((getLocation().x + (popupDialog.getWidth()/4)), ((getLocation().y + (popupDialog.getHeight()/4))));
+					popupDialog.setVisible(true);
+					popupDialog.setEditingForm(Entity.EntityTypes.CUSTOMER, true);
+					popupDialog.setFormEditable(Entity.EntityTypes.CUSTOMER, true);
+				}	
+				
+			}
+			
+		});
+		cust_contentPanel.add(editTableRowBtn);
+		
+		//The 'Delete' side icon.
+		deleteTableRowBtn = new JButton("");
+		deleteTableRowBtn.setBounds(5, 98, 20, 25);
+		deleteTableRowBtn.setBackground(Color.WHITE);
+		deleteTableRowBtn.setBorder(null);
+		deleteTableRowBtn.setIcon(new ImageIcon("lib/images/delete_icon_black_20x20.png"));
+		deleteTableRowBtn.setRolloverIcon(new ImageIcon("lib/images/delete_icon_grey_20x20.png"));
+		deleteTableRowBtn.setContentAreaFilled(false);
+		deleteTableRowBtn.setVisible(false);
+		deleteTableRowBtn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				//Delete the customer from the database.
+				//Make a popup for a confirmation.
+				
+				int selectedRow = cust_customersTable.getSelectedRow();
+				
+				if(selectedRow >= 0) {
+					
+					Customer customer = (Customer) customerList.get(selectedRow);
+					
+					if(null != customer) {
+												
+						String fullName = (customer.getFirstName() + " " + customer.getLastName());
+						int selectedOption = 
+								JOptionPane.showConfirmDialog(null, 
+										"You are about to delete the following customer from the system.\n\nCustomer Number: " + customer.getCustomerNumber() + ".\nName: " + fullName + ".\n\nAre you sure you wish to continue?", 
+										"Delete customer - " + fullName + "?", 
+										JOptionPane.YES_NO_OPTION);
+						
+						//If they clicked the 'Yes' button.
+						if(selectedOption == JOptionPane.OK_OPTION) {
+							appManager.deleteEntity(Entity.EntityTypes.CUSTOMER, customer);
+						}						
+					}
+					
 				}				
 			}
-		});
-		popup_viewMnItem.addMouseMotionListener(new MouseMotionListener() {
-			@Override
-			public void mouseDragged(MouseEvent arg0) { }
-
-			@Override
-			public void mouseMoved(MouseEvent arg0) {		
-				popup_closeMnItem.setForeground(Color.BLACK);
-				popup_viewMnItem.setForeground(Color.RED);
-				popup_editMnItem.setForeground(Color.BLACK);
-				popup_deleteMnItem.setForeground(Color.BLACK);
-			}
 			
 		});
-		popup_viewMnItem.setBounds(0, 0, 20, 20);
-		popup_optionsPopup.add(popup_viewMnItem);
-		
-		//The Edit menu item.
-		popup_editMnItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("EDITING");
-			}
-		});
-		popup_editMnItem.addMouseMotionListener(new MouseMotionListener() {
-			@Override
-			public void mouseDragged(MouseEvent arg0) { }
-
-			@Override
-			public void mouseMoved(MouseEvent arg0) {			
-				popup_closeMnItem.setForeground(Color.BLACK);	
-				popup_viewMnItem.setForeground(Color.BLACK);	
-				popup_editMnItem.setForeground(Color.RED);
-				popup_deleteMnItem.setForeground(Color.BLACK);
-			}
-			
-		});
-		popup_optionsPopup.add(popup_editMnItem);
-		
-		//The Delete menu item.
-		popup_deleteMnItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("DELETING");
-			}
-		});
-		popup_deleteMnItem.addMouseMotionListener(new MouseMotionListener() {
-			@Override
-			public void mouseDragged(MouseEvent arg0) { }
-
-			@Override
-			public void mouseMoved(MouseEvent arg0) {	
-				popup_closeMnItem.setForeground(Color.BLACK);	
-				popup_editMnItem.setForeground(Color.BLACK);
-				popup_viewMnItem.setForeground(Color.BLACK);				
-				popup_deleteMnItem.setForeground(Color.RED);
-			}
-			
-		});
-		popup_optionsPopup.add(popup_deleteMnItem);
+		cust_contentPanel.add(deleteTableRowBtn);		
 	}	
 	
 	/**
@@ -1415,8 +1441,7 @@ public class ApplicationFrame extends JFrame {
 	 * To display the main menu, display("MAIN MENU") would work.
 	 * @param panelName - The name of the panel to display. Example - "HOME" would be used to display the home panel.
 	 */
-	void display(String panelName) {
-		//System.out.println("Attempting to display.. " + panelName);
+	private void display(String panelName) {
 		JPanel panelToDisplay = null;
 		switch(panelName) {		
 			case "MAIN MENU": {
@@ -1475,8 +1500,8 @@ public class ApplicationFrame extends JFrame {
 				break;
 			}
 			case "USERS": {
-				//currentlyDisplayedTable = user_usersTable;
-				//panelToDisplay = user_contentPanel;
+				currentlyDisplayedTable = user_usersTable;
+				panelToDisplay = user_contentPanel;
 			}
 		}
 
@@ -1579,8 +1604,20 @@ public class ApplicationFrame extends JFrame {
 		if(currentPanel != null) currentPanel.setVisible(false);
 		super.setContentPane(panel);		
 		
+		if(null != viewTableRowBtn) viewTableRowBtn.setVisible(false);
+		if(null != editTableRowBtn) editTableRowBtn.setVisible(false);
+		if(null != deleteTableRowBtn) deleteTableRowBtn.setVisible(false);
+		
+		
 		if(currentPanel != null && currentPanel != mm_contentPanel && currentPanel != config_contentPanel && currentPanel != login_contentPanel) {
 			currentPanel.remove(menu_menuBar);			
+		}
+		
+		if(currentPanel != null && (currentPanel == cust_contentPanel || currentPanel == emp_contentPanel || currentPanel == user_contentPanel)) {
+			currentPanel.remove(viewTableRowBtn);
+			currentPanel.remove(editTableRowBtn);
+			currentPanel.remove(deleteTableRowBtn);
+			
 		}
 		
 		if(currentPanel != null) {
@@ -1603,6 +1640,13 @@ public class ApplicationFrame extends JFrame {
 		
 		if(currentPanel != null && currentPanel != mm_contentPanel && currentPanel != config_contentPanel && currentPanel != login_contentPanel) {
 			currentPanel.add(menu_menuBar);
+		}
+		
+		if(currentPanel != null && (currentPanel == cust_contentPanel || currentPanel == emp_contentPanel || currentPanel == user_contentPanel)) {
+			currentPanel.add(viewTableRowBtn);
+			currentPanel.add(editTableRowBtn);
+			currentPanel.add(deleteTableRowBtn);
+			
 		}
 		
 	}
@@ -1664,6 +1708,16 @@ public class ApplicationFrame extends JFrame {
 				break;
 			}
 			case USER: {
+				
+				query = "SELECT `user_number`, `username`, `admin`, `last_logon` FROM `users` ";
+				
+				query += "WHERE ";
+				
+				query += "`user_number` LIKE '"+user_searchTextField.getText()+"%' OR `username` LIKE '"+user_searchTextField.getText()+"%'";
+								
+				//If the search field is just left as "Search..." or there's nothing in it, then select everything from the table.
+				if(user_searchTextField.getText().equals("Search...") || user_searchTextField.getText().length() == 0) query = "SELECT `user_number`, `username`, `admin`, `last_logon` FROM `users` ";
+				
 				break;
 			}
 		}
@@ -1690,9 +1744,9 @@ public class ApplicationFrame extends JFrame {
 		this.query = null;
 		
 		//Set the 'View', 'Edit' & 'Delete' icons to be invisible.
-		if(null != cust_viewTableBtn) cust_viewTableBtn.setVisible(false);
-		if(null != cust_editTableBtn) cust_editTableBtn.setVisible(false);
-		if(null != cust_deleteTableBtn) cust_deleteTableBtn.setVisible(false);
+		if(null != viewTableRowBtn) viewTableRowBtn.setVisible(false);
+		if(null != editTableRowBtn) editTableRowBtn.setVisible(false);
+		if(null != deleteTableRowBtn) deleteTableRowBtn.setVisible(false);
 		
 		
 		SwingWorker<Integer, Integer> sw = new SwingWorker<Integer, Integer>() {
@@ -1725,6 +1779,22 @@ public class ApplicationFrame extends JFrame {
 						break;
 					}
 					case USER: {
+
+						table = user_usersTable;
+						
+						query = prepareTableQuery(entityType);
+						
+						if(null != query) {
+							
+							//Get the list of User objects generated from the query. Then get an array containing all the data from the objects so it can be displayed in the table.
+							userList = appManager.getTableRowData(Entity.EntityTypes.USER, query);  
+														
+							columnNames = user_tableColumnNames;
+														
+							rowData = appManager.getRowData(Entity.EntityTypes.USER, userList);
+							
+						}			
+						
 						break;
 					}
 				}
@@ -1740,7 +1810,7 @@ public class ApplicationFrame extends JFrame {
 					
 					columnNames = new String[]{""};
 				}
-				
+								
 				//Display the new data.
 				if(table != null) {
 					//Create a new table model for the table.

@@ -80,7 +80,6 @@ public class AppManager {
 			
 			resultSet = statement.executeQuery(query);
 						
-			
 			//NEED A THREAD HERE!!
 			while(resultSet.next()) { //While there is another row of data.		
 				
@@ -88,15 +87,18 @@ public class AppManager {
 				switch(entityType) {
 					case CUSTOMER: {
 						
-						//Add a new Customer object with the given information to the ArrayList.
+						//Add a new Customer object with the stored information to the ArrayList.
 						objectList.add(new Customer(resultSet.getInt("customer_number"), resultSet.getString("first_name"), resultSet.getString("last_name"), resultSet.getString("address_one"), resultSet.getString("address_two"), resultSet.getString("address_city"), resultSet.getString("address_country")));						
 						
 						break;
 					}
-					case EMPLOYEE: {
+					case EMPLOYEE: {						
 						break;
 					}
 					case USER: {
+						
+						//Add a new User object with the stored information to the ArrayList.
+						objectList.add(new User(resultSet.getInt("user_number"), resultSet.getString("username"), "", resultSet.getBoolean("admin"), resultSet.getDate("last_logon")));
 						break;
 					}
 				}				
@@ -238,7 +240,7 @@ public class AppManager {
 			User tempUser = null; 
 			
 			while(resultSet.next()) {
-				tempUser = new User(resultSet.getInt("user_number"), resultSet.getString("username"), resultSet.getString("password"), resultSet.getBoolean("admin"));
+				tempUser = new User(resultSet.getInt("user_number"), resultSet.getString("username"), resultSet.getString("password"), resultSet.getBoolean("admin"), resultSet.getDate("last_logon"));
 				
 				//System.out.println(tempUser.getInformation()); //Debugging.
 				
@@ -434,7 +436,7 @@ public class AppManager {
 				break;
 			}
 			case USER: {
-				//rowData = User.convertObjectsToRowData(this, objectList);
+				rowData = User.convertObjectsToRowData(this, objectList);
 				break;
 			}
 		}	
