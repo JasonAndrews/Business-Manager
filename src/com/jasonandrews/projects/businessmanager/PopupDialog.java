@@ -1,6 +1,7 @@
 package com.jasonandrews.projects.businessmanager;
 
 
+import java.awt.Container;
 import java.awt.EventQueue;
 
 import javax.swing.ImageIcon;
@@ -40,8 +41,10 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
+
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 
@@ -63,7 +66,10 @@ public class PopupDialog extends JDialog {
 	private JPanel employeesFormPanel;
 	private JPanel usersFormPanel;
 
+	private JPanel currentPanel;
+	
 	private Entity loadedObject; //The customer / employee / user object that is currently loaded.
+	
 	
 	//Customer related objects.
 	private JTextField c_customerNoTextField;
@@ -523,6 +529,7 @@ public class PopupDialog extends JDialog {
 		user_userNumberTextField.setBounds(24, 33, 122, 20);
 		usersFormPanel.add(user_userNumberTextField);
 		
+		currentPanel = customersFormPanel;
 		
 		//User Panel.
 	}
@@ -565,8 +572,18 @@ public class PopupDialog extends JDialog {
 		
 			case CUSTOMER: {
 				customersFormPanel.setVisible(true);
-				this.setContentPane(customersFormPanel);
+				//employeesFormPanel.setVisible(false);
+				usersFormPanel.setVisible(false);
+				
+				customersFormPanel.add(c_confirmBtn);
+				customersFormPanel.add(c_closeBtn);
+				
 				this.setSize(205,  450);
+				
+				c_confirmBtn.setLocation(50, 365);
+				//System.out.println("CONFIRM CUST BTN: " + c_confirmBtn.getLocation().x + " " + c_confirmBtn.getLocation().y);
+				c_closeBtn.setLocation(100, 365);
+				//System.out.println("CLOSE CUST BTN: " + c_closeBtn.getLocation().x + " " + c_closeBtn.getLocation().y);
 				
 				
 				//Reset the editing and creation of a customer variables.
@@ -617,16 +634,27 @@ public class PopupDialog extends JDialog {
 				break;
 			}
 			case EMPLOYEE: {
+				customersFormPanel.setVisible(false);
+				//employeesFormPanel.setVisible(true);
+				usersFormPanel.setVisible(false);
 				//customerPanel.setVisible(false);
 				//employeePanel.setVisible(true);
 				//userPanel.setVisible(false);
 				break;
 			}
 			case USER: {
+				customersFormPanel.setVisible(false);
+				//employeesFormPanel.setVisible(false);
 				usersFormPanel.setVisible(true);
-				this.setContentPane(usersFormPanel);
+				
 				//System.out.println(getWidth() + " " + getHeight());
-				this.setSize(180,  250);
+				this.setSize(180,  275);
+				
+				usersFormPanel.add(c_confirmBtn);
+				usersFormPanel.add(c_closeBtn);
+				
+				c_confirmBtn.setLocation(35, 180);
+				c_closeBtn.setLocation(85, 180);
 				
 				User user = ((User) entity);
 				

@@ -498,7 +498,26 @@ public class AppManager {
 							break;
 						}
 						case USER: {
-				
+							
+							User user = (User) entityToUpdate;
+							
+							//Check if the customer already exists and needs to be updated.
+							if(user.getUserNumber() > 0) {
+								
+								query = "UPDATE `users` SET `username` = '" + user.getUsername() + "', `admin` = '" + (user.isAdmin() ? 1 : 0) + "'"; 
+								//System.out.println("UPDATE QUERY: " + query); //Debugging.
+							} else { 
+								//If this code runs, it means that the user is creating a new customer.		
+								
+								
+								query = "INSERT INTO `users` (`username`, `password`, `admin`) VALUES ('" + user.getUsername() + "', '', '" + (user.isAdmin() ? 1 : 0) + "')";
+								//System.out.println("INSERT QUERY: " + query); //Debugging.
+							}
+							
+							statement = connection.createStatement();
+							
+							statement.executeUpdate(query);
+							
 							break;
 						}
 				

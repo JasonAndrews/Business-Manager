@@ -12,6 +12,10 @@ public class User extends Entity {
 	private Date lastLogonDate;
 	//private Date date;
 	
+	public User() {
+		super();
+	}
+	
 	public User(int userNumber, String username, String password, boolean isAdmin, Date lastLogonDate) {
 		this.userNumber = userNumber;
 		this.username = username;

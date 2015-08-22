@@ -854,9 +854,21 @@ public class ApplicationFrame extends JFrame {
 		menu_menuBar.add(menu_employeesMenu);
 		
 		JMenuItem menu_viewEmployeesMnItem = new JMenuItem("View");
+		menu_viewEmployeesMnItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//display("EMPLOYEES");
+			}
+		});
 		menu_employeesMenu.add(menu_viewEmployeesMnItem);
 		
 		JMenuItem menu_newEmployeesMnItem = new JMenuItem("New");
+		menu_newEmployeesMnItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//popupDialog.fillInForm(Entity.EntityTypes.EMPLOYEE,  new Employee());
+				//popupDialog.setLocation((getLocation().x + (popupDialog.getWidth()/4)), ((getLocation().y + (popupDialog.getHeight()/4)))); //Set the position of the PopupFrame.
+				//popupDialog.setVisible(true);	
+			}
+		});
 		menu_employeesMenu.add(menu_newEmployeesMnItem);
 		
 		
@@ -876,7 +888,9 @@ public class ApplicationFrame extends JFrame {
 		JMenuItem menu_newUsersMnItem = new JMenuItem("New");
 		menu_newUsersMnItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				//System.out.println("Yooo");
+				popupDialog.fillInForm(Entity.EntityTypes.USER,  new User());
+				popupDialog.setLocation((getLocation().x + (popupDialog.getWidth()/4)), ((getLocation().y + (popupDialog.getHeight()/4)))); //Set the position of the PopupFrame.
+				popupDialog.setVisible(true);	
 			}
 		});
 		menu_usersMenu.add(menu_newUsersMnItem);
@@ -1245,7 +1259,7 @@ public class ApplicationFrame extends JFrame {
 					if(currentlyDisplayedTable == cust_customersTable) {
 						popupDialog.fillInForm(Entity.EntityTypes.CUSTOMER, customerList.get(selectedRow));
 					} else if(currentlyDisplayedTable == emp_employeesTable) {
-						
+						//popupDialog.fillInForm(Entity.EntityTypes.EMPLOYEE, employeeList.get(selectedRow));
 					} else if(currentlyDisplayedTable == user_usersTable) {
 						popupDialog.fillInForm(Entity.EntityTypes.USER, userList.get(selectedRow));
 					}
@@ -1274,15 +1288,34 @@ public class ApplicationFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				//Edit information about the customer (can also be done when viewing the customer, but this is direct.)
 				
-				int selectedRow = cust_customersTable.getSelectedRow();
+				if(null == currentlyDisplayedTable) return;
+				
+				System.out.println("DEBUG 001");
+				
+				int selectedRow = currentlyDisplayedTable.getSelectedRow();
 				
 				if(selectedRow >= 0) { //Make sure the selected row is valid.
-					popupDialog.fillInForm(Entity.EntityTypes.CUSTOMER,  customerList.get(selectedRow));
+					
+					if(currentlyDisplayedTable == cust_customersTable) {
+						System.out.println("DEBUG 002");
+						popupDialog.fillInForm(Entity.EntityTypes.CUSTOMER, customerList.get(selectedRow));
+						popupDialog.setEditingForm(Entity.EntityTypes.CUSTOMER, true);
+						popupDialog.setFormEditable(Entity.EntityTypes.CUSTOMER, true);
+					} else if(currentlyDisplayedTable == emp_employeesTable) {
+						//popupDialog.fillInForm(Entity.EntityTypes.EMPLOYEE, employeeList.get(selectedRow));
+						//popupDialog.setEditingForm(Entity.EntityTypes.EMPLOYEE, true);
+						//popupDialog.setFormEditable(Entity.EntityTypes.EMPLOYEE, true);
+					} else if(currentlyDisplayedTable == user_usersTable) {
+						System.out.println("DEBUG 003");
+						popupDialog.fillInForm(Entity.EntityTypes.USER, userList.get(selectedRow));
+						popupDialog.setEditingForm(Entity.EntityTypes.USER, true);
+						popupDialog.setFormEditable(Entity.EntityTypes.USER, true);
+					}			
 					popupDialog.setLocation((getLocation().x + (popupDialog.getWidth()/4)), ((getLocation().y + (popupDialog.getHeight()/4))));
 					popupDialog.setVisible(true);
-					popupDialog.setEditingForm(Entity.EntityTypes.CUSTOMER, true);
-					popupDialog.setFormEditable(Entity.EntityTypes.CUSTOMER, true);
 				}	
+				
+				
 				
 			}
 			
